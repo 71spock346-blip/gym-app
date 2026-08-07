@@ -349,6 +349,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds) {
         <div class="exercise-meta">
           <span class="chip chip-gear">${ex.gear}</span>
           <span class="chip chip-muscle">${ex.muscles}</span>
+          <a class="chip chip-video" href="${videoUrl(ex)}" target="_blank" rel="noopener">▶ Video</a>
         </div>
       </div>
     </div>

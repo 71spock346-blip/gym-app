@@ -167,6 +167,10 @@ body {
 }
 .chip-gear { background: var(--surface-2); color: var(--blue); }
 .chip-muscle { background: var(--surface-2); color: var(--text-dim); }
+.chip-video {
+  background: var(--accent-dim); color: var(--accent);
+  border-color: var(--accent); text-decoration: none; font-weight: 700;
+}
 
 .scheme-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
 
