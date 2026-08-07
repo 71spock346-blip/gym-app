@@ -131,6 +131,8 @@ body {
   font-size: 0.88rem; color: var(--text-dim); margin-bottom: 12px;
 }
 .warmup-card strong { color: var(--amber); }
+.warmup-list { padding-left: 20px; margin-top: 6px; }
+.warmup-list li { margin-bottom: 3px; }
 
 /* ------------------------------ exercise cards ------------------------------ */
 .exercise-card {
@@ -175,6 +177,8 @@ body {
   font-weight: 800; font-size: 0.9rem;
 }
 .scheme-rest { color: var(--text-dim); font-size: 0.8rem; }
+
+.tempo-line { color: var(--text-dim); font-size: 0.78rem; margin-top: 6px; }
 
 .weight-line {
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -226,6 +230,24 @@ body {
 .howto-body h4:first-child { margin-top: 0; }
 .howto-body ol, .howto-body ul { padding-left: 20px; }
 .howto-body li { margin-bottom: 4px; }
+.howto-body .mistakes li { color: var(--rose); }
+.howto-body .mistakes li::marker { content: '✗ '; }
+
+.video-link {
+  display: block; text-align: center;
+  background: var(--surface-2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px 14px; margin-bottom: 4px;
+  font-weight: 700; font-size: 0.88rem; text-decoration: none;
+}
+.video-link:active { background: var(--accent-dim); }
+
+.swap-line {
+  margin-top: 12px; padding: 10px 12px;
+  background: var(--surface-2); border: 1px dashed var(--border);
+  border-radius: 10px; font-size: 0.82rem; color: var(--text-dim);
+}
+.swap-line strong { color: var(--text); }
 
 /* ------------------------------ footer ------------------------------ */
 .footer {

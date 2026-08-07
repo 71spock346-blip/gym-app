@@ -14,24 +14,28 @@ const PHASES = [
     key: 'hypertrophy', name: 'Hypertrophy', badge: '💪',
     desc: 'Muscle-building week: moderate weight, controlled 2–3 second negatives.',
     sets: [3, 4], reps: [[8, 12], [10, 12]], rest: '60–90 s',
+    tempo: '1 s up · squeeze · 2–3 s down',
     pct: 1.0, isoPct: 1.0, isoReps: [[10, 12], [12, 15]],
   },
   {
     key: 'strength', name: 'Strength', badge: '🏋️',
     desc: 'Heavy week: bigger loads, fewer reps, full rests between sets.',
     sets: [4, 5], reps: [[4, 6], [5, 6]], rest: '2–3 min',
+    tempo: 'drive up hard · 2 s down',
     pct: 1.15, isoPct: 1.05, isoReps: [[8, 10], [8, 12]],
   },
   {
     key: 'volume', name: 'Volume', badge: '🔥',
     desc: 'Pump week: lighter weight, high reps, short rests. Chase the burn.',
     sets: [3, 3], reps: [[12, 15], [15, 20]], rest: '45–60 s',
+    tempo: 'steady rhythm · 1–2 s each way',
     pct: 0.85, isoPct: 0.85, isoReps: [[15, 20], [12, 15]],
   },
   {
     key: 'deload', name: 'Deload', badge: '🧘',
     desc: 'Recovery week: light and easy on purpose. Perfect form, leave energy in the tank — you grow while you recover.',
     sets: [2, 3], reps: [[10, 12], [10, 12]], rest: '60 s',
+    tempo: 'slow & perfect · 3 s down',
     pct: 0.6, isoPct: 0.6, isoReps: [[10, 12], [12, 15]],
   },
 ];
@@ -167,6 +171,30 @@ function hashId(id) {
   return h;
 }
 
+/* A same-muscle stand-in for when the machine is taken. Prefers exercises
+ * sharing a specific tag (quad, press, biceps, …) that aren't already in
+ * today's plan; deterministic per week so it doesn't jump around. */
+const GENERIC_TAGS = new Set(['compound', 'isolation', 'finisher']);
+function swapSuggestion(ex, dayKey, chosenIds, weekIdx) {
+  const pool = EXERCISE_DB[dayKey];
+  const specific = ex.tags.filter((t) => !GENERIC_TAGS.has(t));
+  const rank = (e) => {
+    if (e.id === ex.id) return -1;
+    const shared = e.tags.some((t) => specific.includes(t));
+    if (!shared) return -1;
+    return chosenIds.has(e.id) ? 1 : 2;   // prefer exercises not already planned today
+  };
+  const candidates = pool.filter((e) => rank(e) > 0).sort((a, b) => rank(b) - rank(a));
+  if (!candidates.length) return null;
+  const top = candidates.filter((e) => rank(e) === rank(candidates[0]));
+  const rng = mulberry32(weekIdx * 52711 + hashId(ex.id));
+  return top[Math.floor(rng() * top.length)];
+}
+
+function videoUrl(ex) {
+  return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(ex.video || ex.name + ' proper form');
+}
+
 /* ------------------------------ weights ------------------------------ */
 function suggestedWeightKg(ex, scheme, weekIdx) {
   const base = state.baselines[ex.id];
@@ -266,7 +294,8 @@ function renderDay() {
   const weekendNote = (state.weekOffset === 0 && dow > 4)
     ? `<div class="note-card">😴 It’s the weekend — rest up! Here’s Monday’s ${day.name} session.</div>` : '';
 
-  const cards = exercises.map((ex, i) => exerciseCard(ex, i, phase, weekIdx, dateISO)).join('');
+  const chosenIds = new Set(exercises.map((ex) => ex.id));
+  const cards = exercises.map((ex, i) => exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds)).join('');
 
   $('#content').innerHTML = `
     ${weekendNote}
@@ -276,13 +305,13 @@ function renderDay() {
         .toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC' })}</span>
     </div>
     <div class="warmup-card">
-      <strong>🔥 Warm-up first:</strong> 5 min easy cardio, then 2 light warm-up sets
-      of your first exercise (about half your working weight) before the counted sets.
+      <strong>🔥 Warm-up first</strong>
+      <ol class="warmup-list">${day.warmup.map((s) => `<li>${s}</li>`).join('')}</ol>
     </div>
     ${cards}`;
 }
 
-function exerciseCard(ex, i, phase, weekIdx, dateISO) {
+function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds) {
   const scheme = schemeFor(ex, phase, weekIdx, i);
   const suggested = suggestedWeightKg(ex, scheme, weekIdx);
   const weightText = formatWeight(suggested);
@@ -327,20 +356,33 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO) {
       <span class="scheme-pill">${scheme.sets} × ${scheme.repsLo}–${scheme.repsHi} reps</span>
       <span class="scheme-rest">rest ${scheme.rest}</span>
     </div>
+    <div class="tempo-line">⏱ ${phase.tempo}</div>
     ${weightBlock}
     <div class="sets-row">${bubbles}</div>
     <details class="howto">
       <summary>📖 How to use this machine</summary>
       <div class="howto-body">
+        <a class="video-link" href="${videoUrl(ex)}" target="_blank" rel="noopener">
+          ▶ Watch form videos on YouTube
+        </a>
         <h4>Set-up</h4>
         <ol>${ex.setup.map((s) => `<li>${s}</li>`).join('')}</ol>
         <h4>Doing the exercise</h4>
         <ol>${ex.execution.map((s) => `<li>${s}</li>`).join('')}</ol>
         <h4>Tips</h4>
         <ul>${ex.tips.map((s) => `<li>${s}</li>`).join('')}</ul>
+        ${ex.mistakes ? `<h4>Common mistakes</h4>
+        <ul class="mistakes">${ex.mistakes.map((s) => `<li>${s}</li>`).join('')}</ul>` : ''}
+        ${swapLine(ex, day, chosenIds, weekIdx)}
       </div>
     </details>
   </article>`;
+}
+
+function swapLine(ex, day, chosenIds, weekIdx) {
+  const alt = swapSuggestion(ex, day.key, chosenIds, weekIdx);
+  if (!alt) return '';
+  return `<div class="swap-line">🔄 <strong>Machine busy?</strong> Swap for: ${alt.name} (${alt.gear.toLowerCase()})</div>`;
 }
 
 /* ------------------------------ events ------------------------------ */
