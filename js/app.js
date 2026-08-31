@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 7;   // keep in step with the CACHE version in sw.js
+const APP_VERSION = 8;   // keep in step with the CACHE version in sw.js
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -293,32 +293,9 @@ const $ = (sel) => document.querySelector(sel);
 
 function render() {
   renderHeader();
-  if (!state.goal) { renderGoalChooser(); return; }
   renderPhaseBanner();
   renderTabs();
   renderDay();
-}
-
-/* First open on each phone: pick who's training. Two people can share the
- * same link — each device remembers its own goal, weights and progress. */
-function renderGoalChooser() {
-  $('#phaseBanner').hidden = true;
-  $('#dayTabs').innerHTML = '';
-  $('#content').innerHTML = `
-    <div class="chooser-card">
-      <h2 class="chooser-title">What's your goal?</h2>
-      <p class="chooser-sub">Training together? You'll both get the <strong>same exercises on the
-      same day</strong> — this choice just tunes your reps, rests and weights. Each phone
-      remembers its own goal and progress.</p>
-      ${Object.values(GOALS).map((g) => `
-        <button class="goal-btn" type="button" data-goal="${g.key}">
-          <span class="goal-btn-emoji">${g.emoji}</span>
-          <span class="goal-btn-text">
-            <strong>${g.name}</strong>
-            <small>${g.desc}</small>
-          </span>
-        </button>`).join('')}
-    </div>`;
 }
 
 function renderHeader() {
@@ -336,13 +313,12 @@ function renderHeader() {
 function renderPhaseBanner() {
   const phase = phaseForWeek(displayedWeekIndex());
   const goal = currentGoal();
-  $('#phaseBanner').hidden = false;
   $('#phaseBanner').innerHTML = `
     <div class="phase-head">
       <span class="phase-badge">${phase.badge}</span>
       <span class="phase-name phase-${phase.key}">${phase.name} week</span>
       <button id="goalPill" class="goal-pill" type="button"
-        title="Change goal">${goal.emoji} ${goal.name}</button>
+        title="Tap to switch goal">${goal.emoji} ${goal.name} ⇄</button>
     </div>
     <p class="phase-desc">${phase.desc}</p>`;
 }
@@ -373,7 +349,18 @@ function renderDay() {
   const chosenIds = new Set(exercises.map((ex) => ex.id));
   const cards = exercises.map((ex, i) => exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds)).join('');
 
+  // Until this phone has explicitly picked a goal, show a one-time pointer
+  // to the switch — that's all the setup a second person needs.
+  const goalHint = state.goal === null ? `
+    <div class="note-card goal-hint">👋 Training as a pair? This phone is set to
+      <strong>💪 Build muscle</strong>. Tap the pill at the top to switch to
+      <strong>🔥 Lose fat</strong> — same exercises, tuned reps, rests and weights.
+      Each phone keeps its own choice.
+      <button id="goalHintDismiss" class="hint-dismiss" type="button">Got it 👍</button>
+    </div>` : '';
+
   $('#content').innerHTML = `
+    ${goalHint}
     ${weekendNote}
     <div class="day-heading">
       <h2>${day.emoji} ${day.name}</h2>
@@ -599,16 +586,15 @@ $('#restPlus').addEventListener('click', () => {
 
 /* ------------------------------ events ------------------------------ */
 document.addEventListener('click', (e) => {
-  const goalBtn = e.target.closest('.goal-btn');
-  if (goalBtn) {
-    state.goal = goalBtn.dataset.goal;
+  if (e.target.closest('#goalPill')) {
+    state.goal = currentGoal().key === 'build' ? 'fatloss' : 'build';
     store.write('goal', state.goal);
     render();
     return;
   }
-  if (e.target.closest('#goalPill')) {
-    state.goal = null;           // back to the chooser; nothing else is lost
-    store.write('goal', null);
+  if (e.target.closest('#goalHintDismiss')) {
+    state.goal = 'build';        // explicit choice = hint never comes back
+    store.write('goal', state.goal);
     render();
     return;
   }
