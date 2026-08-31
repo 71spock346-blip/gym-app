@@ -40,6 +40,40 @@ const PHASES = [
   },
 ];
 
+/* ------------------------------ training goals ------------------------------ */
+/* Two people can share the same link and the same workout day: the exercise
+ * selection comes from the calendar week (identical on every phone), while
+ * the goal chosen on each device adjusts reps, rests and weight suggestions. */
+const GOALS = {
+  build: {
+    key: 'build', name: 'Build muscle', emoji: '💪',
+    desc: 'Full rests and progressive overload — maximum strength and size.',
+    repsDelta: 0, restMult: 1, pctMult: 1, finisher: false,
+  },
+  fatloss: {
+    key: 'fatloss', name: 'Lose fat', emoji: '🔥',
+    desc: 'Same exercises, higher reps and short rests to keep your heart rate up, plus a cardio finisher. You keep your muscle while the calories burn.',
+    repsDelta: 3, restMult: 0.65, pctMult: 0.85, finisher: true,
+  },
+};
+
+const FINISHERS = [
+  { name: 'Incline Treadmill Walk', time: '12 min',
+    how: 'Speed 5.5–6.5 km/h, incline 10–12%. Steady pace — you should just about be able to talk.' },
+  { name: 'Bike Intervals', time: '10 min',
+    how: '30 s fast pedalling, 60 s easy — repeat 7 rounds, then 1 min easy spin to finish.' },
+  { name: 'Rowing Machine', time: '8 min',
+    how: 'Smooth steady strokes: push with the legs, then lean back, then pull the arms. Aim for a pace you can hold the full 8 minutes.' },
+  { name: 'Stair Climber', time: '10 min',
+    how: 'Steady climb, hands resting lightly — no locking your arms on the rails and hanging.' },
+  { name: 'Elliptical Push', time: '12 min',
+    how: 'Alternate 2 min moderate and 1 min hard resistance. Full strides, tall posture.' },
+  { name: 'Fast Flat Walk', time: '15 min',
+    how: 'Brisk treadmill walk straight after the weights — easy on the joints and great for fat burn.' },
+];
+
+function currentGoal() { return GOALS[state.goal] || GOALS.build; }
+
 const KG_PER_LB = 0.45359237;
 const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
 // A Monday long before any user data, so week indices are stable positive ints.
@@ -62,6 +96,7 @@ const state = {
   weekOffset: 0,                                   // 0 = current week
   selectedDay: defaultDayIndex(),
   unit: store.read('unit', 'kg'),                  // 'kg' | 'lb'
+  goal: store.read('goal', null),                  // 'build' | 'fatloss' | null = ask
   baselines: store.read('baselines', {}),          // { exId: { w: kg, c: cycleWhenSet } }
   done: store.read('done', {}),                    // { 'YYYY-MM-DD': { exId: completedSets } }
 };
@@ -159,10 +194,22 @@ function pickExercises(day, weekIdx, dayIdx) {
 function schemeFor(ex, phase, weekIdx, exOrdinal) {
   const rng = mulberry32(weekIdx * 31337 + exOrdinal * 977 + hashId(ex.id));
   const iso = !ex.tags.includes('compound');
+  const goal = currentGoal();
   const repsOptions = iso ? phase.isoReps : phase.reps;
-  const [lo, hi] = repsOptions[Math.floor(rng() * repsOptions.length)];
+  let [lo, hi] = repsOptions[Math.floor(rng() * repsOptions.length)];
+  lo = Math.min(lo + goal.repsDelta, 18);
+  hi = Math.min(hi + goal.repsDelta, 22);
   const sets = phase.sets[Math.floor(rng() * phase.sets.length)];
-  return { sets, repsLo: lo, repsHi: hi, rest: phase.rest, pct: iso ? phase.isoPct : phase.pct };
+  const restSec = Math.max(40, Math.round((phase.restSec * goal.restMult) / 5) * 5);
+  return {
+    sets, repsLo: lo, repsHi: hi,
+    restSec, rest: formatRest(restSec),
+    pct: (iso ? phase.isoPct : phase.pct) * goal.pctMult,
+  };
+}
+
+function formatRest(sec) {
+  return sec >= 90 ? `${Math.round(sec / 30) / 2} min` : `${sec} s`;
 }
 
 function hashId(id) {
@@ -244,9 +291,32 @@ const $ = (sel) => document.querySelector(sel);
 
 function render() {
   renderHeader();
+  if (!state.goal) { renderGoalChooser(); return; }
   renderPhaseBanner();
   renderTabs();
   renderDay();
+}
+
+/* First open on each phone: pick who's training. Two people can share the
+ * same link — each device remembers its own goal, weights and progress. */
+function renderGoalChooser() {
+  $('#phaseBanner').hidden = true;
+  $('#dayTabs').innerHTML = '';
+  $('#content').innerHTML = `
+    <div class="chooser-card">
+      <h2 class="chooser-title">What's your goal?</h2>
+      <p class="chooser-sub">Training together? You'll both get the <strong>same exercises on the
+      same day</strong> — this choice just tunes your reps, rests and weights. Each phone
+      remembers its own goal and progress.</p>
+      ${Object.values(GOALS).map((g) => `
+        <button class="goal-btn" type="button" data-goal="${g.key}">
+          <span class="goal-btn-emoji">${g.emoji}</span>
+          <span class="goal-btn-text">
+            <strong>${g.name}</strong>
+            <small>${g.desc}</small>
+          </span>
+        </button>`).join('')}
+    </div>`;
 }
 
 function renderHeader() {
@@ -262,11 +332,14 @@ function renderHeader() {
 
 function renderPhaseBanner() {
   const phase = phaseForWeek(displayedWeekIndex());
+  const goal = currentGoal();
+  $('#phaseBanner').hidden = false;
   $('#phaseBanner').innerHTML = `
     <div class="phase-head">
       <span class="phase-badge">${phase.badge}</span>
       <span class="phase-name phase-${phase.key}">${phase.name} week</span>
-      <span class="phase-load">${Math.round(phase.pct * 100)}% load</span>
+      <button id="goalPill" class="goal-pill" type="button"
+        title="Change goal">${goal.emoji} ${goal.name}</button>
     </div>
     <p class="phase-desc">${phase.desc}</p>`;
 }
@@ -308,7 +381,31 @@ function renderDay() {
       <strong>🔥 Warm-up first</strong>
       <ol class="warmup-list">${day.warmup.map((s) => `<li>${s}</li>`).join('')}</ol>
     </div>
-    ${cards}`;
+    ${cards}
+    ${finisherCard(weekIdx, dayIdx)}`;
+}
+
+/* Fat-loss mode ends every session with a rotating cardio finisher. */
+function finisherCard(weekIdx, dayIdx) {
+  if (!currentGoal().finisher) return '';
+  const rng = mulberry32(weekIdx * 6011 + dayIdx * 389);
+  const fin = FINISHERS[Math.floor(rng() * FINISHERS.length)];
+  return `
+  <article class="exercise-card finisher-card">
+    <div class="exercise-top">
+      <div class="exercise-icon finisher-icon">🏃</div>
+      <div class="exercise-info">
+        <h3 class="exercise-name">Cardio finisher: ${fin.name}</h3>
+        <div class="exercise-meta">
+          <span class="chip chip-gear">${fin.time}</span>
+          <span class="chip chip-muscle">Fat burn</span>
+        </div>
+      </div>
+    </div>
+    <p class="finisher-how">${fin.how}</p>
+    <p class="finisher-note">Straight after your last set, while your heart rate is already up.
+    And remember: fat loss is won mostly in the kitchen — this builds the shape underneath. 🍎</p>
+  </article>`;
 }
 
 function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds) {
@@ -324,7 +421,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds) {
 
   const bubbles = Array.from({ length: scheme.sets }, (_, s) => `
     <button class="set-bubble ${s < completed ? 'done' : ''}" type="button"
-      data-ex="${ex.id}" data-set="${s + 1}" data-date="${dateISO}"
+      data-ex="${ex.id}" data-set="${s + 1}" data-date="${dateISO}" data-rest="${scheme.restSec}"
       aria-label="Mark set ${s + 1}">${s + 1}</button>`).join('');
 
   const weightBlock = isBodyweight
@@ -499,6 +596,19 @@ $('#restPlus').addEventListener('click', () => {
 
 /* ------------------------------ events ------------------------------ */
 document.addEventListener('click', (e) => {
+  const goalBtn = e.target.closest('.goal-btn');
+  if (goalBtn) {
+    state.goal = goalBtn.dataset.goal;
+    store.write('goal', state.goal);
+    render();
+    return;
+  }
+  if (e.target.closest('#goalPill')) {
+    state.goal = null;           // back to the chooser; nothing else is lost
+    store.write('goal', null);
+    render();
+    return;
+  }
   const tab = e.target.closest('.day-tab');
   if (tab) {
     state.selectedDay = Number(tab.dataset.day);
@@ -515,9 +625,9 @@ document.addEventListener('click', (e) => {
     setDoneCount(date, ex, completing ? setNum : setNum - 1);
     if (completing) {
       ensureAudio();   // user tap = the moment we're allowed to unlock sound
-      const phase = phaseForWeek(displayedWeekIndex());
+      const restSec = Number(bubble.dataset.rest) || 60;
       const exercise = EXERCISE_DB[DAYS[state.selectedDay].key].find((x) => x.id === ex);
-      startRestTimer(phase.restSec, `Rest — ${exercise ? exercise.name : 'set'} · set ${setNum} done`);
+      startRestTimer(restSec, `Rest — ${exercise ? exercise.name : 'set'} · set ${setNum} done`);
     }
     renderDay();
   }
