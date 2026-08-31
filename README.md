@@ -11,6 +11,19 @@ accounts, no ads, works offline in the gym.
 | Thursday | Chest |
 | Friday | Arms |
 
+## Two goals, one plan — train together
+
+On first open each phone asks **"What's your goal?"**:
+
+- **💪 Build muscle** — full rests, progressive overload.
+- **🔥 Lose fat** — the *same exercises*, higher reps, rests cut to ~65%, lighter
+  weight suggestions, and a rotating cardio finisher after every session.
+
+Exercise selection comes from the calendar week, so two phones always show the
+same machines on the same day — perfect for couples who train together with
+different goals. Each device keeps its own goal, weights, and progress; switch
+any time via the goal pill in the banner.
+
 ## What it does
 
 - **A different plan every week.** Each calendar week gets its own combination of
