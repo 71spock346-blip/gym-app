@@ -1,6 +1,6 @@
 /* Iron Week service worker — precache the app shell so it works offline in the gym. */
 
-const CACHE = 'ironweek-v4';
+const CACHE = 'ironweek-v5';
 const ASSETS = [
   './',
   './index.html',

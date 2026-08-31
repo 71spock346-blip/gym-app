@@ -61,8 +61,15 @@
   <script src="js/exercises.js"></script>
   <script src="js/app.js"></script>
   <script>
+    // Register the offline cache, and auto-reload once a new version has
+    // installed — so updates apply on the first open, no relaunch dance.
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+      let hadController = !!navigator.serviceWorker.controller;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!hadController) { hadController = true; return; } // first-ever install: nothing to swap
+        window.location.reload();
+      });
     }
   </script>
 </body>
