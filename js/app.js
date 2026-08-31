@@ -14,28 +14,28 @@ const PHASES = [
     key: 'hypertrophy', name: 'Hypertrophy', badge: '💪',
     desc: 'Muscle-building week: moderate weight, controlled 2–3 second negatives.',
     sets: [3, 4], reps: [[8, 12], [10, 12]], rest: '60–90 s',
-    tempo: '1 s up · squeeze · 2–3 s down',
+    tempo: '1 s up · squeeze · 2–3 s down', restSec: 75,
     pct: 1.0, isoPct: 1.0, isoReps: [[10, 12], [12, 15]],
   },
   {
     key: 'strength', name: 'Strength', badge: '🏋️',
     desc: 'Heavy week: bigger loads, fewer reps, full rests between sets.',
     sets: [4, 5], reps: [[4, 6], [5, 6]], rest: '2–3 min',
-    tempo: 'drive up hard · 2 s down',
+    tempo: 'drive up hard · 2 s down', restSec: 150,
     pct: 1.15, isoPct: 1.05, isoReps: [[8, 10], [8, 12]],
   },
   {
     key: 'volume', name: 'Volume', badge: '🔥',
     desc: 'Pump week: lighter weight, high reps, short rests. Chase the burn.',
     sets: [3, 3], reps: [[12, 15], [15, 20]], rest: '45–60 s',
-    tempo: 'steady rhythm · 1–2 s each way',
+    tempo: 'steady rhythm · 1–2 s each way', restSec: 50,
     pct: 0.85, isoPct: 0.85, isoReps: [[15, 20], [12, 15]],
   },
   {
     key: 'deload', name: 'Deload', badge: '🧘',
     desc: 'Recovery week: light and easy on purpose. Perfect form, leave energy in the tank — you grow while you recover.',
     sets: [2, 3], reps: [[10, 12], [10, 12]], rest: '60 s',
-    tempo: 'slow & perfect · 3 s down',
+    tempo: 'slow & perfect · 3 s down', restSec: 60,
     pct: 0.6, isoPct: 0.6, isoReps: [[10, 12], [12, 15]],
   },
 ];
@@ -386,6 +386,117 @@ function swapLine(ex, day, chosenIds, weekIdx) {
   return `<div class="swap-line">🔄 <strong>Machine busy?</strong> Swap for: ${alt.name} (${alt.gear.toLowerCase()})</div>`;
 }
 
+/* ------------------------------ rest timer ------------------------------ */
+/* Starts automatically when a set is checked off; chimes + vibrates at zero.
+ * Uses a wall-clock end time so it stays accurate even if the browser
+ * throttles timers, and a screen wake lock (where supported) so the phone
+ * doesn't sleep mid-rest. */
+const rest = { endAt: 0, totalMs: 0, tick: null, hideTimer: null, running: false, wakeLock: null };
+let audioCtx = null;
+
+function ensureAudio() {
+  // Must be called from a user tap — that unlocks audio playback on phones.
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  } catch { /* no audio support — timer still works visually */ }
+}
+
+function chime() {
+  if (!audioCtx) return;
+  try {
+    // Two rounds of a rising three-note bell: E5 → G5 → C6.
+    const notes = [659.25, 783.99, 1046.5];
+    for (let round = 0; round < 2; round++) {
+      notes.forEach((freq, i) => {
+        const t = audioCtx.currentTime + round * 0.85 + i * 0.18;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.5, t + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(t);
+        osc.stop(t + 0.5);
+      });
+    }
+  } catch { /* ignore */ }
+  try { navigator.vibrate && navigator.vibrate([250, 120, 250, 120, 400]); } catch { /* ignore */ }
+}
+
+async function holdWakeLock() {
+  try { rest.wakeLock = await navigator.wakeLock?.request('screen'); } catch { rest.wakeLock = null; }
+}
+function releaseWakeLock() {
+  try { rest.wakeLock?.release(); } catch { /* ignore */ }
+  rest.wakeLock = null;
+}
+
+function startRestTimer(seconds, label) {
+  clearTimeout(rest.hideTimer);
+  clearInterval(rest.tick);
+  rest.endAt = Date.now() + seconds * 1000;
+  rest.totalMs = seconds * 1000;
+  rest.running = true;
+  const el = $('#restTimer');
+  el.hidden = false;
+  el.classList.remove('done');
+  document.body.classList.add('timer-on');
+  $('#restEmoji').textContent = '⏳';
+  $('#restLabel').textContent = label;
+  updateRestTimer();
+  rest.tick = setInterval(updateRestTimer, 250);
+  holdWakeLock();
+}
+
+function updateRestTimer() {
+  const remaining = rest.endAt - Date.now();
+  if (remaining <= 0) { finishRestTimer(); return; }
+  const secs = Math.ceil(remaining / 1000);
+  $('#restTime').textContent = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+  $('#restFill').style.width = `${Math.min(100, 100 * (1 - remaining / rest.totalMs))}%`;
+}
+
+function finishRestTimer() {
+  if (!rest.running) return;
+  rest.running = false;
+  clearInterval(rest.tick);
+  chime();
+  const el = $('#restTimer');
+  el.classList.add('done');
+  $('#restEmoji').textContent = '🔔';
+  $('#restTime').textContent = '0:00';
+  $('#restLabel').textContent = 'GO — start your next set!';
+  $('#restFill').style.width = '100%';
+  releaseWakeLock();
+  rest.hideTimer = setTimeout(stopRestTimer, 8000);
+}
+
+function stopRestTimer() {
+  rest.running = false;
+  clearInterval(rest.tick);
+  clearTimeout(rest.hideTimer);
+  releaseWakeLock();
+  $('#restTimer').hidden = true;
+  document.body.classList.remove('timer-on');
+}
+
+// If the phone was locked or the browser tabbed away past the end time,
+// fire the finish state (and chime) the moment the app is visible again.
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && rest.running) updateRestTimer();
+});
+
+$('#restSkip').addEventListener('click', stopRestTimer);
+$('#restPlus').addEventListener('click', () => {
+  if (!rest.running) return;
+  rest.endAt += 30 * 1000;
+  rest.totalMs += 30 * 1000;
+  updateRestTimer();
+});
+
 /* ------------------------------ events ------------------------------ */
 document.addEventListener('click', (e) => {
   const tab = e.target.closest('.day-tab');
@@ -399,8 +510,15 @@ document.addEventListener('click', (e) => {
     const { ex, set, date } = bubble.dataset;
     const setNum = Number(set);
     const current = doneCount(date, ex);
+    const completing = current !== setNum;
     // Tapping the last completed bubble un-completes it; otherwise complete up to here.
-    setDoneCount(date, ex, current === setNum ? setNum - 1 : setNum);
+    setDoneCount(date, ex, completing ? setNum : setNum - 1);
+    if (completing) {
+      ensureAudio();   // user tap = the moment we're allowed to unlock sound
+      const phase = phaseForWeek(displayedWeekIndex());
+      const exercise = EXERCISE_DB[DAYS[state.selectedDay].key].find((x) => x.id === ex);
+      startRestTimer(phase.restSec, `Rest — ${exercise ? exercise.name : 'set'} · set ${setNum} done`);
+    }
     renderDay();
   }
 });

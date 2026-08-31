@@ -36,6 +36,23 @@
 
   <main id="content" class="content"></main>
 
+  <div id="restTimer" class="rest-timer" hidden>
+    <div class="rest-progress"><div id="restFill" class="rest-fill"></div></div>
+    <div class="rest-row">
+      <div class="rest-info">
+        <span id="restEmoji" class="rest-emoji">⏳</span>
+        <div>
+          <div id="restTime" class="rest-time">1:00</div>
+          <div id="restLabel" class="rest-label">Rest</div>
+        </div>
+      </div>
+      <div class="rest-actions">
+        <button id="restPlus" class="rest-btn" type="button">+30 s</button>
+        <button id="restSkip" class="rest-btn rest-btn-skip" type="button">Skip</button>
+      </div>
+    </div>
+  </div>
+
   <footer class="footer">
     <p>Plans rotate automatically every week — exercises, sets, reps and weights all change.
     Set your working weight on each exercise and Iron Week will suggest loads for every phase.</p>
