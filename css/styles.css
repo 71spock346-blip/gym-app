@@ -346,6 +346,7 @@ body.timer-on .footer { padding-bottom: calc(110px + env(safe-area-inset-bottom)
   color: var(--text-dim); font-size: 0.78rem; text-align: center;
   max-width: 640px; margin: 0 auto;
 }
+.app-version { margin-top: 8px; opacity: 0.55; font-size: 0.7rem; }
 
 /* ------------------------------ larger screens ------------------------------ */
 @media (min-width: 700px) {

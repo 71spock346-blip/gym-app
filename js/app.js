@@ -6,6 +6,8 @@
 
 'use strict';
 
+const APP_VERSION = 7;   // keep in step with the CACHE version in sw.js
+
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
  * ~10-rep load). Isolation moves never drop below 8 reps, even in strength week. */
@@ -328,6 +330,7 @@ function renderHeader() {
   $('#weekTitle').textContent = `Week ${isoWeekNumber(monday)}${offsetNote}`;
   $('#weekDates').textContent = `${fmt(monday)} – ${fmt(friday)}`;
   $('#unitToggle').textContent = state.unit;
+  $('#appVersion').textContent = `Iron Week v${APP_VERSION}`;
 }
 
 function renderPhaseBanner() {
