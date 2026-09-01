@@ -1,16 +1,19 @@
 /* Stay Strong — mobile-first dark theme */
 
+/* Brand palette drawn from the app icon: charcoal body, electric-blue and
+ * orange swooshes, silver figure. --amber is the icon orange (name kept to
+ * avoid touching every rule). */
 :root {
-  --bg: #101418;
-  --surface: #1a2026;
-  --surface-2: #222a32;
-  --border: #2e3843;
+  --bg: #0f1318;
+  --surface: #171c23;
+  --surface-2: #202834;
+  --border: #2c3644;
   --text: #eef2f6;
   --text-dim: #9aa7b4;
-  --accent: #4ade80;
-  --accent-dim: rgba(74, 222, 128, 0.14);
-  --amber: #fbbf24;
-  --blue: #60a5fa;
+  --accent: #2f9bff;
+  --accent-dim: rgba(47, 155, 255, 0.16);
+  --amber: #ff8c1a;
+  --blue: #7ec1ff;
   --rose: #fb7185;
   --radius: 14px;
 }
@@ -40,6 +43,11 @@ body {
 
 .brand { font-size: 1.25rem; letter-spacing: 0.02em; }
 .brand-icon { margin-right: 2px; }
+.brand-text {
+  background: linear-gradient(90deg, #2f9bff 20%, #ff8c1a 100%);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
 
 .unit-toggle {
   background: var(--surface-2); color: var(--text);
@@ -239,7 +247,7 @@ body {
 }
 .set-bubble:active { transform: scale(0.92); }
 .set-bubble.done {
-  background: var(--accent); border-color: var(--accent); color: #0c1a10;
+  background: var(--accent); border-color: var(--accent); color: #041018;
 }
 
 /* ------------------------------ how-to ------------------------------ */
