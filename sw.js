@@ -1,6 +1,6 @@
 /* Iron Week service worker — precache the app shell so it works offline in the gym. */
 
-const CACHE = 'ironweek-v8';
+const CACHE = 'ironweek-v9';
 const ASSETS = [
   './',
   './index.html',
@@ -8,9 +8,9 @@ const ASSETS = [
   './js/exercises.js',
   './js/app.js',
   './manifest.webmanifest',
-  './icons/icon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
 ];
 
