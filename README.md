@@ -1,4 +1,4 @@
-# 🏋️ Iron Week — Gym Planner
+# 🏋️ Stay Strong — Gym Planner
 
 A phone-friendly workout planner for a 5-day split that **changes every week** — no
 accounts, no ads, works offline in the gym.

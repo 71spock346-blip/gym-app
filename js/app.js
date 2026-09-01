@@ -1,4 +1,4 @@
-/* Iron Week — weekly plan generator + UI.
+/* Stay Strong — weekly plan generator + UI.
  * Every calendar week gets a deterministic seed, so the plan is stable within
  * a week but different from every other week: new exercise combos, new
  * set/rep schemes (4-week phase cycle) and adjusted weight suggestions.
@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 9;   // keep in step with the CACHE version in sw.js
+const APP_VERSION = 10;  // keep in step with the CACHE version in sw.js
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -85,6 +85,8 @@ const WEEK_EPOCH = Date.UTC(2001, 0, 1);
 const store = {
   read(key, fallback) {
     try {
+      // NOTE: the 'ironweek.' storage prefix predates the Stay Strong rename;
+      // it stays so nobody loses their saved weights and progress.
       const raw = localStorage.getItem('ironweek.' + key);
       return raw === null ? fallback : JSON.parse(raw);
     } catch { return fallback; }
@@ -307,7 +309,7 @@ function renderHeader() {
   $('#weekTitle').textContent = `Week ${isoWeekNumber(monday)}${offsetNote}`;
   $('#weekDates').textContent = `${fmt(monday)} – ${fmt(friday)}`;
   $('#unitToggle').textContent = state.unit;
-  $('#appVersion').textContent = `Iron Week v${APP_VERSION}`;
+  $('#appVersion').textContent = `Stay Strong v${APP_VERSION}`;
 }
 
 function renderPhaseBanner() {

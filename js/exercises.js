@@ -1,4 +1,4 @@
-/* Iron Week — exercise database.
+/* Stay Strong — exercise database.
  * Each day has a pool of exercises; the planner picks a fresh combination every week.
  * tags drive selection rules (e.g. legs always get quads + hamstrings + calves).
  * video is a YouTube search query — search links never go stale, and on phones
