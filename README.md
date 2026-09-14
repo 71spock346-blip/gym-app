@@ -27,9 +27,13 @@ any time via the goal pill in the banner.
 ## What it does
 
 - **A different plan every week.** Each calendar week gets its own combination of
-  exercises, drawn from a pool of 45+ machine and free-weight movements. Selection
+  exercises, drawn from a pool of 65+ machine and free-weight movements. Selection
   rules keep every session balanced (leg day always has quads + hamstrings + calves,
   arm day always gets 3 biceps + 3 triceps moves, and so on).
+- **Anti-repeat rotation.** Exercises used last week go to the back of the queue,
+  so consecutive weeks genuinely rotate through the pool instead of re-picking
+  favourites. Strength weeks also lean into big compound lifts while volume weeks
+  favour cable/isolation pump work, so each type of week feels different.
 - **Reps and sets rotate through a 4-week training cycle:**
   1. **Hypertrophy** — 3–4 sets × 8–12 reps, moderate weight
   2. **Strength** — 4–5 sets × 4–6 reps, heavy
@@ -74,7 +78,7 @@ python3 -m http.server 8000
 ```
 index.html            app shell
 css/styles.css        mobile-first dark theme
-js/exercises.js       exercise database (45+ exercises with machine guides) + SVG pictograms
+js/exercises.js       exercise database (65+ exercises with machine guides) + SVG pictograms
 js/app.js             weekly plan generator, weight logic, UI
 sw.js                 service worker (offline support)
 manifest.webmanifest  PWA install metadata

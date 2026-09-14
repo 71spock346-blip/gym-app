@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 11;  // keep in step with the CACHE version in sw.js
+const APP_VERSION = 12;  // keep in step with the CACHE version in sw.js
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -162,15 +162,46 @@ function seededShuffle(arr, rng) {
 function phaseForWeek(weekIdx) { return PHASES[((weekIdx % 4) + 4) % 4]; }
 function cycleForWeek(weekIdx) { return Math.floor(weekIdx / 4); }
 
-/* Pick this week's exercises for a day: fill required slots first
- * (so every leg day has quads/hams/calves etc.), then top up from the rest.
- * Compounds are ordered before isolation work. */
+/* Pick this week's exercises for a day, with two guarantees on top of the
+ * weekly shuffle:
+ *  - ANTI-REPEAT: exercises used last week go to the back of the queue, so
+ *    every slot rotates through its alternatives instead of re-picking
+ *    favourites. The week-by-week chain is anchored at a fixed calendar
+ *    week, so every phone replays the identical history.
+ *  - WEEK FLAVOUR: strength weeks prefer big compound lifts, volume weeks
+ *    prefer isolation/cable pump work — each type of week feels different.
+ * Selection never depends on the device's goal, so two people training
+ * together still see the same exercises. */
+const ANTI_REPEAT_ANCHOR = Math.floor((Date.UTC(2026, 0, 5) - WEEK_EPOCH) / MS_PER_WEEK);
+
 function pickExercises(day, weekIdx, dayIdx) {
+  let prevIds = new Set();
+  let picks = null;
+  for (let w = Math.min(weekIdx, ANTI_REPEAT_ANCHOR); w <= weekIdx; w++) {
+    picks = pickWeek(day, w, dayIdx, prevIds);
+    prevIds = new Set(picks.map((ex) => ex.id));
+  }
+  return picks;
+}
+
+function pickWeek(day, weekIdx, dayIdx, prevIds) {
   const rng = mulberry32(weekIdx * 7919 + dayIdx * 104729 + 17);
-  const pool = seededShuffle(EXERCISE_DB[day.key], rng);
+  const phase = phaseForWeek(weekIdx);
+  const flavour = (ex) => {
+    if (phase.key === 'strength') return ex.tags.includes('compound') ? 0 : 1;
+    if (phase.key === 'volume') return ex.tags.includes('compound') ? 1 : 0;
+    return 0;
+  };
+  const pool = seededShuffle(EXERCISE_DB[day.key], rng)
+    .map((ex, i) => ({ ex, i }))
+    .sort((a, b) =>
+      (prevIds.has(a.ex.id) - prevIds.has(b.ex.id)) ||
+      (flavour(a.ex) - flavour(b.ex)) ||
+      (a.i - b.i))
+    .map((o) => o.ex);
+
   const chosen = [];
   const taken = new Set();
-
   for (const slot of day.slots) {
     let need = slot.count;
     for (const ex of pool) {

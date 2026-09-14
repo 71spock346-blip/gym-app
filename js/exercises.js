@@ -259,6 +259,108 @@ const EXERCISE_DB = {
         'Raising above shoulder height — no benefit, extra joint stress.',
       ],
     },
+    {
+      id: 'sh-arnold-press', name: 'Arnold Press',
+      gear: 'Dumbbells + upright bench', icon: 'dumbbell',
+      tags: ['compound', 'press'], muscles: 'All three delt heads, triceps',
+      video: 'seated arnold press proper form',
+      setup: [
+        'Sit on an upright bench holding dumbbells at shoulder height, palms facing YOU.',
+      ],
+      execution: [
+        'Press up while rotating your palms outward — at the top they face forward.',
+        'Reverse the rotation on the way down, back to palms-facing-you.',
+      ],
+      tips: [
+        'The rotation sweeps through more of the delt than a straight press — go a bit lighter.',
+      ],
+      mistakes: [
+        'Rotating with a jerk instead of smoothly through the whole press.',
+        'Flaring the elbows out early — they should follow the rotation.',
+      ],
+    },
+    {
+      id: 'sh-bb-press', name: 'Standing Barbell Press',
+      gear: 'Barbell + rack', icon: 'barbell',
+      tags: ['compound', 'press'], muscles: 'Delts, triceps, core',
+      video: 'standing barbell overhead press proper form',
+      setup: [
+        'Set the bar at upper-chest height in the rack; grip just outside your shoulders.',
+        'Unrack with the bar on your front delts, elbows slightly in front, core braced.',
+      ],
+      execution: [
+        'Press the bar straight up, moving your head back slightly to clear the chin.',
+        'Push your head "through the window" at the top so the bar stacks over mid-foot.',
+        'Lower under control back to your upper chest.',
+      ],
+      tips: [
+        'Squeeze glutes and abs hard — a rigid body presses more.',
+      ],
+      mistakes: [
+        'Arching the lower back into a standing incline press.',
+        'Pressing the bar out in front instead of straight overhead.',
+      ],
+    },
+    {
+      id: 'sh-lean-raise', name: 'Leaning Lateral Raise',
+      gear: 'Dumbbell + upright post or rack', icon: 'dumbbell',
+      tags: ['isolation', 'side'], muscles: 'Side delts (extra range at the bottom)',
+      video: 'leaning single arm lateral raise form',
+      setup: [
+        'Hold a post or rack upright with one hand and lean your whole body away, feet close to the post.',
+        'Hold a light dumbbell in the hanging outside hand.',
+      ],
+      execution: [
+        'Raise the dumbbell out to shoulder height, lower slowly; finish the set, switch sides.',
+      ],
+      tips: [
+        'The lean keeps tension on the delt at the bottom where normal raises go slack.',
+      ],
+      mistakes: [
+        'Turning the raise into a swing with the lean as momentum.',
+        'Grip hand doing the work — the holding arm stays passive.',
+      ],
+    },
+    {
+      id: 'sh-cross-cable-rear', name: 'Cross-Body Cable Rear Delt Fly',
+      gear: 'Cable tower, single handle at shoulder height', icon: 'cable',
+      tags: ['isolation', 'rear'], muscles: 'Rear delts',
+      video: 'single arm cross body cable rear delt fly form',
+      setup: [
+        'Set a pulley at shoulder height with no handle (grip the ball/end) or a single handle.',
+        'Stand side-on and grab it with the FAR hand, arm across your chest.',
+      ],
+      execution: [
+        'Sweep your arm out and back in a wide arc until it points away from the machine.',
+        'Return slowly across your body. Finish the set, then switch arms.',
+      ],
+      tips: [
+        'Very light weight — the rear delt is small and this movement is unforgiving of cheating.',
+      ],
+      mistakes: [
+        'Bending the elbow and rowing instead of sweeping.',
+        'Rotating the torso to help the arm across.',
+      ],
+    },
+    {
+      id: 'sh-plate-raise', name: 'Plate Front Raise',
+      gear: 'One weight plate', icon: 'dumbbell',
+      tags: ['isolation', 'front'], muscles: 'Front delts',
+      video: 'plate front raise proper form',
+      setup: [
+        'Hold a plate with both hands at 3 and 9 o\'clock, arms hanging in front of you.',
+      ],
+      execution: [
+        'Raise the plate to eye level with slightly bent arms, pause, lower slowly.',
+      ],
+      tips: [
+        'Holding the top for 2 seconds every few reps burns beautifully.',
+      ],
+      mistakes: [
+        'Leaning back and turning it into a swing.',
+        'Dropping the plate down fast — the lowering half is half the exercise.',
+      ],
+    },
   ],
 
   /* -------------------------------- BACK -------------------------------- */
@@ -459,6 +561,90 @@ const EXERCISE_DB = {
         'Rolling the shoulders in circles.',
         'Bending the elbows and turning it into a half-curl.',
         'Tiny bouncy reps — pause at the top, stretch at the bottom.',
+      ],
+    },
+    {
+      id: 'bk-close-pulldown', name: 'Close-Grip Lat Pulldown',
+      gear: 'Lat pulldown machine + V-handle', icon: 'latPulldown',
+      tags: ['compound', 'vertical'], muscles: 'Lower lats, biceps',
+      video: 'close grip v bar lat pulldown proper form',
+      setup: [
+        'Swap the wide bar for the narrow V-handle.',
+        'Lock your thighs under the pad and sit tall, arms extended overhead.',
+      ],
+      execution: [
+        'Pull the handle to the top of your chest, elbows driving down past your ribs.',
+        'Lean back only slightly; let the handle rise to a full stretch between reps.',
+      ],
+      tips: [
+        'The neutral close grip lets most people feel their lats better than the wide bar — great swap week.',
+      ],
+      mistakes: [
+        'Rocking back and pulling with bodyweight.',
+        'Stopping the stretch short at the top.',
+      ],
+    },
+    {
+      id: 'bk-machine-highrow', name: 'Machine High Row',
+      gear: 'High row machine (chest pad, overhead handles)', icon: 'rowMachine',
+      tags: ['compound', 'vertical'], muscles: 'Upper lats, mid back',
+      video: 'machine high row proper form',
+      setup: [
+        'Adjust the seat so the handles sit up and forward of your shoulders.',
+        'Chest on the pad, grab the handles with a neutral grip.',
+      ],
+      execution: [
+        'Pull down-and-back toward your lower ribs in one arc.',
+        'Squeeze the shoulder blades, then let the arms stretch fully up-and-forward.',
+      ],
+      tips: [
+        'Halfway between a pulldown and a row — hits the lats from an angle the others miss.',
+      ],
+      mistakes: [
+        'Chest leaving the pad to jerk the weight.',
+        'Pulling straight down instead of down-and-back.',
+      ],
+    },
+    {
+      id: 'bk-single-cable-row', name: 'Single-Arm Cable Row',
+      gear: 'Cable row station or low pulley + single handle', icon: 'cableRow',
+      tags: ['compound', 'horizontal'], muscles: 'Lats, mid back (each side alone)',
+      video: 'single arm seated cable row proper form',
+      setup: [
+        'Attach a single handle to the low pulley and sit as for a normal cable row.',
+        'Grab it with one hand, palm facing in, arm extended.',
+      ],
+      execution: [
+        'Row the handle to your hip, elbow tight to your side; you may rotate the torso slightly open at the stretch.',
+        'Finish all reps, then switch arms.',
+      ],
+      tips: [
+        'One side at a time exposes and fixes strength imbalances the two-hand row hides.',
+      ],
+      mistakes: [
+        'Twisting hard with the torso to move heavier weight.',
+        'Shrugging the working shoulder toward your ear.',
+      ],
+    },
+    {
+      id: 'bk-bb-row', name: 'Barbell Bent-Over Row',
+      gear: 'Barbell', icon: 'barbell',
+      tags: ['compound', 'horizontal'], muscles: 'Whole back, rear delts, biceps',
+      video: 'barbell bent over row proper form',
+      setup: [
+        'Grip the bar just outside your knees, hinge to ~45°, back flat, knees soft.',
+      ],
+      execution: [
+        'Row the bar to your lower ribs, elbows driving back, and lower under control.',
+        'Hold the hinge — your torso angle should not change during the set.',
+      ],
+      tips: [
+        'The king of back builders — but only with a weight you can row without heaving.',
+      ],
+      mistakes: [
+        'Standing up a little on every rep to bounce the weight.',
+        'Rounding the lower back as the set gets hard.',
+        'Rowing to the chest instead of the lower ribs.',
       ],
     },
   ],
@@ -686,6 +872,111 @@ const EXERCISE_DB = {
         'Letting the stack pull your legs open fast between reps.',
       ],
     },
+    {
+      id: 'lg-goblet-squat', name: 'Goblet Squat',
+      gear: 'One dumbbell or kettlebell', icon: 'dumbbell',
+      tags: ['compound', 'quad'], muscles: 'Quads, glutes, core',
+      video: 'goblet squat proper form',
+      setup: [
+        'Hold a dumbbell vertically against your chest, elbows tucked under it.',
+        'Feet slightly wider than shoulders, toes a little out.',
+      ],
+      execution: [
+        'Squat down between your knees until your elbows brush your thighs.',
+        'Drive up through mid-foot, chest tall the whole way.',
+      ],
+      tips: [
+        'The front-held weight balances you into a naturally deep, upright squat — the best squat teacher there is.',
+      ],
+      mistakes: [
+        'Letting the dumbbell drift away from the chest.',
+        'Heels lifting — widen the stance or slow down.',
+      ],
+    },
+    {
+      id: 'lg-bulgarian', name: 'Bulgarian Split Squat',
+      gear: 'Dumbbells + bench behind you', icon: 'dumbbell',
+      tags: ['compound', 'quad', 'glute'], muscles: 'Quads, glutes, balance',
+      video: 'dumbbell bulgarian split squat proper form',
+      setup: [
+        'Stand a big step in front of a bench; rest the top of your rear foot on it.',
+        'Hold a dumbbell in each hand at your sides.',
+      ],
+      execution: [
+        'Lower straight down until the front thigh is parallel, rear knee toward the floor.',
+        'Drive up through the front heel. All reps, then switch legs.',
+      ],
+      tips: [
+        'Everyone wobbles at first — start with bodyweight only and add dumbbells next week.',
+      ],
+      mistakes: [
+        'Front foot too close to the bench, slamming the knee forward.',
+        'Pushing off the back foot — it is a balance point, not a driver.',
+      ],
+    },
+    {
+      id: 'lg-hip-thrust', name: 'Barbell Hip Thrust',
+      gear: 'Barbell + bench (bar pad recommended)', icon: 'bench',
+      tags: ['compound', 'glute'], muscles: 'Glutes, hamstrings',
+      video: 'barbell hip thrust proper form',
+      setup: [
+        'Sit on the floor, upper back against a bench, barbell (with pad) across your hips.',
+        'Feet flat, shoulder-width, close enough that your shins are vertical at the top.',
+      ],
+      execution: [
+        'Drive through your heels and squeeze your glutes to lift your hips until your body is a flat table.',
+        'Chin tucked, ribs down; lower with control and repeat.',
+      ],
+      tips: [
+        'The single best glute builder in the gym — squeeze hard for a full second at the top.',
+      ],
+      mistakes: [
+        'Overarching the lower back at the top instead of finishing with the glutes.',
+        'Pushing through the toes — heels drive, knees stay over ankles.',
+      ],
+    },
+    {
+      id: 'lg-lying-curl', name: 'Lying Leg Curl Machine',
+      gear: 'Lying leg curl machine', icon: 'legIso',
+      tags: ['isolation', 'ham'], muscles: 'Hamstrings',
+      video: 'lying leg curl machine proper form',
+      setup: [
+        'Lie face down, knees just off the pad edge, ankle roller on your lower calves.',
+        'Grip the handles and press your hips into the bench.',
+      ],
+      execution: [
+        'Curl your heels toward your glutes as far as they go.',
+        'Lower slowly to a full stretch without the stack touching down.',
+      ],
+      tips: [
+        'Lying and seated curls hit the hamstrings slightly differently — your plan rotates both.',
+      ],
+      mistakes: [
+        'Hips popping up off the bench to cheat the weight over.',
+        'Half reps in the middle of the range.',
+      ],
+    },
+    {
+      id: 'lg-legpress-calf', name: 'Leg Press Calf Raise',
+      gear: '45° leg press machine', icon: 'legPress',
+      tags: ['isolation', 'calf'], muscles: 'Calves',
+      video: 'leg press calf raise proper form',
+      setup: [
+        'Sit in the leg press with only the balls of your feet on the bottom edge of the platform.',
+        'Press the sled up and keep your knees almost straight — safeties ON.',
+      ],
+      execution: [
+        'Let the platform push your toes back for a deep calf stretch.',
+        'Press through the balls of your feet until your ankles are fully extended.',
+      ],
+      tips: [
+        'Lets you load calves heavier than standing raises without balancing anything.',
+      ],
+      mistakes: [
+        'Bending and snapping the knees to bounce the sled.',
+        'Feet too high on the platform — you lose the range of motion.',
+      ],
+    },
   ],
 
   /* -------------------------------- CHEST -------------------------------- */
@@ -867,6 +1158,88 @@ const EXERCISE_DB = {
         'Sagging hips — squeeze your glutes to hold the plank line.',
         'Half reps that stop a foot above the floor.',
         'Head diving first while the chest stays high.',
+      ],
+    },
+    {
+      id: 'ch-flat-db-press', name: 'Flat Dumbbell Press',
+      gear: 'Flat bench + dumbbells', icon: 'dumbbell',
+      tags: ['compound', 'press'], muscles: 'Chest, triceps, stabilisers',
+      video: 'flat dumbbell bench press proper form',
+      setup: [
+        'Sit with dumbbells on your thighs; kick them up one at a time as you lie back.',
+        'Start with dumbbells over your chest, palms forward, feet planted.',
+      ],
+      execution: [
+        'Lower both dumbbells to the sides of your chest for a deeper stretch than a barbell allows.',
+        'Press up and slightly together without clanging them at the top.',
+      ],
+      tips: [
+        'No spotter needed — if you fail, just lower the dumbbells to your sides.',
+      ],
+      mistakes: [
+        'Elbows flaring straight out at 90°.',
+        'Dropping the dumbbells from the top instead of lowering them.',
+      ],
+    },
+    {
+      id: 'ch-smith-flat', name: 'Smith Machine Flat Press',
+      gear: 'Smith machine + flat bench', icon: 'smith',
+      tags: ['compound', 'press'], muscles: 'Chest, triceps',
+      video: 'smith machine flat bench press proper form',
+      setup: [
+        'Centre a flat bench so the bar comes down to mid-chest.',
+        'Grip slightly wider than shoulders; set the safety stops just below chest level.',
+      ],
+      execution: [
+        'Lower the bar to your mid-chest, pause a beat, press to near-lockout.',
+      ],
+      tips: [
+        'The fixed path is perfect for pushing close to failure safely on heavy weeks.',
+      ],
+      mistakes: [
+        'Bench off-centre so the bar lands on your belly or throat — check with an empty bar.',
+        'Bouncing the bar off the chest.',
+      ],
+    },
+    {
+      id: 'ch-low-cable-fly', name: 'Low-to-High Cable Fly',
+      gear: 'Dual cable towers, handles at lowest setting', icon: 'cable',
+      tags: ['isolation', 'fly', 'upper'], muscles: 'Upper chest',
+      video: 'low to high cable fly proper form',
+      setup: [
+        'Set both pulleys to the lowest position, one handle in each hand.',
+        'Step forward into a staggered stance, arms down-and-back, slight elbow bend.',
+      ],
+      execution: [
+        'Sweep both hands up and together, finishing in front of your upper chest.',
+        'Squeeze, then lower wide and back with control.',
+      ],
+      tips: [
+        'The upward angle hits the upper chest that flat pressing misses — pairs perfectly with incline press weeks.',
+      ],
+      mistakes: [
+        'Turning it into an upward press by bending the elbows.',
+        'Standing square and wobbling — stagger the feet.',
+      ],
+    },
+    {
+      id: 'ch-flat-fly', name: 'Flat Dumbbell Fly',
+      gear: 'Flat bench + light dumbbells', icon: 'dumbbell',
+      tags: ['isolation', 'fly'], muscles: 'Chest (stretch focus)',
+      video: 'flat dumbbell chest fly proper form',
+      setup: [
+        'Lie on a flat bench, dumbbells over your chest, palms facing each other, slight elbow bend.',
+      ],
+      execution: [
+        'Open your arms in a wide arc until you feel a deep chest stretch.',
+        'Sweep back up like hugging a barrel — the elbow angle never changes.',
+      ],
+      tips: [
+        'Go much lighter than presses; the stretched bottom position is where it works and where it bites.',
+      ],
+      mistakes: [
+        'Bending the elbows on the way up — that is a press, not a fly.',
+        'Descending past a comfortable stretch and straining the shoulder.',
       ],
     },
   ],
@@ -1088,6 +1461,109 @@ const EXERCISE_DB = {
         'Hips drifting far away from the bench, which strains the shoulders.',
         'Shoulders rolling forward at the bottom — keep the chest up.',
         'Only bending the elbows a few centimetres.',
+      ],
+    },
+    {
+      id: 'ar-concentration', name: 'Concentration Curl',
+      gear: 'One dumbbell + bench', icon: 'dumbbell',
+      tags: ['biceps'], muscles: 'Biceps (peak focus)',
+      video: 'seated concentration curl proper form',
+      setup: [
+        'Sit on a bench, feet wide; brace your elbow against the inside of your thigh.',
+        'Let the dumbbell hang at full arm extension.',
+      ],
+      execution: [
+        'Curl the dumbbell to your shoulder without the elbow leaving your thigh.',
+        'Lower slowly to a dead hang. All reps, then switch arms.',
+      ],
+      tips: [
+        'The thigh brace removes every trace of cheating — the strictest curl there is.',
+      ],
+      mistakes: [
+        'Leaning your torso back to finish reps.',
+        'Letting the elbow slide off the thigh as you fatigue.',
+      ],
+    },
+    {
+      id: 'ar-spider-curl', name: 'Spider Curl',
+      gear: 'Incline bench + dumbbells', icon: 'preacher',
+      tags: ['biceps'], muscles: 'Biceps (short head, squeeze focus)',
+      video: 'dumbbell spider curl proper form',
+      setup: [
+        'Lie chest-down on a 45° incline bench, arms hanging straight toward the floor.',
+      ],
+      execution: [
+        'Curl both dumbbells up without moving your upper arms, squeeze hard at the top.',
+        'Lower all the way to straight arms.',
+      ],
+      tips: [
+        'The opposite of the incline curl: maximum tension at the squeeze instead of the stretch — your plan rotates both.',
+      ],
+      mistakes: [
+        'Swinging the upper arms forward to lift more.',
+        'Lifting the chest off the bench.',
+      ],
+    },
+    {
+      id: 'ar-cgbp', name: 'Close-Grip Bench Press',
+      gear: 'Barbell + flat bench', icon: 'bench',
+      tags: ['triceps'], muscles: 'Triceps, inner chest',
+      video: 'close grip bench press proper form',
+      setup: [
+        'Lie on the bench and grip the bar at shoulder width — NOT hands-touching.',
+        'Shoulder blades pinched, feet planted.',
+      ],
+      execution: [
+        'Lower the bar to your lower chest with elbows tucked close to your sides.',
+        'Press up, focusing on pushing through the triceps.',
+      ],
+      tips: [
+        'The heaviest triceps exercise you can do — perfect for strength weeks.',
+      ],
+      mistakes: [
+        'Gripping too narrow, which wrecks the wrists.',
+        'Letting the elbows flare — that turns it back into a chest press.',
+      ],
+    },
+    {
+      id: 'ar-db-overhead', name: 'Single-Arm Overhead Dumbbell Extension',
+      gear: 'One dumbbell', icon: 'dumbbell',
+      tags: ['triceps'], muscles: 'Triceps (long head)',
+      video: 'single arm overhead dumbbell tricep extension form',
+      setup: [
+        'Sit or stand tall holding one dumbbell straight overhead, elbow by your ear.',
+      ],
+      execution: [
+        'Bend only the elbow to lower the dumbbell behind your head to a deep stretch.',
+        'Extend back to straight. All reps, then switch arms.',
+      ],
+      tips: [
+        'Support your working elbow with the free hand if it wanders.',
+      ],
+      mistakes: [
+        'Elbow flaring out sideways as you lower.',
+        'Arching the back instead of bracing the core.',
+      ],
+    },
+    {
+      id: 'ar-kickback', name: 'Triceps Kickback',
+      gear: 'Dumbbells + bench (or cable, low setting)', icon: 'dumbbell',
+      tags: ['triceps'], muscles: 'Triceps (peak contraction)',
+      video: 'dumbbell tricep kickback proper form',
+      setup: [
+        'Hinge forward with one hand braced on a bench, back flat.',
+        'Hold a light dumbbell with your upper arm pinned parallel to the floor.',
+      ],
+      execution: [
+        'Extend the forearm straight back until the arm is fully locked out — squeeze one second.',
+        'Return to 90° without dropping the upper arm.',
+      ],
+      tips: [
+        'Featherweight and strict — the lockout squeeze is the entire point.',
+      ],
+      mistakes: [
+        'Upper arm dropping and swinging on every rep.',
+        'Going heavy and shortening the lockout.',
       ],
     },
   ],
