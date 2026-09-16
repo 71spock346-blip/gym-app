@@ -277,24 +277,42 @@ body {
 .howto-body .mistakes li { color: var(--rose); }
 .howto-body .mistakes li::marker { content: '✗ '; }
 
-/* ------------------------------ animations ------------------------------ */
-.anim-stage {
-  height: 168px; margin-bottom: 10px;
-  background: var(--surface-2); border: 1px solid var(--border);
-  border-radius: 12px; overflow: hidden; position: relative;
-  color: var(--text);
+/* ------------------------------ photo demos ------------------------------ */
+/* Two real photos (start / finish) cross-fade to show the movement.
+ * Tapping the demo holds both frames side by side for a closer look. */
+.photo-demo {
+  position: relative; aspect-ratio: 3 / 2; margin-bottom: 10px;
+  border-radius: 12px; overflow: hidden; background: #000;
+  border: 1px solid var(--border); cursor: pointer;
 }
-.anim-canvas, .anim-stage .anim-svg { width: 100%; height: 100%; display: block; }
-.anim-svg { stroke: currentColor; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; fill: none; }
-.anim-svg .anim-ground { stroke: var(--border); stroke-width: 2; }
-.anim-svg .anim-gear { stroke: var(--text-dim); stroke-width: 3; fill: var(--surface); opacity: 0.8; }
-.anim-svg .anim-far { opacity: 0.35; }
-.anim-svg .anim-weight { stroke: var(--accent); }
-.anim-caption {
-  position: absolute; left: 10px; bottom: 6px;
-  font-size: 0.7rem; color: var(--text-dim);
+.photo-frame {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; display: block;
 }
-.anim-caption strong { color: var(--accent); }
+.photo-end { animation: photo-swap 3.2s ease-in-out infinite; }
+@keyframes photo-swap {
+  0%, 30% { opacity: 0; }
+  50%, 80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.photo-tag {
+  position: absolute; top: 8px; left: 8px;
+  background: rgba(0, 0, 0, 0.65); color: #fff;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;
+  padding: 3px 8px; border-radius: 999px;
+}
+.photo-tag-end { animation: photo-swap 3.2s ease-in-out infinite; background: var(--accent); color: #041018; }
+.photo-hint {
+  position: absolute; right: 8px; bottom: 6px;
+  font-size: 0.68rem; color: rgba(255, 255, 255, 0.85);
+  background: rgba(0, 0, 0, 0.55); padding: 2px 7px; border-radius: 999px;
+}
+
+/* compare mode: both frames visible, side by side */
+.photo-demo.compare { display: flex; aspect-ratio: 3 / 1; }
+.photo-demo.compare .photo-frame { position: static; width: 50%; height: 100%; animation: none; opacity: 1; }
+.photo-demo.compare .photo-tag-end { animation: none; opacity: 1; left: auto; right: 8px; }
+.photo-demo.compare .photo-hint { display: none; }
 
 .video-link {
   display: block; text-align: center;

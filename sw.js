@@ -1,12 +1,14 @@
 /* Stay Strong service worker — precache the app shell so it works offline in the gym. */
 
-const CACHE = 'staystrong-v13';
+importScripts('./js/demos.js');   // DEMO_PHOTOS: exercise id → photo credit
+
+const CACHE = 'staystrong-v14';
 const ASSETS = [
   './',
   './index.html',
   './css/styles.css',
   './js/exercises.js',
-  './js/anim.js',
+  './js/demos.js',
   './js/app.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
@@ -14,10 +16,16 @@ const ASSETS = [
   './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
 ];
+// Demo photos are cached best-effort at install (a few MB), and on demand
+// afterwards — so the shell always installs even on a flaky connection.
+const PHOTOS = Object.keys(DEMO_PHOTOS).flatMap((id) => [`./img/demo/${id}-0.jpg`, `./img/demo/${id}-1.jpg`]);
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE)
+      .then((cache) => cache.addAll(ASSETS)
+        .then(() => Promise.allSettled(PHOTOS.map((url) => cache.add(url)))))
+      .then(() => self.skipWaiting())
   );
 });
 

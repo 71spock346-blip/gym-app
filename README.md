@@ -44,10 +44,11 @@ any time via the goal pill in the banner.
   deload) and adds +2.5% per completed cycle for steady progressive overload.
   Toggle between kg and lb in the header.
 - **Machine guides.** Every exercise card has a "How to use this machine" section
-  with an animated demo of the movement, set-up steps, execution steps, form tips,
-  and common mistakes. The demos are built into the app, so they play with no
-  signal — basement gyms included. (YouTube form-video links are there too for
-  when you're online.)
+  with real start/finish photographs of the movement (cross-fading; tap to see
+  them side by side), set-up steps, execution steps, form tips, and common
+  mistakes. The photos are bundled with the app, so they work with no signal —
+  basement gyms included. (YouTube form-video links are there too for when
+  you're online.)
 - **Plate-stack machines.** Tap the unit next to any weight box to switch that
   exercise to *plates* — for stacks with unmarked plates you enter the plate count
   and get suggestions back as plate counts.
@@ -85,11 +86,20 @@ python3 -m http.server 8000
 index.html            app shell
 css/styles.css        mobile-first dark theme
 js/exercises.js       exercise database (65+ exercises with machine guides) + SVG pictograms
+js/demos.js           generated manifest of bundled demo photos
+img/demo/             start/finish photos per exercise (public domain)
 js/app.js             weekly plan generator, weight logic, UI
 sw.js                 service worker (offline support)
 manifest.webmanifest  PWA install metadata
 icons/                app icons
 ```
+
+## Credits
+
+Exercise photographs come from the
+[free-exercise-db](https://github.com/yuhonas/free-exercise-db) project, released
+into the public domain (Unlicense). They are re-encoded to phone size and stored
+in `img/demo/`; `js/demos.js` maps each exercise to its source entry.
 
 ## How the weekly variation works
 

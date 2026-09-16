@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 13;  // keep in step with the CACHE version in sw.js
+const APP_VERSION = 14;  // keep in step with the CACHE version in sw.js
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -493,10 +493,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds) {
     <details class="howto">
       <summary>📖 How to use this machine</summary>
       <div class="howto-body">
-        <div class="anim-stage">
-          <div class="anim-canvas" data-ex="${ex.id}"></div>
-          <span class="anim-caption"><strong>▶ Demo</strong> · works offline</span>
-        </div>
+        ${photoDemo(ex)}
         <a class="video-link" href="${videoUrl(ex)}" target="_blank" rel="noopener">
           ▶ Watch form videos on YouTube (needs signal)
         </a>
@@ -512,6 +509,21 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds) {
       </div>
     </details>
   </article>`;
+}
+
+/* Real start/finish photographs (public domain, bundled with the app so they
+ * work with no signal). The two frames cross-fade to show the movement;
+ * tap to hold them side by side. */
+function photoDemo(ex) {
+  if (!DEMO_PHOTOS[ex.id]) return '';
+  return `
+    <div class="photo-demo" data-ex="${ex.id}">
+      <img class="photo-frame photo-start" src="img/demo/${ex.id}-0.jpg" alt="${ex.name} — start position" loading="lazy" />
+      <img class="photo-frame photo-end" src="img/demo/${ex.id}-1.jpg" alt="${ex.name} — finish position" loading="lazy" />
+      <span class="photo-tag photo-tag-start">Start</span>
+      <span class="photo-tag photo-tag-end">Finish</span>
+      <span class="photo-hint">📷 Works offline · tap to compare</span>
+    </div>`;
 }
 
 function swapLine(ex, day, chosenIds, weekIdx) {
@@ -617,17 +629,6 @@ function stopRestTimer() {
   document.body.classList.remove('timer-on');
 }
 
-// Exercise demos animate only while their how-to section is open.
-// 'toggle' doesn't bubble, so listen in the capture phase.
-document.addEventListener('toggle', (e) => {
-  const details = e.target;
-  if (!details.classList || !details.classList.contains('howto')) return;
-  const canvas = details.querySelector('.anim-canvas');
-  if (!canvas) return;
-  if (details.open) mountAnim(canvas, canvas.dataset.ex);
-  else unmountAnim(canvas);
-}, true);
-
 // If the phone was locked or the browser tabbed away past the end time,
 // fire the finish state (and chime) the moment the app is visible again.
 document.addEventListener('visibilitychange', () => {
@@ -656,6 +657,8 @@ document.addEventListener('click', (e) => {
     render();
     return;
   }
+  const demo = e.target.closest('.photo-demo');
+  if (demo) { demo.classList.toggle('compare'); return; }
   const modeBtn = e.target.closest('.weight-mode');
   if (modeBtn) {
     const exId = modeBtn.dataset.ex;
