@@ -388,6 +388,15 @@ body.timer-on .footer { padding-bottom: calc(110px + env(safe-area-inset-bottom)
   max-width: 640px; margin: 0 auto;
 }
 .app-version { margin-top: 8px; opacity: 0.55; font-size: 0.7rem; }
+.offline-status { margin-top: 10px; font-size: 0.75rem; color: var(--text-dim); min-height: 1em; }
+.offline-status.done { color: var(--accent); }
+.update-btn {
+  margin-top: 10px;
+  background: var(--surface-2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 999px;
+  padding: 8px 16px; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+}
+.update-btn:active { border-color: var(--accent); }
 
 /* ------------------------------ larger screens ------------------------------ */
 @media (min-width: 700px) {

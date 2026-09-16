@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Stay Strong" />
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css?v=16" />
 </head>
 <body>
   <header class="topbar">
@@ -57,12 +57,14 @@
   <footer class="footer">
     <p>Plans rotate automatically every week — exercises, sets, reps and weights all change.
     Set your working weight on each exercise and Stay Strong will suggest loads for every phase.</p>
+    <p id="offlineStatus" class="offline-status"></p>
     <p id="appVersion" class="app-version"></p>
+    <button id="checkUpdate" class="update-btn" type="button">🔄 Check for updates</button>
   </footer>
 
-  <script src="js/exercises.js"></script>
-  <script src="js/demos.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/exercises.js?v=16"></script>
+  <script src="js/demos.js?v=16"></script>
+  <script src="js/app.js?v=16"></script>
   <script>
     // Register the offline cache, and auto-reload once a new version has
     // installed — so updates apply on the first open, no relaunch dance.

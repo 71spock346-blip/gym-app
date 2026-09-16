@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 15;  // keep in step with the CACHE version in sw.js
+const APP_VERSION = 16;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -721,4 +721,64 @@ $('#unitToggle').addEventListener('click', () => {
   render();
 });
 
+/* ------------------------------ offline photos ------------------------------ */
+/* Save every demo photo into the persistent photo cache in the background —
+ * resumable (skips what's already there), a few at a time, with a status line
+ * so you know when it's safe to head underground. */
+const PHOTO_CACHE = 'staystrong-photos';
+
+async function prefetchPhotos() {
+  const status = $('#offlineStatus');
+  if (!('caches' in window) || !navigator.onLine) return;
+  try {
+    const cache = await caches.open(PHOTO_CACHE);
+    const wanted = Object.keys(DEMO_PHOTOS).flatMap((id) => [`img/demo/${id}-0.jpg`, `img/demo/${id}-1.jpg`]);
+    const have = new Set((await cache.keys()).map((req) => new URL(req.url).pathname));
+    const base = new URL('.', location.href).pathname;
+    const missing = wanted.filter((p) => !have.has(base + p));
+    let done = wanted.length - missing.length;
+    const total = wanted.length;
+    const show = () => {
+      status.classList.toggle('done', done === total);
+      status.textContent = done === total
+        ? '📷 All demo photos saved — the app works fully offline ✓'
+        : `📷 Saving demo photos for offline use… ${done}/${total}`;
+    };
+    show();
+    const queue = missing.slice();
+    const worker = async () => {
+      while (queue.length) {
+        const p = queue.shift();
+        try { await cache.add(p); done++; show(); } catch { /* retry next open */ }
+      }
+    };
+    await Promise.all([worker(), worker(), worker()]);
+    if (done < total) status.textContent = `📷 ${done}/${total} demo photos saved — reopen with signal to finish`;
+  } catch { /* storage unavailable (private mode) — photos still load live */ }
+}
+
+/* Nuclear option for stuck installs: drop the old service worker and caches
+ * (saved weights and progress live in localStorage and are untouched), then
+ * reload straight from the network. */
+async function forceUpdate() {
+  const btn = $('#checkUpdate');
+  btn.disabled = true;
+  btn.textContent = '⏳ Refreshing…';
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister()));
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter((k) => k !== PHOTO_CACHE).map((k) => caches.delete(k)));
+    }
+  } catch { /* still reload */ }
+  location.replace(location.pathname + '?fresh=' + Date.now());
+}
+
+$('#checkUpdate').addEventListener('click', forceUpdate);
+window.addEventListener('online', prefetchPhotos);
+
 render();
+prefetchPhotos();

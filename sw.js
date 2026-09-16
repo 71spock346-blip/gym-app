@@ -1,44 +1,46 @@
-/* Stay Strong service worker — precache the app shell so it works offline in the gym. */
+/* Stay Strong service worker — precache the app shell so it works offline in the gym.
+ *
+ * Only the small app shell is cached at install (so a new version activates in
+ * seconds even on a weak signal). Demo photos live in a separate, persistent
+ * cache that the page fills in the background and that the fetch handler
+ * tops up on demand. */
 
-importScripts('./js/demos.js');   // DEMO_PHOTOS: exercise id → photo credit
-
-const CACHE = 'staystrong-v15';
+const VERSION = 16;                       // keep in step with APP_VERSION in js/app.js
+const CACHE = `staystrong-v${VERSION}`;
+const PHOTO_CACHE = 'staystrong-photos';  // survives version bumps
 const ASSETS = [
   './',
   './index.html',
-  './css/styles.css',
-  './js/exercises.js',
-  './js/demos.js',
-  './js/app.js',
+  `./css/styles.css?v=${VERSION}`,
+  `./js/exercises.js?v=${VERSION}`,
+  `./js/demos.js?v=${VERSION}`,
+  `./js/app.js?v=${VERSION}`,
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
 ];
-// Demo photos are cached best-effort at install (a few MB), and on demand
-// afterwards — so the shell always installs even on a flaky connection.
-const PHOTOS = Object.keys(DEMO_PHOTOS).flatMap((id) => [`./img/demo/${id}-0.jpg`, `./img/demo/${id}-1.jpg`]);
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE)
-      .then((cache) => cache.addAll(ASSETS)
-        .then(() => Promise.allSettled(PHOTOS.map((url) => cache.add(url)))))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys
+        .filter((k) => k !== CACHE && k !== PHOTO_CACHE)
+        .map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
 
-/* Network-first for navigations (so updates land when online),
- * cache-first for everything else (instant + offline). */
+/* Navigations: network-first (so updates land when online), cached shell offline.
+ * Photos: cache-first from the photo cache, fetched + stored on demand.
+ * Everything else: cache-first, stored on demand. */
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
@@ -56,10 +58,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  const isPhoto = request.url.includes('/img/demo/');
   event.respondWith(
     caches.match(request).then((hit) => hit || fetch(request).then((resp) => {
-      const copy = resp.clone();
-      caches.open(CACHE).then((cache) => cache.put(request, copy));
+      if (resp.ok) {
+        const copy = resp.clone();
+        caches.open(isPhoto ? PHOTO_CACHE : CACHE).then((cache) => cache.put(request, copy));
+      }
       return resp;
     }))
   );

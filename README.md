@@ -70,7 +70,10 @@ The app is plain HTML/CSS/JS — any static host works. The easiest is **GitHub 
    - **Android (Chrome):** ⋮ menu → **Add to Home screen** / **Install app**
 
 It installs like a native app, launches full-screen, and keeps working with no signal
-in the gym thanks to the service worker cache.
+in the gym thanks to the service worker cache. The footer shows a status line while
+demo photos are being saved for offline use, the running version number, and a
+**🔄 Check for updates** button that forces a clean refresh (your saved weights and
+progress are kept).
 
 ## Run it locally
 
