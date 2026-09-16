@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 16;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 17;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -273,8 +273,17 @@ function swapSuggestion(ex, dayKey, chosenIds, weekIdx) {
   return top[Math.floor(rng() * top.length)];
 }
 
+/* Exact video per exercise (deep link → plays from YouTube app downloads
+ * offline); falls back to a search if an exercise has no curated video. */
 function videoUrl(ex) {
+  const v = FORM_VIDEOS[ex.id];
+  return v ? `https://www.youtube.com/watch?v=${v.id}` : videoSearchUrl(ex);
+}
+function videoSearchUrl(ex) {
   return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(ex.video || ex.name + ' proper form');
+}
+function playlistUrl(ids) {
+  return 'https://www.youtube.com/watch_videos?video_ids=' + ids.join(',');
 }
 
 /* ------------------------------ weights ------------------------------ */
@@ -494,9 +503,13 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds) {
       <summary>📖 How to use this machine</summary>
       <div class="howto-body">
         ${photoDemo(ex)}
-        <a class="video-link" href="${videoUrl(ex)}" target="_blank" rel="noopener">
-          ▶ Watch form videos on YouTube (needs signal)
-        </a>
+        <div class="video-box">
+          <a class="video-link" href="${videoUrl(ex)}" target="_blank" rel="noopener">
+            ▶ ${FORM_VIDEOS[ex.id] ? `Form video: ${FORM_VIDEOS[ex.id].title}` : 'Watch form videos on YouTube'}
+          </a>
+          <small class="video-sub">Plays offline if downloaded in YouTube (Premium) ·
+            <a class="video-more" href="${videoSearchUrl(ex)}" target="_blank" rel="noopener">more videos</a></small>
+        </div>
         <h4>Set-up</h4>
         <ol>${ex.setup.map((s) => `<li>${s}</li>`).join('')}</ol>
         <h4>Doing the exercise</h4>
@@ -721,6 +734,39 @@ $('#unitToggle').addEventListener('click', () => {
   render();
 });
 
+/* ------------------------------ video library ------------------------------ */
+/* One-time YouTube Premium setup: each training day opens as a playlist of its
+ * form videos; save + download it in YouTube and every ▶ Video button in the
+ * app then plays with no signal. */
+function renderVideoLibrary() {
+  const el = $('#videoLibraryBody');
+  if (!el) return;
+  const days = DAYS.map((day) => {
+    const items = EXERCISE_DB[day.key].filter((ex) => FORM_VIDEOS[ex.id]);
+    const ids = items.map((ex) => FORM_VIDEOS[ex.id].id);
+    return `
+      <div class="vl-day">
+        <a class="vl-playlist" href="${playlistUrl(ids)}" target="_blank" rel="noopener">
+          ${day.emoji} ${day.label} · ${day.name} — open as playlist (${ids.length} videos)
+        </a>
+        <details class="vl-list">
+          <summary>Individual videos</summary>
+          <ul>${items.map((ex) => `<li><a href="${videoUrl(ex)}" target="_blank" rel="noopener">${ex.name}</a></li>`).join('')}</ul>
+        </details>
+      </div>`;
+  }).join('');
+  el.innerHTML = `
+    <p class="vl-intro"><strong>One-time setup with YouTube Premium (needs signal, WiFi is best):</strong></p>
+    <ol class="vl-steps">
+      <li>Tap a day below — it opens YouTube with that day's form videos as a playlist.</li>
+      <li>In YouTube tap <strong>⋮ → Save playlist</strong> (easiest in a laptop browser, then it appears in the app on your phone).</li>
+      <li>Open the saved playlist in the YouTube app and tap <strong>Download</strong>.</li>
+    </ol>
+    <p class="vl-note">After that, every <strong>▶ Video</strong> button in this app opens the downloaded video — no signal needed.
+    If "Save playlist" isn't offered on your phone, use "Individual videos" and download each with ⋮ → Download.</p>
+    ${days}`;
+}
+
 /* ------------------------------ offline photos ------------------------------ */
 /* Save every demo photo into the persistent photo cache in the background —
  * resumable (skips what's already there), a few at a time, with a status line
@@ -781,4 +827,5 @@ $('#checkUpdate').addEventListener('click', forceUpdate);
 window.addEventListener('online', prefetchPhotos);
 
 render();
+renderVideoLibrary();
 prefetchPhotos();

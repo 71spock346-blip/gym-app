@@ -323,6 +323,32 @@ body {
   font-weight: 700; font-size: 0.88rem; text-decoration: none;
 }
 .video-link:active { background: var(--accent-dim); }
+.video-box { margin-bottom: 6px; text-align: center; }
+.video-sub { display: block; margin-top: 4px; font-size: 0.72rem; color: var(--text-dim); }
+.video-more { color: var(--blue); text-decoration: underline; }
+
+/* ------------------------------ video library ------------------------------ */
+.video-library {
+  text-align: left; margin: 14px 0 6px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px 14px;
+}
+.video-library summary { cursor: pointer; font-weight: 700; color: var(--text); font-size: 0.88rem; }
+.vl-intro { margin-top: 10px; color: var(--text); font-size: 0.85rem; }
+.vl-steps { padding-left: 20px; margin: 6px 0; font-size: 0.82rem; color: var(--text-dim); }
+.vl-steps li { margin-bottom: 4px; }
+.vl-note { font-size: 0.78rem; color: var(--text-dim); margin: 8px 0 12px; }
+.vl-day { margin-bottom: 10px; }
+.vl-playlist {
+  display: block; background: var(--accent-dim); color: var(--accent);
+  border: 1px solid var(--accent); border-radius: 10px;
+  padding: 9px 12px; font-weight: 700; font-size: 0.85rem; text-decoration: none;
+}
+.vl-list { margin-top: 4px; padding-left: 4px; }
+.vl-list summary { font-size: 0.75rem; color: var(--text-dim); font-weight: 600; }
+.vl-list ul { padding-left: 18px; margin-top: 4px; font-size: 0.8rem; }
+.vl-list li { margin-bottom: 3px; }
+.vl-list a { color: var(--blue); }
 
 .swap-line {
   margin-top: 12px; padding: 10px 12px;

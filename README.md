@@ -49,6 +49,11 @@ any time via the goal pill in the banner.
   mistakes. The photos are bundled with the app, so they work with no signal —
   basement gyms included. (YouTube form-video links are there too for when
   you're online.)
+- **Form videos that work offline (YouTube Premium).** Every exercise's ▶ Video
+  button deep-links to one curated form video (many from NASM's technique
+  series). The footer's *Form video library* opens each training day as a
+  YouTube playlist: save it, download it with Premium, and the ▶ buttons then
+  play from your downloads with no signal.
 - **Plate-stack machines.** Tap the unit next to any weight box to switch that
   exercise to *plates* — for stacks with unmarked plates you enter the plate count
   and get suggestions back as plate counts.

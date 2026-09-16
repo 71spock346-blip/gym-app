@@ -5,7 +5,7 @@
  * cache that the page fills in the background and that the fetch handler
  * tops up on demand. */
 
-const VERSION = 16;                       // keep in step with APP_VERSION in js/app.js
+const VERSION = 17;                       // keep in step with APP_VERSION in js/app.js
 const CACHE = `staystrong-v${VERSION}`;
 const PHOTO_CACHE = 'staystrong-photos';  // survives version bumps
 const ASSETS = [
@@ -14,6 +14,7 @@ const ASSETS = [
   `./css/styles.css?v=${VERSION}`,
   `./js/exercises.js?v=${VERSION}`,
   `./js/demos.js?v=${VERSION}`,
+  `./js/videos.js?v=${VERSION}`,
   `./js/app.js?v=${VERSION}`,
   './manifest.webmanifest',
   './icons/icon-192.png',
