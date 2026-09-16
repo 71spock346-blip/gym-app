@@ -234,7 +234,12 @@ body {
   width: 58px; background: transparent; border: none; outline: none;
   color: var(--text); font-size: 1rem; font-weight: 700; text-align: right;
 }
-.weight-unit { color: var(--text-dim); font-size: 0.75rem; text-transform: uppercase; }
+.weight-unit {
+  color: var(--text-dim); font-size: 0.75rem; text-transform: uppercase;
+  background: none; border: none; padding: 2px 4px; cursor: pointer;
+  border-bottom: 1px dotted var(--text-dim); font-weight: 700;
+}
+.weight-unit:active { color: var(--accent); }
 
 .sets-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 
@@ -271,6 +276,25 @@ body {
 .howto-body li { margin-bottom: 4px; }
 .howto-body .mistakes li { color: var(--rose); }
 .howto-body .mistakes li::marker { content: '✗ '; }
+
+/* ------------------------------ animations ------------------------------ */
+.anim-stage {
+  height: 168px; margin-bottom: 10px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden; position: relative;
+  color: var(--text);
+}
+.anim-canvas, .anim-stage .anim-svg { width: 100%; height: 100%; display: block; }
+.anim-svg { stroke: currentColor; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+.anim-svg .anim-ground { stroke: var(--border); stroke-width: 2; }
+.anim-svg .anim-gear { stroke: var(--text-dim); stroke-width: 3; fill: var(--surface); opacity: 0.8; }
+.anim-svg .anim-far { opacity: 0.35; }
+.anim-svg .anim-weight { stroke: var(--accent); }
+.anim-caption {
+  position: absolute; left: 10px; bottom: 6px;
+  font-size: 0.7rem; color: var(--text-dim);
+}
+.anim-caption strong { color: var(--accent); }
 
 .video-link {
   display: block; text-align: center;

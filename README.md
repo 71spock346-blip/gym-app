@@ -44,7 +44,13 @@ any time via the goal pill in the banner.
   deload) and adds +2.5% per completed cycle for steady progressive overload.
   Toggle between kg and lb in the header.
 - **Machine guides.** Every exercise card has a "How to use this machine" section
-  with an illustration, set-up steps, execution steps, and form tips.
+  with an animated demo of the movement, set-up steps, execution steps, form tips,
+  and common mistakes. The demos are built into the app, so they play with no
+  signal — basement gyms included. (YouTube form-video links are there too for
+  when you're online.)
+- **Plate-stack machines.** Tap the unit next to any weight box to switch that
+  exercise to *plates* — for stacks with unmarked plates you enter the plate count
+  and get suggestions back as plate counts.
 - **Set tracking.** Tap the numbered bubbles to check off sets as you finish them.
 - **Week preview.** Use the ‹ › arrows to peek at next week's (or last week's) plan.
 

@@ -1,11 +1,12 @@
 /* Stay Strong service worker — precache the app shell so it works offline in the gym. */
 
-const CACHE = 'staystrong-v12';
+const CACHE = 'staystrong-v13';
 const ASSETS = [
   './',
   './index.html',
   './css/styles.css',
   './js/exercises.js',
+  './js/anim.js',
   './js/app.js',
   './manifest.webmanifest',
   './icons/icon-192.png',

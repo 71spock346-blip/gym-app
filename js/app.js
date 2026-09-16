@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 12;  // keep in step with the CACHE version in sw.js
+const APP_VERSION = 13;  // keep in step with the CACHE version in sw.js
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -298,6 +298,12 @@ function formatWeight(kg) {
   return `${Math.max(rounded, 2.5)} kg`;
 }
 
+function formatPlates(n) {
+  if (n == null) return null;
+  const plates = Math.max(1, Math.round(n));
+  return `${plates} plate${plates === 1 ? '' : 's'}`;
+}
+
 function parseWeightInput(text) {
   const n = parseFloat(String(text).replace(',', '.'));
   if (!isFinite(n) || n <= 0) return null;
@@ -434,10 +440,12 @@ function finisherCard(weekIdx, dayIdx) {
 function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds) {
   const scheme = schemeFor(ex, phase, weekIdx, i);
   const suggested = suggestedWeightKg(ex, scheme, weekIdx);
-  const weightText = formatWeight(suggested);
   const base = state.baselines[ex.id];
+  // Plate mode: for stacks with unmarked plates, the number IS the plate count.
+  const plates = !!(base && base.plates);
+  const weightText = plates ? formatPlates(suggested) : formatWeight(suggested);
   const baseText = base && base.w
-    ? (state.unit === 'lb' ? Math.round(base.w / KG_PER_LB) : Math.round(base.w * 10) / 10)
+    ? (plates ? base.w : state.unit === 'lb' ? Math.round(base.w / KG_PER_LB) : Math.round(base.w * 10) / 10)
     : '';
   const completed = doneCount(dateISO, ex.id);
   const isBodyweight = /bodyweight/i.test(ex.gear);
@@ -452,12 +460,14 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds) {
     : `<div class="weight-line">
         <span class="weight-suggest">${weightText
           ? `🎯 Suggested: <strong>${weightText}</strong>`
-          : `Set your weight to get weekly suggestions →`}</span>
-        <label class="weight-input-wrap">
+          : plates ? `Enter how many plates you use →` : `Set your weight to get weekly suggestions →`}</span>
+        <span class="weight-input-wrap">
           <input class="weight-input" type="number" inputmode="decimal" min="1" step="0.5"
-            placeholder="wt" value="${baseText}" data-ex="${ex.id}" aria-label="Your working weight" />
-          <span class="weight-unit">${state.unit}</span>
-        </label>
+            placeholder="${plates ? 'no.' : 'wt'}" value="${baseText}" data-ex="${ex.id}"
+            aria-label="${plates ? 'Number of plates' : 'Your working weight'}" />
+          <button class="weight-unit weight-mode" type="button" data-ex="${ex.id}"
+            title="Tap to switch between weight and plate count">${plates ? 'plates' : state.unit}</button>
+        </span>
       </div>`;
 
   return `
@@ -483,8 +493,12 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds) {
     <details class="howto">
       <summary>📖 How to use this machine</summary>
       <div class="howto-body">
+        <div class="anim-stage">
+          <div class="anim-canvas" data-ex="${ex.id}"></div>
+          <span class="anim-caption"><strong>▶ Demo</strong> · works offline</span>
+        </div>
         <a class="video-link" href="${videoUrl(ex)}" target="_blank" rel="noopener">
-          ▶ Watch form videos on YouTube
+          ▶ Watch form videos on YouTube (needs signal)
         </a>
         <h4>Set-up</h4>
         <ol>${ex.setup.map((s) => `<li>${s}</li>`).join('')}</ol>
@@ -603,6 +617,17 @@ function stopRestTimer() {
   document.body.classList.remove('timer-on');
 }
 
+// Exercise demos animate only while their how-to section is open.
+// 'toggle' doesn't bubble, so listen in the capture phase.
+document.addEventListener('toggle', (e) => {
+  const details = e.target;
+  if (!details.classList || !details.classList.contains('howto')) return;
+  const canvas = details.querySelector('.anim-canvas');
+  if (!canvas) return;
+  if (details.open) mountAnim(canvas, canvas.dataset.ex);
+  else unmountAnim(canvas);
+}, true);
+
 // If the phone was locked or the browser tabbed away past the end time,
 // fire the finish state (and chime) the moment the app is visible again.
 document.addEventListener('visibilitychange', () => {
@@ -629,6 +654,17 @@ document.addEventListener('click', (e) => {
     state.goal = 'build';        // explicit choice = hint never comes back
     store.write('goal', state.goal);
     render();
+    return;
+  }
+  const modeBtn = e.target.closest('.weight-mode');
+  if (modeBtn) {
+    const exId = modeBtn.dataset.ex;
+    const wasPlates = !!(state.baselines[exId] && state.baselines[exId].plates);
+    // A kg figure means nothing as a plate count (and vice versa) — start fresh.
+    state.baselines[exId] = { w: null, plates: !wasPlates };
+    if (!state.baselines[exId].plates) delete state.baselines[exId];
+    store.write('baselines', state.baselines);
+    renderDay();
     return;
   }
   const tab = e.target.closest('.day-tab');
@@ -658,10 +694,14 @@ document.addEventListener('click', (e) => {
 document.addEventListener('change', (e) => {
   const input = e.target.closest('.weight-input');
   if (!input) return;
-  const kg = parseWeightInput(input.value);
   const exId = input.dataset.ex;
-  if (kg) {
-    state.baselines[exId] = { w: kg, c: cycleForWeek(currentWeekIndex()) };
+  const plates = !!(state.baselines[exId] && state.baselines[exId].plates);
+  const raw = parseFloat(String(input.value).replace(',', '.'));
+  const value = plates ? (isFinite(raw) && raw > 0 ? raw : null) : parseWeightInput(input.value);
+  if (value) {
+    state.baselines[exId] = { w: value, c: cycleForWeek(currentWeekIndex()), plates };
+  } else if (plates) {
+    state.baselines[exId] = { w: null, plates: true };   // keep the mode, drop the number
   } else {
     delete state.baselines[exId];
   }
