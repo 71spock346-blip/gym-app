@@ -2,7 +2,7 @@
 
 importScripts('./js/demos.js');   // DEMO_PHOTOS: exercise id → photo credit
 
-const CACHE = 'staystrong-v14';
+const CACHE = 'staystrong-v15';
 const ASSETS = [
   './',
   './index.html',

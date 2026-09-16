@@ -4,6 +4,7 @@
  * orange swooshes, silver figure. --amber is the icon orange (name kept to
  * avoid touching every rule). */
 :root {
+  color-scheme: dark;   /* already dark — stops Android's "force dark" re-tinting it */
   --bg: #0f1318;
   --surface: #171c23;
   --surface-2: #202834;
