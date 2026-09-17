@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 17;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 18;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -53,11 +53,27 @@ const GOALS = {
     repsDelta: 0, restMult: 1, pctMult: 1, finisher: false,
   },
   fatloss: {
-    key: 'fatloss', name: 'Lose fat', emoji: '🔥',
-    desc: 'Same exercises, higher reps and short rests to keep your heart rate up, plus a cardio finisher. You keep your muscle while the calories burn.',
-    repsDelta: 3, restMult: 0.65, pctMult: 0.85, finisher: true,
+    key: 'fatloss', name: 'HIIT · Lean & toned', emoji: '🔥',
+    desc: 'Built for her: same training days as your partner, but higher reps, supersets and short rests to keep the heart rate up, core work on push and arm days, glute focus on leg day, and a HIIT finisher. No chest-building or heavy arm-isolation lifts.',
+    repsDelta: 3, restMult: 0.6, restMin: 30, pctMult: 0.85, finisher: true, supersets: true,
+    // Never scheduled in this mode (chest growth / heavy arm isolation / traps).
+    avoid: [
+      'ch-bench-press', 'ch-smith-flat', 'ch-smith-incline', 'ch-pec-deck', 'ch-cable-cross',
+      'ch-flat-fly', 'ch-low-cable-fly', 'ch-flat-db-press', 'ch-dips',
+      'ar-concentration', 'ar-skull', 'ar-spider-curl', 'ar-cgbp', 'ar-preacher',
+      'bk-shrug',
+    ],
+    // Guaranteed per day on top of the shared plan.
+    extraSlots: {
+      shoulders: [{ tag: 'core', count: 1 }],
+      legs: [{ tag: 'glute', count: 2 }],
+      chest: [{ tag: 'core', count: 2 }],
+      arms: [{ tag: 'core', count: 1 }],
+    },
   },
 };
+
+function dayName(day) { return currentGoal().supersets && day.hiitName ? day.hiitName : day.name; }
 
 const FINISHERS = [
   { name: 'Incline Treadmill Walk', time: '12 min',
@@ -72,6 +88,23 @@ const FINISHERS = [
     how: 'Alternate 2 min moderate and 1 min hard resistance. Full strides, tall posture.' },
   { name: 'Fast Flat Walk', time: '15 min',
     how: 'Brisk treadmill walk straight after the weights — easy on the joints and great for fat burn.' },
+];
+
+/* HIIT finishers for the lean-and-toned goal (deload weeks fall back to the
+ * steady list above). video = curated YouTube id where useful. */
+const HIIT_FINISHERS = [
+  { name: 'Bike Sprints', time: '8 min',
+    how: '8 rounds: 20 s all-out sprint, 40 s easy spin. The last two rounds should feel almost impossible.' },
+  { name: 'Rower Intervals', time: '10 min',
+    how: '10 rounds: 30 s hard (drive with the legs), 30 s easy. Try to hold the same split every round.' },
+  { name: 'Treadmill Hill Sprints', time: '9 min',
+    how: '6 rounds: 30 s fast on an 8–10% incline, 60 s walking. Hands off the rails.' },
+  { name: 'Kettlebell Swing EMOM', time: '10 min', video: 'B_x0tp3HIbk',
+    how: 'Every minute on the minute: 15 swings, rest the remainder of the minute. Hinge at the hips and snap them forward — it is not a squat.' },
+  { name: 'Bodyweight Circuit', time: '12 min',
+    how: '4 rounds: 12 squat jumps, 20 mountain climbers, 8 burpees, 30 s plank. Rest 45 s between rounds.' },
+  { name: 'Stair Climber Intervals', time: '10 min',
+    how: '8 rounds: 45 s fast, 45 s easy. No leaning on the rails.' },
 ];
 
 function currentGoal() { return GOALS[state.goal] || GOALS.build; }
@@ -175,13 +208,60 @@ function cycleForWeek(weekIdx) { return Math.floor(weekIdx / 4); }
 const ANTI_REPEAT_ANCHOR = Math.floor((Date.UTC(2026, 0, 5) - WEEK_EPOCH) / MS_PER_WEEK);
 
 function pickExercises(day, weekIdx, dayIdx) {
-  let prevIds = new Set();
-  let picks = null;
+  let prevIds = new Set();      // last week's shared plan
+  let prevMine = new Set();     // last week's goal-adjusted plan
+  let mine = null;
   for (let w = Math.min(weekIdx, ANTI_REPEAT_ANCHOR); w <= weekIdx; w++) {
-    picks = pickWeek(day, w, dayIdx, prevIds);
+    const picks = pickWeek(day, w, dayIdx, prevIds);
     prevIds = new Set(picks.map((ex) => ex.id));
+    mine = applyGoal(picks, day, w, dayIdx, prevMine);
+    prevMine = new Set(mine.map((ex) => ex.id));
   }
-  return picks;
+  return mine;
+}
+
+/* Goal-specific adjustments on top of the shared plan: drop anything the
+ * goal avoids, guarantee its extra slots (core / glute work), and refill from
+ * the same day's pool — with last week's substitutions sent to the back of
+ * the queue so they rotate too. Everything not touched stays identical to the
+ * partner's plan, so most of the session is still shared. */
+function applyGoal(picks, day, weekIdx, dayIdx, prevMine) {
+  const goal = currentGoal();
+  if (!goal.avoid) return picks;
+  const avoid = new Set(goal.avoid);
+  const rng = mulberry32(weekIdx * 4241 + dayIdx * 613 + 7);
+  const pool = seededShuffle(EXERCISE_DB[day.key].concat(EXERCISE_DB.core), rng)
+    .map((ex, i) => ({ ex, i }))
+    .sort((a, b) => (prevMine.has(a.ex.id) - prevMine.has(b.ex.id)) || (a.i - b.i))
+    .map((o) => o.ex)
+    .filter((ex) => !avoid.has(ex.id));
+  const out = picks.filter((ex) => !avoid.has(ex.id));
+  const taken = new Set(out.map((ex) => ex.id));
+  const has = (ex, tag) => ex.tags.includes(tag);
+  const count = (tag) => out.filter((ex) => has(ex, tag)).length;
+  const add = (pred, n) => {
+    for (const ex of pool) {
+      if (n <= 0) break;
+      if (!taken.has(ex.id) && pred(ex)) { out.push(ex); taken.add(ex.id); n--; }
+    }
+  };
+  const extras = goal.extraSlots[day.key] || [];
+  for (const slot of extras) add((ex) => has(ex, slot.tag), slot.count - count(slot.tag));
+  add((ex) => !has(ex, 'core'), day.picks - out.length);
+
+  // Trim back to the day's size without breaking any slot rule (shared or
+  // extra): drop isolation work first, compounds second, never core.
+  const slots = day.slots.concat(extras);
+  const removable = (i) => !has(out[i], 'core') &&
+    slots.every((s) => !has(out[i], s.tag) || count(s.tag) - 1 >= s.count);
+  while (out.length > day.picks) {
+    let idx = -1;
+    for (let i = out.length - 1; i >= 0 && idx < 0; i--) if (removable(i) && !has(out[i], 'compound')) idx = i;
+    for (let i = out.length - 1; i >= 0 && idx < 0; i--) if (removable(i)) idx = i;
+    out.splice(idx < 0 ? out.length - 1 : idx, 1);
+  }
+  out.sort((a, b) => (has(a, 'core') - has(b, 'core')) || (has(b, 'compound') - has(a, 'compound')));
+  return out;
 }
 
 function pickWeek(day, weekIdx, dayIdx, prevIds) {
@@ -235,7 +315,7 @@ function schemeFor(ex, phase, weekIdx, exOrdinal) {
   lo = Math.min(lo + goal.repsDelta, 18);
   hi = Math.min(hi + goal.repsDelta, 22);
   const sets = phase.sets[Math.floor(rng() * phase.sets.length)];
-  const restSec = Math.max(40, Math.round((phase.restSec * goal.restMult) / 5) * 5);
+  const restSec = Math.max(goal.restMin || 40, Math.round((phase.restSec * goal.restMult) / 5) * 5);
   return {
     sets, repsLo: lo, repsHi: hi,
     restSec, rest: formatRest(restSec),
@@ -258,7 +338,7 @@ function hashId(id) {
  * today's plan; deterministic per week so it doesn't jump around. */
 const GENERIC_TAGS = new Set(['compound', 'isolation', 'finisher']);
 function swapSuggestion(ex, dayKey, chosenIds, weekIdx) {
-  const pool = EXERCISE_DB[dayKey];
+  const pool = ex.tags.includes('core') ? EXERCISE_DB.core : EXERCISE_DB[dayKey];
   const specific = ex.tags.filter((t) => !GENERIC_TAGS.has(t));
   const rank = (e) => {
     if (e.id === ex.id) return -1;
@@ -375,7 +455,7 @@ function renderTabs() {
   const tabs = DAYS.map((day, i) => `
     <button class="day-tab ${i === state.selectedDay ? 'active' : ''}" data-day="${i}" type="button">
       <span class="day-tab-dow">${day.label}</span>
-      <span class="day-tab-name">${day.emoji} ${day.name}</span>
+      <span class="day-tab-name">${day.emoji} ${dayName(day)}</span>
     </button>`).join('');
   $('#dayTabs').innerHTML = tabs;
 }
@@ -392,17 +472,25 @@ function renderDay() {
   const isToday = dateISO === todayISO;
   const dow = (new Date().getDay() + 6) % 7;
   const weekendNote = (state.weekOffset === 0 && dow > 4)
-    ? `<div class="note-card">😴 It’s the weekend — rest up! Here’s Monday’s ${day.name} session.</div>` : '';
+    ? `<div class="note-card">😴 It’s the weekend — rest up! Here’s Monday’s ${dayName(day)} session.</div>` : '';
+
+  // Supersets (HIIT goal): exercises are paired A, B, C… — do both back to back, then rest.
+  const supersets = currentGoal().supersets;
+  const paired = supersets ? Math.floor(exercises.length / 2) * 2 : 0;
+  const supersetLabel = (i) => (i < paired ? 'ABC'[Math.floor(i / 2)] : null);
+  const hiitNote = supersets ? `
+    <div class="note-card hiit-note">🔗 <strong>Supersets:</strong> exercises marked A, B, C are pairs —
+      do both back to back with no rest, then rest once. Keeps the heart rate up and the session short.</div>` : '';
 
   const chosenIds = new Set(exercises.map((ex) => ex.id));
-  const cards = exercises.map((ex, i) => exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds)).join('');
+  const cards = exercises.map((ex, i) => exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLabel(i))).join('');
 
   // Until this phone has explicitly picked a goal, show a one-time pointer
   // to the switch — that's all the setup a second person needs.
   const goalHint = state.goal === null ? `
     <div class="note-card goal-hint">👋 Training as a pair? This phone is set to
       <strong>💪 Build muscle</strong>. Tap the pill at the top to switch to
-      <strong>🔥 Lose fat</strong> — same exercises, tuned reps, rests and weights.
+      <strong>🔥 HIIT · Lean &amp; toned</strong> — same training days, her own programme.
       Each phone keeps its own choice.
       <button id="goalHintDismiss" class="hint-dismiss" type="button">Got it 👍</button>
     </div>` : '';
@@ -411,7 +499,7 @@ function renderDay() {
     ${goalHint}
     ${weekendNote}
     <div class="day-heading">
-      <h2>${day.emoji} ${day.name}</h2>
+      <h2>${day.emoji} ${dayName(day)}</h2>
       <span class="day-date ${isToday ? 'today' : ''}">${isToday ? 'Today' : new Date(dateISO + 'T00:00:00Z')
         .toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC' })}</span>
     </div>
@@ -419,34 +507,41 @@ function renderDay() {
       <strong>🔥 Warm-up first</strong>
       <ol class="warmup-list">${day.warmup.map((s) => `<li>${s}</li>`).join('')}</ol>
     </div>
+    ${hiitNote}
     ${cards}
-    ${finisherCard(weekIdx, dayIdx)}`;
+    ${finisherCard(weekIdx, dayIdx, phase)}`;
 }
 
-/* Fat-loss mode ends every session with a rotating cardio finisher. */
-function finisherCard(weekIdx, dayIdx) {
+/* The lean-and-toned goal ends every session with a rotating HIIT finisher
+ * (a gentle steady one on deload weeks). */
+function finisherCard(weekIdx, dayIdx, phase) {
   if (!currentGoal().finisher) return '';
   const rng = mulberry32(weekIdx * 6011 + dayIdx * 389);
-  const fin = FINISHERS[Math.floor(rng() * FINISHERS.length)];
+  const hiit = phase.key !== 'deload';
+  const pool = hiit ? HIIT_FINISHERS : FINISHERS;
+  const fin = pool[Math.floor(rng() * pool.length)];
+  const video = fin.video
+    ? `<a class="video-link" href="https://www.youtube.com/watch?v=${fin.video}" target="_blank" rel="noopener">▶ Form video</a>` : '';
   return `
   <article class="exercise-card finisher-card">
     <div class="exercise-top">
-      <div class="exercise-icon finisher-icon">🏃</div>
+      <div class="exercise-icon finisher-icon">${hiit ? '⚡' : '🏃'}</div>
       <div class="exercise-info">
-        <h3 class="exercise-name">Cardio finisher: ${fin.name}</h3>
+        <h3 class="exercise-name">${hiit ? 'HIIT finisher' : 'Easy finisher'}: ${fin.name}</h3>
         <div class="exercise-meta">
           <span class="chip chip-gear">${fin.time}</span>
-          <span class="chip chip-muscle">Fat burn</span>
+          <span class="chip chip-muscle">${hiit ? 'Intervals · fat burn' : 'Recovery week'}</span>
         </div>
       </div>
     </div>
     <p class="finisher-how">${fin.how}</p>
+    ${video}
     <p class="finisher-note">Straight after your last set, while your heart rate is already up.
     And remember: fat loss is won mostly in the kitchen — this builds the shape underneath. 🍎</p>
   </article>`;
 }
 
-function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds) {
+function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLabel) {
   const scheme = schemeFor(ex, phase, weekIdx, i);
   const suggested = suggestedWeightKg(ex, scheme, weekIdx);
   const base = state.baselines[ex.id];
@@ -489,6 +584,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds) {
           <span class="chip chip-gear">${ex.gear}</span>
           <span class="chip chip-muscle">${ex.muscles}</span>
           <a class="chip chip-video" href="${videoUrl(ex)}" target="_blank" rel="noopener">▶ Video</a>
+          ${supersetLabel ? `<span class="chip chip-superset">🔗 Superset ${supersetLabel}</span>` : ''}
         </div>
       </div>
     </div>
@@ -741,7 +837,8 @@ $('#unitToggle').addEventListener('click', () => {
 function renderVideoLibrary() {
   const el = $('#videoLibraryBody');
   if (!el) return;
-  const days = DAYS.map((day) => {
+  const groups = DAYS.concat([{ key: 'core', label: 'Core', name: 'Core moves (HIIT mode)', emoji: '🧘' }]);
+  const days = groups.map((day) => {
     const items = EXERCISE_DB[day.key].filter((ex) => FORM_VIDEOS[ex.id]);
     const ids = items.map((ex) => FORM_VIDEOS[ex.id].id);
     return `

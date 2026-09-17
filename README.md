@@ -16,13 +16,18 @@ accounts, no ads, works offline in the gym.
 On first open each phone asks **"What's your goal?"**:
 
 - **💪 Build muscle** — full rests, progressive overload.
-- **🔥 Lose fat** — the *same exercises*, higher reps, rests cut to ~65%, lighter
-  weight suggestions, and a rotating cardio finisher after every session.
+- **🔥 HIIT · Lean & toned** — built for her: the same training days, but higher
+  reps, supersets, rests cut to ~60%, lighter weight suggestions, core work on
+  shoulder/push/arm days, a glute focus on leg day, and a rotating HIIT finisher
+  (easy cardio on deload weeks). Chest-building lifts (bench, flys, pec deck)
+  and heavy arm isolation (concentration curls, skull crushers, spider curls,
+  close-grip bench, preacher curls) are never scheduled in this mode.
 
-Exercise selection comes from the calendar week, so two phones always show the
-same machines on the same day — perfect for couples who train together with
-different goals. Each device keeps its own goal, weights, and progress; switch
-any time via the goal pill in the banner.
+Exercise selection comes from the calendar week, so both phones start from the
+same plan on the same day; the HIIT mode then swaps out only what it avoids and
+adds its core/glute slots, so most of the session is still shared machine for
+machine. Each device keeps its own goal, weights, and progress; switch any time
+via the goal pill in the banner.
 
 ## What it does
 

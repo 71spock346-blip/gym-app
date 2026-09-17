@@ -72,5 +72,15 @@ const DEMO_PHOTOS = {
   "ar-spider-curl": "Spider Curl",
   "ar-cgbp": "Close-Grip Barbell Bench Press",
   "ar-db-overhead": "Dumbbell One-Arm Triceps Extension",
-  "ar-kickback": "Tricep Dumbbell Kickback"
+  "ar-kickback": "Tricep Dumbbell Kickback",
+  "lg-cable-kickback": "One-Legged Cable Kickback",
+  "lg-abductor": "Thigh Abductor",
+  "lg-step-up": "Step-up with Knee Raise",
+  "lg-sumo-squat": "Plie Dumbbell Squat",
+  "co-plank": "Plank",
+  "co-dead-bug": "Dead Bug",
+  "co-cable-crunch": "Cable Crunch",
+  "co-hanging-knee": "Hanging Leg Raise",
+  "co-mountain-climber": "Mountain Climbers",
+  "co-bicycle": "Air Bike"
 };

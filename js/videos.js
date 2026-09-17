@@ -82,4 +82,18 @@ const FORM_VIDEOS = {
   'ar-cgbp':             { id: 'LJeqLAmJLfs', title: 'Close Grip Bench Press — proper form' },
   'ar-db-overhead':      { id: 'kZ-ReOdn2qk', title: 'Seated Single-Arm Dumbbell Tricep Extension' },
   'ar-kickback':         { id: '6SS6K3lAwZ8', title: 'How To: Tricep Kickback (Dumbbell)' },
+
+  /* glutes */
+  'lg-cable-kickback':   { id: 'bVrmtCI00Ys', title: 'Cable Kickback (Glute Max) — form tutorial' },
+  'lg-abductor':         { id: 'soaTR1UtEw0', title: 'Hip Abductor Machine — how to' },
+  'lg-step-up':          { id: 'tqECKZxlCKE', title: 'Dumbbell Step-Ups — master proper form' },
+  'lg-sumo-squat':       { id: 'YYpq4fkl308', title: 'Dumbbell Sumo Squat — perfect form' },
+
+  /* core */
+  'co-plank':            { id: 'mwlp75MS6Rg', title: 'Plank (NASM)' },
+  'co-dead-bug':         { id: 'bxn9FBrt4-A', title: 'Dead Bug (NASM)' },
+  'co-cable-crunch':     { id: '0KEP6A1deBE', title: 'Kneeling Cable Crunch — tutorial' },
+  'co-hanging-knee':     { id: 'G6a5267YpHM', title: 'Hanging Knee Raise — proper form' },
+  'co-mountain-climber': { id: 'BhERlhtzQ1s', title: 'Mountain Climbers — proper form' },
+  'co-bicycle':          { id: 'Mwo0pNv5EG8', title: 'Bicycle Crunch — NASM CPT' },
 };

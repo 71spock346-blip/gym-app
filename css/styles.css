@@ -207,6 +207,9 @@ body {
   background: var(--accent-dim); color: var(--accent);
   border-color: var(--accent); text-decoration: none; font-weight: 700;
 }
+.chip-superset { background: rgba(255, 140, 26, 0.16); color: var(--amber); border-color: var(--amber); font-weight: 700; }
+.hiit-note { border-color: var(--amber); }
+.hiit-note strong { color: var(--amber); }
 
 .scheme-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
 

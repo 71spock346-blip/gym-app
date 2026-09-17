@@ -6,8 +6,9 @@
  * icon keys map to the ICONS pictogram set at the bottom of this file.
  */
 
+/* hiitName: what the day is called in the HIIT / lean-and-toned goal. */
 const DAYS = [
-  { key: 'shoulders', label: 'Mon', name: 'Shoulders', emoji: '🪨',
+  { key: 'shoulders', label: 'Mon', name: 'Shoulders', hiitName: 'Shoulders & Core', emoji: '🪨',
     picks: 5,
     slots: [ { tag: 'press', count: 1 }, { tag: 'side', count: 2 }, { tag: 'rear', count: 1 } ],
     warmup: [
@@ -15,7 +16,7 @@ const DAYS = [
       '15 slow arm circles each way, then 15 band pull-aparts (or wall slides).',
       '2 light sets of your first press — about half your working weight.',
     ] },
-  { key: 'back', label: 'Tue', name: 'Back', emoji: '🦅',
+  { key: 'back', label: 'Tue', name: 'Back', hiitName: 'Back', emoji: '🦅',
     picks: 5,
     slots: [ { tag: 'vertical', count: 1 }, { tag: 'horizontal', count: 2 } ],
     warmup: [
@@ -23,7 +24,7 @@ const DAYS = [
       '20–30 s dead hang from the pull-up bar, then 10 slow cat-cows.',
       '2 light sets of your first pull — about half your working weight.',
     ] },
-  { key: 'legs', label: 'Wed', name: 'Legs', emoji: '🦵',
+  { key: 'legs', label: 'Wed', name: 'Legs', hiitName: 'Legs & Glutes', emoji: '🦵',
     picks: 6,
     slots: [ { tag: 'quad', count: 2 }, { tag: 'ham', count: 1 }, { tag: 'calf', count: 1 } ],
     warmup: [
@@ -31,7 +32,7 @@ const DAYS = [
       '15 bodyweight squats and 10 leg swings per leg (front-to-back and side-to-side).',
       '2 light sets of your first exercise — about half your working weight.',
     ] },
-  { key: 'chest', label: 'Thu', name: 'Chest', emoji: '🛡️',
+  { key: 'chest', label: 'Thu', name: 'Chest', hiitName: 'Push & Core', emoji: '🛡️',
     picks: 5,
     slots: [ { tag: 'press', count: 2 }, { tag: 'fly', count: 1 } ],
     warmup: [
@@ -39,7 +40,7 @@ const DAYS = [
       '10 slow push-ups and a 30 s doorway pec stretch per side.',
       '2 light sets of your first press — about half your working weight.',
     ] },
-  { key: 'arms', label: 'Fri', name: 'Arms', emoji: '💪',
+  { key: 'arms', label: 'Fri', name: 'Arms', hiitName: 'Arms & Core', emoji: '💪',
     picks: 6,
     slots: [ { tag: 'biceps', count: 3 }, { tag: 'triceps', count: 3 } ],
     warmup: [
@@ -975,6 +976,211 @@ const EXERCISE_DB = {
       mistakes: [
         'Bending and snapping the knees to bounce the sled.',
         'Feet too high on the platform — you lose the range of motion.',
+      ],
+    },
+    {
+      id: 'lg-cable-kickback', name: 'Cable Glute Kickback',
+      gear: 'Cable tower, ankle strap, lowest setting', icon: 'cable',
+      tags: ['isolation', 'glute'], muscles: 'Glutes (max)',
+      video: 'cable glute kickback proper form',
+      setup: [
+        'Strap an ankle cuff to the low pulley and onto one ankle.',
+        'Face the tower, hold it for balance, and hinge slightly forward.',
+      ],
+      execution: [
+        'Drive the strapped leg straight back and up, squeezing the glute hard at the top.',
+        'Return slowly without letting the stack touch down. All reps, then switch legs.',
+      ],
+      tips: [
+        'Small, strict range beats a big swing — the squeeze at the top is the exercise.',
+      ],
+      mistakes: [
+        'Arching the lower back to kick higher.',
+        'Swinging the leg with momentum.',
+      ],
+    },
+    {
+      id: 'lg-abductor', name: 'Hip Abduction Machine',
+      gear: 'Abduction machine (pads outside knees)', icon: 'legIso',
+      tags: ['isolation', 'glute'], muscles: 'Glutes (side), hips',
+      video: 'hip abduction machine proper form',
+      setup: [
+        'Sit with your legs inside the pads pressing outward; lean slightly forward for more glute.',
+      ],
+      execution: [
+        'Push your knees apart as far as you can, pause, and return slowly.',
+      ],
+      tips: [
+        'Hold the open position for a second — this builds the upper/side glute that shapes the hip.',
+      ],
+      mistakes: [
+        'Bouncing through the range with heavy weight.',
+        'Letting the pads slam back together.',
+      ],
+    },
+    {
+      id: 'lg-step-up', name: 'Dumbbell Step-Up',
+      gear: 'Dumbbells + box or bench (knee height)', icon: 'dumbbell',
+      tags: ['compound', 'glute', 'quad'], muscles: 'Glutes, quads',
+      video: 'dumbbell step up proper form',
+      setup: [
+        'Stand facing a box or bench about knee height, a dumbbell in each hand.',
+      ],
+      execution: [
+        'Put your whole foot on the box and drive through that heel to stand up tall on it.',
+        'Lower the other foot slowly back to the floor — don’t drop. All reps, then switch legs.',
+      ],
+      tips: [
+        'Push off the top leg only — the bottom foot is just a landing gear.',
+      ],
+      mistakes: [
+        'Bouncing off the bottom foot.',
+        'Knee caving inward on the way up.',
+      ],
+    },
+    {
+      id: 'lg-sumo-squat', name: 'Dumbbell Sumo Squat',
+      gear: 'One heavy dumbbell', icon: 'dumbbell',
+      tags: ['compound', 'glute', 'quad'], muscles: 'Glutes, inner thighs, quads',
+      video: 'dumbbell sumo squat proper form',
+      setup: [
+        'Wide stance, toes turned out ~45°, holding one dumbbell hanging between your legs.',
+      ],
+      execution: [
+        'Squat down keeping your chest tall and knees tracking over your toes.',
+        'Drive up and squeeze your glutes together at the top.',
+      ],
+      tips: [
+        'The wide stance shifts work from the quads to glutes and inner thighs.',
+      ],
+      mistakes: [
+        'Knees falling inward.',
+        'Leaning forward instead of sitting straight down.',
+      ],
+    },
+  ],
+
+  /* -------------------------------- CORE -------------------------------- */
+  /* Pool used by the HIIT goal to add core work to shoulder / push / arm days. */
+  core: [
+    {
+      id: 'co-plank', name: 'Plank',
+      gear: 'Mat', icon: 'pushup',
+      tags: ['core', 'finisher'], muscles: 'Deep core, shoulders',
+      video: 'plank proper form',
+      setup: [
+        'Forearms on the mat, elbows under shoulders, feet together.',
+      ],
+      execution: [
+        'Lift into a straight line from head to heels and hold for the time shown (reps = seconds).',
+        'Squeeze glutes, brace like you’re about to be poked in the stomach, breathe.',
+      ],
+      tips: [
+        'Shorter perfect holds beat long saggy ones.',
+      ],
+      mistakes: [
+        'Hips sagging or piking up.',
+        'Holding your breath.',
+      ],
+    },
+    {
+      id: 'co-dead-bug', name: 'Dead Bug',
+      gear: 'Mat', icon: 'pushup',
+      tags: ['core'], muscles: 'Deep core, hip flexors',
+      video: 'dead bug exercise proper form',
+      setup: [
+        'Lie on your back, arms straight up, knees bent at 90° over your hips.',
+        'Press your lower back into the floor.',
+      ],
+      execution: [
+        'Slowly lower one arm overhead and the opposite leg toward the floor.',
+        'Return and switch sides. Each side counts as one rep.',
+      ],
+      tips: [
+        'The lower back never leaves the floor — if it does, shorten the reach.',
+      ],
+      mistakes: [
+        'Rushing — this is a slow, controlled movement.',
+        'Lower back arching off the floor.',
+      ],
+    },
+    {
+      id: 'co-cable-crunch', name: 'Kneeling Cable Crunch',
+      gear: 'Cable tower + rope, high setting', icon: 'cable',
+      tags: ['core'], muscles: 'Abs',
+      video: 'kneeling cable crunch proper form',
+      setup: [
+        'Kneel facing the tower with the rope held either side of your head.',
+      ],
+      execution: [
+        'Crunch your ribs down toward your hips, rounding the upper back.',
+        'Return slowly to a tall kneel.',
+      ],
+      tips: [
+        'The hands stay by your head the whole time — this is not a rope pulldown.',
+      ],
+      mistakes: [
+        'Hinging at the hips instead of crunching the spine.',
+        'Pulling with the arms.',
+      ],
+    },
+    {
+      id: 'co-hanging-knee', name: 'Hanging Knee Raise',
+      gear: 'Pull-up bar or captain’s chair', icon: 'pullup',
+      tags: ['core'], muscles: 'Lower abs, hip flexors',
+      video: 'hanging knee raise proper form',
+      setup: [
+        'Hang from the bar (or rest your forearms in the captain’s chair), legs straight down.',
+      ],
+      execution: [
+        'Curl your knees up toward your chest, tucking the pelvis at the top.',
+        'Lower slowly without swinging.',
+      ],
+      tips: [
+        'Pause at the top and tilt the hips up — that little curl is where the abs work.',
+      ],
+      mistakes: [
+        'Swinging to build momentum.',
+        'Dropping the legs fast.',
+      ],
+    },
+    {
+      id: 'co-mountain-climber', name: 'Mountain Climbers',
+      gear: 'Mat', icon: 'pushup',
+      tags: ['core', 'finisher'], muscles: 'Core, shoulders, heart rate',
+      video: 'mountain climbers proper form',
+      setup: [
+        'Straight-arm plank, hands under shoulders, body in a straight line.',
+      ],
+      execution: [
+        'Drive one knee toward your chest, then switch legs quickly. Each knee is one rep.',
+      ],
+      tips: [
+        'Keep the hips level and low — no bouncing up and down.',
+      ],
+      mistakes: [
+        'Hips piking up toward the ceiling.',
+        'Shoulders drifting behind the hands.',
+      ],
+    },
+    {
+      id: 'co-bicycle', name: 'Bicycle Crunch',
+      gear: 'Mat', icon: 'pushup',
+      tags: ['core'], muscles: 'Abs, obliques',
+      video: 'bicycle crunch proper form',
+      setup: [
+        'Lie on your back, hands lightly behind your head, knees up.',
+      ],
+      execution: [
+        'Bring one elbow toward the opposite knee while extending the other leg, then switch.',
+        'Each elbow-to-knee is one rep.',
+      ],
+      tips: [
+        'Slow and twisting from the ribs beats fast pedalling.',
+      ],
+      mistakes: [
+        'Yanking on your neck with your hands.',
+        'Going so fast it becomes a leg exercise.',
       ],
     },
   ],
