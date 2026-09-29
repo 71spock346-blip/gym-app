@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 19;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 20;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -154,6 +154,7 @@ const state = {
   profile: store.read('profile', null),            // { name, onboarded }
   baselines: store.read('baselines', {}),          // { exId: { w: kg, c: cycleWhenSet, plates } }
   done: store.read('done', {}),                    // { 'YYYY-MM-DD': { exId: completedSets } }
+  swaps: store.read('swaps', {}),                  // { 'YYYY-MM-DD': { plannedExId: swappedInExId } } — "machine busy" swaps
   sessions: store.read('sessions', {}),            // { 'YYYY-MM-DD': { day, name, sets, total, completed, ex } }
   prs: store.read('prs', []),                      // [{ id, name, w, plates, date }]
   ob: { goal: 'build', equip: 'gym' },             // onboarding choices in progress
@@ -394,32 +395,45 @@ function hashId(id) {
 const GENERIC_TAGS = new Set(['compound', 'isolation', 'finisher']);
 function specificTags(ex) { return ex.tags.filter((t) => !GENERIC_TAGS.has(t)); }
 
+/* "Machine busy?" — another exercise for the same muscles, from the equipment
+ * you have, that isn't already in today's plan. Stable for the week. */
 function swapSuggestion(ex, dayKey, chosenIds, weekIdx) {
+  const avoid = new Set(currentGoal().avoid || []);
   const pool = (ex.tags.includes('core') ? EXERCISE_DB.core : dayPool(dayKey)).filter(allowed);
   const specific = specificTags(ex);
-  const rank = (e) => {
-    if (e.id === ex.id) return -1;
-    const shared = e.tags.some((t) => specific.includes(t));
-    if (!shared) return -1;
-    return chosenIds.has(e.id) ? 1 : 2;   // prefer exercises not already planned today
-  };
-  const candidates = pool.filter((e) => rank(e) > 0).sort((a, b) => rank(b) - rank(a));
-  if (!candidates.length) return null;
-  const top = candidates.filter((e) => rank(e) === rank(candidates[0]));
+  const c = pool.filter((e) => e.id !== ex.id && !chosenIds.has(e.id) && !avoid.has(e.id) &&
+    e.tags.some((t) => specific.includes(t)));
+  if (!c.length) return null;
   const rng = mulberry32(weekIdx * 52711 + hashId(ex.id));
-  return top[Math.floor(rng() * top.length)];
+  return c[Math.floor(rng() * c.length)];
 }
 
 /* The same movement for another equipment profile ("no machine? do this"). */
-function altForEquip(ex, dayKey, equipKey, weekIdx) {
+function altForEquip(ex, dayKey, equipKey, weekIdx, chosenIds) {
   const pool = ex.tags.includes('core') ? EXERCISE_DB.core : dayPool(dayKey);
   const specific = specificTags(ex);
   const avoid = new Set(currentGoal().avoid || []);
   const c = pool.filter((e) => e.id !== ex.id && equipOf(e) === equipKey && !avoid.has(e.id) &&
-    e.tags.some((t) => specific.includes(t)));
+    !(chosenIds && chosenIds.has(e.id)) && e.tags.some((t) => specific.includes(t)));
   if (!c.length) return null;
   const rng = mulberry32(weekIdx * 7331 + hashId(ex.id) + equipKey.length);
   return c[Math.floor(rng() * c.length)];
+}
+
+/* Swap a planned exercise for one of its alternatives, for one day only.
+ * The plan for the week is untouched; the card just becomes the other move. */
+function swapExercise(dateISO, plannedId, altId) {
+  if (!state.swaps[dateISO]) state.swaps[dateISO] = {};
+  if (altId) state.swaps[dateISO][plannedId] = altId;
+  else delete state.swaps[dateISO][plannedId];
+  if (!Object.keys(state.swaps[dateISO]).length) delete state.swaps[dateISO];
+  const keys = Object.keys(state.swaps).sort();
+  while (keys.length > 60) delete state.swaps[keys.shift()];
+  store.write('swaps', state.swaps);
+}
+function swappedFor(dateISO, plannedId) {
+  const id = state.swaps[dateISO] && state.swaps[dateISO][plannedId];
+  return id ? findExercise(id) : null;
 }
 
 /* Exact video per exercise (deep link → plays from YouTube app downloads
@@ -647,8 +661,11 @@ function renderDay() {
   const phase = phaseForWeek(weekIdx);
   const dayIdx = state.selectedDay;
   const day = DAYS[dayIdx];
-  const exercises = pickExercises(day, weekIdx, dayIdx);
   const dateISO = dayDateISO(dayIdx);
+  // Today's "machine busy" swaps replace the planned move in place.
+  const planned = pickExercises(day, weekIdx, dayIdx);
+  const exercises = planned.map((ex) => swappedFor(dateISO, ex.id) || ex);
+  const swappedFrom = planned.map((ex, i) => (exercises[i] === ex ? null : ex));
   const isToday = dateISO === todayISO();
   const dow = (new Date().getDay() + 6) % 7;
   const weekendNote = (state.weekOffset === 0 && dow > 4)
@@ -666,7 +683,7 @@ function renderDay() {
   currentPlan = { dateISO, dayIdx, exercises, schemes, isToday, sets: Object.fromEntries(exercises.map((ex, i) => [ex.id, schemes[i].sets])) };
 
   const chosenIds = new Set(exercises.map((ex) => ex.id));
-  const cards = exercises.map((ex, i) => exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLabel(i), schemes[i])).join('');
+  const cards = exercises.map((ex, i) => exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLabel(i), schemes[i], swappedFrom[i])).join('');
 
   const equipNote = currentEquip().key !== 'gym' ? `
     <div class="note-card equip-note">${currentEquip().emoji} <strong>${currentEquip().name} mode</strong> —
@@ -770,7 +787,7 @@ function finisherCard(weekIdx, dayIdx, phase) {
   </article>`;
 }
 
-function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLabel, scheme) {
+function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLabel, scheme, swappedFrom) {
   const suggested = suggestedWeightKg(ex, scheme, weekIdx);
   const base = state.baselines[ex.id];
   // Plate mode: for stacks with unmarked plates, the number IS the plate count.
@@ -803,8 +820,13 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
         </span>
       </div>`;
 
+  const swapNote = swappedFrom ? `
+    <div class="swap-note"><span>🔄 Swapped in for <strong>${swappedFrom.name}</strong></span>
+      <button class="unswap-btn" type="button" data-ex="${swappedFrom.id}" data-date="${dateISO}">↩ Undo</button></div>` : '';
+
   return `
-  <article class="exercise-card ${completed >= scheme.sets ? 'card-done' : ''}" data-ex="${ex.id}">
+  <article class="exercise-card ${completed >= scheme.sets ? 'card-done' : ''} ${swappedFrom ? 'swapped' : ''}" data-ex="${ex.id}">
+    ${swapNote}
     <div class="exercise-top">
       <div class="exercise-icon">${ICONS[ex.icon] || ICONS.dumbbell}</div>
       <div class="exercise-info">
@@ -825,6 +847,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
     <div class="tempo-line">⏱ ${phase.tempo}</div>
     ${weightBlock}
     <div class="sets-row">${bubbles}</div>
+    ${altChips(ex, day, chosenIds, weekIdx, dateISO, swappedFrom)}
     <details class="howto">
       <summary>📖 How to do it</summary>
       <div class="howto-body">
@@ -844,8 +867,6 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
         <ul>${ex.tips.map((s) => `<li>${s}</li>`).join('')}</ul>
         ${ex.mistakes ? `<h4>Common mistakes</h4>
         <ul class="mistakes">${ex.mistakes.map((s) => `<li>${s}</li>`).join('')}</ul>` : ''}
-        ${swapLine(ex, day, chosenIds, weekIdx)}
-        ${altLines(ex, day, weekIdx)}
       </div>
     </details>
   </article>`;
@@ -866,25 +887,30 @@ function photoDemo(ex) {
     </div>`;
 }
 
-function swapLine(ex, day, chosenIds, weekIdx) {
-  const alt = swapSuggestion(ex, day.key, chosenIds, weekIdx);
-  if (!alt) return '';
-  return `<div class="swap-line">🔄 <strong>Machine busy?</strong> Swap for: ${alt.name} (${alt.gear.toLowerCase()})</div>`;
-}
-
-/* "No machine? do this" — the same movement with other equipment. */
-function altLines(ex, day, weekIdx) {
+/* "Machine busy?" chips: tap one and the card becomes that exercise for today,
+ * with its own photos and how-to. Offers a same-equipment alternative, a
+ * free-weight version (for machine moves) and a bodyweight version. */
+function altChips(ex, day, chosenIds, weekIdx, dateISO, swappedFrom) {
+  // The exercise this card was swapped from counts as taken, so it isn't offered again.
+  const taken = new Set(chosenIds);
+  if (swappedFrom) taken.add(swappedFrom.id);
   const mine = equipOf(ex);
-  const lines = [];
-  if (mine === 'machine') {
-    const f = altForEquip(ex, day.key, 'free', weekIdx);
-    if (f) lines.push(`🏋️ <strong>No machine?</strong> Free weights: ${f.name}`);
-  }
-  if (mine !== 'body') {
-    const b = altForEquip(ex, day.key, 'body', weekIdx);
-    if (b) lines.push(`🤸 <strong>No equipment?</strong> Bodyweight: ${b.name}`);
-  }
-  return lines.length ? `<div class="alt-lines">${lines.map((l) => `<div>${l}</div>`).join('')}</div>` : '';
+  const opts = [];
+  const add = (alt, icon, why) => {
+    if (alt && !opts.some((o) => o.alt.id === alt.id)) opts.push({ alt, icon, why });
+  };
+  add(swapSuggestion(ex, day.key, taken, weekIdx), '🔄', 'same kit');
+  if (mine === 'machine') add(altForEquip(ex, day.key, 'free', weekIdx, taken), '🏋️', 'free weights');
+  if (mine !== 'body') add(altForEquip(ex, day.key, 'body', weekIdx, taken), '🤸', 'bodyweight');
+  if (!opts.length) return '';
+  const plannedId = swappedFrom ? swappedFrom.id : ex.id;
+  return `
+    <div class="alts-row">
+      <span class="alts-label">${mine === 'body' ? 'Busy or too hard?' : 'Machine busy?'} Tap to swap:</span>
+      ${opts.map((o) => `
+        <button class="alt-btn" type="button" data-ex="${plannedId}" data-alt="${o.alt.id}" data-date="${dateISO}"
+          title="${o.why}">${o.icon} ${o.alt.name}</button>`).join('')}
+    </div>`;
 }
 
 /* ------------------------------ history view ------------------------------ */
@@ -1115,6 +1141,32 @@ document.addEventListener('click', (e) => {
     if (!state.baselines[exId].plates) delete state.baselines[exId];
     store.write('baselines', state.baselines);
     renderDay();
+    return;
+  }
+  const altBtn = e.target.closest('.alt-btn');
+  if (altBtn) {
+    const { ex, alt, date } = altBtn.dataset;
+    const target = findExercise(alt);
+    if (!target) return;
+    swapExercise(date, ex, alt);
+    renderDay(); renderTabs(); logSession(date);
+    // Land on the new card with its how-to open, so the photos and set-up are right there.
+    const card = $(`.exercise-card[data-ex="${alt}"]`);
+    if (card) {
+      const guide = card.querySelector('.howto');
+      if (guide) guide.open = true;
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    showToast(`🔄 Swapped to ${target.name} — tap ↩ Undo to go back`);
+    return;
+  }
+  const unswap = e.target.closest('.unswap-btn');
+  if (unswap) {
+    const { ex, date } = unswap.dataset;
+    swapExercise(date, ex, null);
+    renderDay(); renderTabs(); logSession(date);
+    const card = $(`.exercise-card[data-ex="${ex}"]`);
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
     return;
   }
   const tab = e.target.closest('.day-tab');

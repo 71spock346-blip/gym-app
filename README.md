@@ -44,9 +44,16 @@ shared machine for machine. Switch any time via the goal pill in the banner.
 
 Every day's plan is rebuilt from exercises that fit the mode, with the same slot
 rules (leg day still gets quads + hamstrings + calves, arm day still gets 3 biceps
-+ 3 triceps moves). In Full gym mode, every machine exercise also shows a
-**"No machine? Free weights: …"** and **"No equipment? Bodyweight: …"** line, so
-you can always swap on the spot when a machine is taken.
++ 3 triceps moves).
+
+### Machine busy? Tap to swap
+
+Every exercise card has a **"Machine busy? Tap to swap"** row with up to three
+alternatives for the same muscles: another move on the same kit, a free-weight
+version and a bodyweight version. Tap one and the card becomes that exercise for
+today — its own photos, set-up steps, video and set bubbles — with an **↩ Undo**
+button to go back. The week's plan itself is untouched, and the swap is
+remembered if you close the app mid-session.
 
 ## What it does
 

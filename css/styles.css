@@ -353,12 +353,33 @@ body {
 .vl-list li { margin-bottom: 3px; }
 .vl-list a { color: var(--blue); }
 
-.swap-line {
+/* "Machine busy?" — tappable alternatives on every card */
+.alts-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
   margin-top: 12px; padding: 10px 12px;
-  background: var(--surface-2); border: 1px dashed var(--border);
-  border-radius: 10px; font-size: 0.82rem; color: var(--text-dim);
+  background: var(--surface-2); border: 1px dashed var(--border); border-radius: 12px;
 }
-.swap-line strong { color: var(--text); }
+.alts-label { width: 100%; font-size: 0.74rem; color: var(--text-dim); font-weight: 600; letter-spacing: 0.02em; }
+.alt-btn {
+  font: inherit; font-size: 0.8rem; font-weight: 600; color: var(--text);
+  background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+  padding: 7px 12px; cursor: pointer; min-height: 36px;
+}
+.alt-btn:active { transform: scale(0.97); border-color: var(--blue); }
+.exercise-card.swapped { border-color: var(--amber); }
+.exercise-card { scroll-margin-top: 112px; }   /* land below the sticky header when scrolled to */
+.swap-note {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+  margin: -4px 0 12px; padding: 8px 12px; border-radius: 10px;
+  background: rgba(255, 140, 26, 0.12); border: 1px solid rgba(255, 140, 26, 0.45);
+  font-size: 0.8rem; color: var(--text-dim);
+}
+.swap-note strong { color: var(--text); }
+.unswap-btn {
+  font: inherit; font-size: 0.78rem; font-weight: 700; color: var(--amber);
+  background: transparent; border: 1px solid var(--amber); border-radius: 999px;
+  padding: 5px 10px; cursor: pointer; min-height: 32px;
+}
 
 /* ------------------------------ rest timer ------------------------------ */
 .rest-timer {
@@ -536,11 +557,6 @@ body.timer-on .main { padding-bottom: calc(180px + env(safe-area-inset-bottom));
 .exercise-card.card-done .exercise-name::after { content: ' ✓'; color: var(--accent); }
 .chip-equip { background: var(--surface-2); color: var(--text-dim); }
 .equip-note { border-color: var(--accent); }
-.alt-lines {
-  margin-top: 10px; padding: 10px 12px; font-size: 0.82rem; color: var(--text-dim);
-  background: var(--surface-2); border: 1px dashed var(--border); border-radius: 10px;
-}
-.alt-lines strong { color: var(--text); }
 .day-tab-mark { color: var(--accent); }
 .day-tab.done { border-color: rgba(47, 155, 255, 0.5); }
 
