@@ -2697,158 +2697,106 @@ function equipOf(ex) {
   return 'body';
 }
 
-/* ------------------------- machine pictograms ------------------------- */
-/* Simple line-art SVGs. Stroke colour inherits from CSS currentColor.   */
+/* ------------------------- equipment pictograms ------------------------- */
+/* Clean 24-grid glyphs of the kit itself (no figures). Stroke and fills
+ * inherit currentColor, so they pick up the accent colour from CSS.        */
 
 const ICON_WRAP = (inner) =>
-  `<svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+const SOLID = 'fill="currentColor" stroke="none"';
 
 const ICONS = {
+  // free weights
   dumbbell: ICON_WRAP(`
-    <line x1="30" y1="60" x2="90" y2="60"/>
-    <rect x="18" y="38" width="12" height="44" rx="3"/>
-    <rect x="90" y="38" width="12" height="44" rx="3"/>
-    <rect x="8" y="46" width="10" height="28" rx="3"/>
-    <rect x="102" y="46" width="10" height="28" rx="3"/>`),
+    <path d="M7 12h10M2.5 10v4M21.5 10v4"/>
+    <rect x="4" y="8" width="3" height="8" rx="1" ${SOLID}/>
+    <rect x="17" y="8" width="3" height="8" rx="1" ${SOLID}/>`),
   barbell: ICON_WRAP(`
-    <line x1="10" y1="60" x2="110" y2="60"/>
-    <rect x="24" y="34" width="10" height="52" rx="3"/>
-    <rect x="86" y="34" width="10" height="52" rx="3"/>
-    <rect x="36" y="42" width="8" height="36" rx="3"/>
-    <rect x="76" y="42" width="8" height="36" rx="3"/>`),
-  smith: ICON_WRAP(`
-    <line x1="28" y1="12" x2="28" y2="108"/>
-    <line x1="92" y1="12" x2="92" y2="108"/>
-    <line x1="16" y1="108" x2="104" y2="108"/>
-    <line x1="20" y1="52" x2="100" y2="52"/>
-    <rect x="34" y="40" width="8" height="24" rx="3"/>
-    <rect x="78" y="40" width="8" height="24" rx="3"/>`),
-  cable: ICON_WRAP(`
-    <line x1="34" y1="12" x2="34" y2="108"/>
-    <line x1="22" y1="108" x2="70" y2="108"/>
-    <circle cx="34" cy="24" r="7"/>
-    <line x1="34" y1="31" x2="72" y2="66"/>
-    <path d="M72 66 l14 12"/>
-    <path d="M80 84 a8 8 0 1 0 12 -8"/>`),
-  pressMachine: ICON_WRAP(`
-    <line x1="30" y1="108" x2="90" y2="108"/>
-    <line x1="44" y1="108" x2="44" y2="64"/>
-    <rect x="36" y="56" width="30" height="10" rx="4"/>
-    <line x1="52" y1="56" x2="52" y2="34"/>
-    <rect x="44" y="24" width="16" height="12" rx="4"/>
-    <path d="M78 44 v-14 h14"/>
-    <path d="M78 44 v20 h10"/>
-    <circle cx="98" cy="30" r="6"/>`),
-  latPulldown: ICON_WRAP(`
-    <line x1="60" y1="10" x2="60" y2="26"/>
-    <path d="M24 26 q36 14 72 0"/>
-    <line x1="60" y1="26" x2="60" y2="44"/>
-    <rect x="42" y="70" width="36" height="10" rx="4"/>
-    <line x1="52" y1="80" x2="52" y2="108"/>
-    <line x1="68" y1="80" x2="68" y2="108"/>
-    <rect x="46" y="52" width="28" height="10" rx="4"/>`),
-  cableRow: ICON_WRAP(`
-    <line x1="14" y1="108" x2="106" y2="108"/>
-    <line x1="20" y1="108" x2="20" y2="56"/>
-    <circle cx="20" cy="50" r="6"/>
-    <line x1="26" y1="52" x2="64" y2="52"/>
-    <path d="M64 44 v16"/>
-    <rect x="72" y="76" width="30" height="10" rx="4"/>
-    <line x1="78" y1="86" x2="78" y2="108"/>
-    <line x1="96" y1="86" x2="96" y2="108"/>`),
-  rowMachine: ICON_WRAP(`
-    <line x1="16" y1="108" x2="104" y2="108"/>
-    <rect x="60" y="72" width="30" height="10" rx="4"/>
-    <line x1="66" y1="82" x2="66" y2="108"/>
-    <line x1="84" y1="82" x2="84" y2="108"/>
-    <rect x="42" y="36" width="10" height="34" rx="4"/>
-    <path d="M30 52 h-12"/>
-    <path d="M30 40 h-12"/>
-    <line x1="47" y1="70" x2="47" y2="108"/>`),
-  pullup: ICON_WRAP(`
-    <line x1="24" y1="14" x2="96" y2="14"/>
-    <line x1="24" y1="14" x2="24" y2="108"/>
-    <line x1="96" y1="14" x2="96" y2="108"/>
-    <circle cx="60" cy="38" r="9"/>
-    <line x1="60" y1="47" x2="60" y2="76"/>
-    <path d="M60 52 L40 20"/>
-    <path d="M60 52 L80 20"/>
-    <path d="M60 76 l-10 22"/>
-    <path d="M60 76 l10 22"/>`),
-  backExt: ICON_WRAP(`
-    <line x1="14" y1="108" x2="106" y2="108"/>
-    <line x1="30" y1="108" x2="58" y2="66"/>
-    <rect x="52" y="58" width="26" height="10" rx="4" transform="rotate(-10 65 63)"/>
-    <circle cx="98" cy="44" r="8"/>
-    <path d="M78 62 L92 50"/>
-    <line x1="36" y1="88" x2="52" y2="88"/>`),
-  legPress: ICON_WRAP(`
-    <line x1="12" y1="108" x2="108" y2="108"/>
-    <path d="M20 108 L52 66 L64 76"/>
-    <rect x="76" y="30" width="12" height="44" rx="3" transform="rotate(35 82 52)"/>
-    <circle cx="34" cy="74" r="8"/>
-    <path d="M42 82 l16 -4 14 14"/>`),
-  hackSquat: ICON_WRAP(`
-    <line x1="12" y1="108" x2="108" y2="108"/>
-    <line x1="30" y1="108" x2="78" y2="30"/>
-    <rect x="70" y="24" width="26" height="10" rx="4" transform="rotate(-58 83 29)"/>
-    <circle cx="88" cy="36" r="8"/>
-    <path d="M76 52 l-14 20 12 14"/>
-    <line x1="52" y1="96" x2="86" y2="96"/>`),
-  legIso: ICON_WRAP(`
-    <line x1="16" y1="108" x2="104" y2="108"/>
-    <line x1="34" y1="108" x2="34" y2="60"/>
-    <rect x="26" y="30" width="12" height="34" rx="4"/>
-    <rect x="38" y="58" width="34" height="10" rx="4"/>
-    <line x1="72" y1="63" x2="94" y2="84"/>
-    <circle cx="98" cy="90" r="7"/>`),
-  calf: ICON_WRAP(`
-    <line x1="20" y1="108" x2="100" y2="108"/>
-    <rect x="40" y="96" width="40" height="12" rx="3"/>
-    <path d="M54 96 v-18"/>
-    <path d="M68 96 v-18"/>
-    <path d="M48 78 h28"/>
-    <path d="M54 60 q6 -10 14 0"/>
-    <line x1="61" y1="42" x2="61" y2="56"/>
-    <circle cx="61" cy="32" r="8"/>`),
+    <path d="M8.5 12h7M2 12h2.5M19.5 12h2.5"/>
+    <rect x="4.5" y="6.5" width="2.5" height="11" rx="1" ${SOLID}/>
+    <rect x="17" y="6.5" width="2.5" height="11" rx="1" ${SOLID}/>
+    <rect x="7" y="9" width="1.5" height="6" rx=".6" ${SOLID}/>
+    <rect x="15.5" y="9" width="1.5" height="6" rx=".6" ${SOLID}/>`),
   bench: ICON_WRAP(`
-    <rect x="24" y="62" width="72" height="10" rx="4"/>
-    <line x1="34" y1="72" x2="34" y2="96"/>
-    <line x1="86" y1="72" x2="86" y2="96"/>
-    <line x1="10" y1="40" x2="110" y2="40"/>
-    <rect x="26" y="24" width="9" height="32" rx="3"/>
-    <rect x="85" y="24" width="9" height="32" rx="3"/>`),
-  dip: ICON_WRAP(`
-    <line x1="30" y1="30" x2="30" y2="108"/>
-    <line x1="90" y1="30" x2="90" y2="108"/>
-    <line x1="30" y1="30" x2="46" y2="30"/>
-    <line x1="74" y1="30" x2="90" y2="30"/>
-    <circle cx="60" cy="26" r="9"/>
-    <line x1="60" y1="35" x2="60" y2="66"/>
-    <path d="M60 40 L46 30"/>
-    <path d="M60 40 L74 30"/>
-    <path d="M60 66 l-8 20 4 16"/>`),
+    <rect x="3" y="11" width="18" height="3" rx="1.2" ${SOLID}/>
+    <path d="M6 14v6M18 14v6M2 6.5h20"/>
+    <rect x="5" y="3.5" width="2.2" height="6" rx=".8" ${SOLID}/>
+    <rect x="16.8" y="3.5" width="2.2" height="6" rx=".8" ${SOLID}/>`),
   preacher: ICON_WRAP(`
-    <line x1="20" y1="108" x2="100" y2="108"/>
-    <line x1="44" y1="108" x2="44" y2="72"/>
-    <path d="M36 72 L70 48"/>
-    <rect x="34" y="66" width="40" height="10" rx="4" transform="rotate(-32 54 71)"/>
-    <circle cx="84" cy="34" r="8"/>
-    <path d="M76 44 l-10 16"/>
-    <path d="M66 60 q-10 6 -20 2"/>`),
-  pushdown: ICON_WRAP(`
-    <line x1="60" y1="10" x2="60" y2="26"/>
-    <circle cx="60" cy="20" r="7"/>
-    <line x1="60" y1="27" x2="60" y2="52"/>
-    <path d="M44 52 h32"/>
-    <path d="M44 52 l-4 14"/>
-    <path d="M76 52 l4 14"/>
-    <circle cx="60" cy="76" r="9"/>
-    <line x1="60" y1="85" x2="60" y2="108"/>`),
+    <path d="M4 21h16M9 21v-7"/>
+    <path d="M6 14.5L16 8" stroke-width="3.2"/>
+    <path d="M16.5 4v5M20 6.5h-6"/>`),
+  // bars & bodyweight
+  pullup: ICON_WRAP(`
+    <path d="M4 6h16M6 6v15M18 6v15M9 6v3.5M15 6v3.5" />`),
+  dip: ICON_WRAP(`
+    <path d="M4 8h5M15 8h5M6 8v13M18 8v13M8 8v13M16 8v13"/>`),
   pushup: ICON_WRAP(`
-    <line x1="12" y1="100" x2="108" y2="100"/>
-    <circle cx="26" cy="62" r="8"/>
-    <path d="M34 68 L92 84"/>
-    <path d="M40 70 l-4 30"/>
-    <path d="M92 84 l10 16"/>`),
+    <circle cx="12" cy="6.8" r="3.2" ${SOLID}/>
+    <path d="M4.5 20.5a7.5 7.5 0 0 1 15 0z" ${SOLID}/>`),
+  calf: ICON_WRAP(`
+    <rect x="3" y="15" width="18" height="6" rx="1" ${SOLID}/>
+    <path d="M7 15v-4h10v4M9.5 11V8h5v3"/>`),
+  // cables
+  cable: ICON_WRAP(`
+    <path d="M7 3v18M4 21h6"/>
+    <circle cx="7" cy="6" r="1.7"/>
+    <path d="M8.3 7.2l6.2 6.6"/>
+    <rect x="13.5" y="14.2" width="6.5" height="2.8" rx="1.4" transform="rotate(45 16.75 15.6)" ${SOLID}/>`),
+  pushdown: ICON_WRAP(`
+    <path d="M12 3v3"/>
+    <circle cx="12" cy="7.5" r="1.7"/>
+    <path d="M12 9.2v4.3M12 13.5l-3 6M12 13.5l3 6"/>
+    <circle cx="9" cy="19.5" r="1.2" ${SOLID}/><circle cx="15" cy="19.5" r="1.2" ${SOLID}/>`),
+  latPulldown: ICON_WRAP(`
+    <path d="M12 3v3"/>
+    <circle cx="12" cy="7.5" r="1.6"/>
+    <path d="M12 9v3M4 12.5q8 3.5 16 0"/>
+    <rect x="8" y="17" width="8" height="2.5" rx="1" ${SOLID}/>
+    <path d="M10 19.5V22M14 19.5V22"/>`),
+  cableRow: ICON_WRAP(`
+    <path d="M3 21h18M5 21v-9"/>
+    <circle cx="5" cy="10.5" r="1.6"/>
+    <path d="M6.6 10.5H13M13 8.5v4"/>
+    <rect x="15" y="15" width="6" height="2.5" rx="1" ${SOLID}/>
+    <path d="M16.5 17.5V21M19.5 17.5V21"/>`),
+  // machines
+  smith: ICON_WRAP(`
+    <path d="M5 3v18M19 3v18M3 21h18M5 10h14"/>
+    <rect x="7" y="7.5" width="2.2" height="5" rx=".7" ${SOLID}/>
+    <rect x="14.8" y="7.5" width="2.2" height="5" rx=".7" ${SOLID}/>`),
+  pressMachine: ICON_WRAP(`
+    <path d="M3 21h18M5 21v-6h6v6M8 15V9"/>
+    <rect x="5.5" y="7" width="5" height="2.5" rx="1.2" ${SOLID}/>
+    <path d="M11 11h6M17 8v6"/>
+    <rect x="14" y="16" width="6" height="5" rx="1"/>`),
+  rowMachine: ICON_WRAP(`
+    <path d="M3 21h18M6 21v-6h6v6M9 15V9"/>
+    <rect x="6.5" y="7" width="5" height="2.5" rx="1.2" ${SOLID}/>
+    <rect x="13.5" y="8" width="2.2" height="7" rx=".8" ${SOLID}/>
+    <path d="M16 10h4M16 13h4"/>`),
+  pecDeck: ICON_WRAP(`
+    <path d="M3 21h18M9 21v-6h6v6M12 15V9"/>
+    <rect x="9.5" y="7" width="5" height="2.5" rx="1.2" ${SOLID}/>
+    <path d="M7 4l3 6M17 4l-3 6"/>
+    <circle cx="7" cy="4" r="1.2" ${SOLID}/><circle cx="17" cy="4" r="1.2" ${SOLID}/>`),
+  legIso: ICON_WRAP(`
+    <path d="M3 21h18M6 21v-7M6 14V6"/>
+    <rect x="4.5" y="5" width="3" height="9" rx="1"/>
+    <rect x="7.5" y="12" width="8" height="2.5" rx="1.2" ${SOLID}/>
+    <path d="M15.5 13.2l3.5 4.5"/>
+    <rect x="17.3" y="17" width="4" height="2" rx="1" transform="rotate(52 19.3 18)" ${SOLID}/>`),
+  legPress: ICON_WRAP(`
+    <path d="M3 21h18M4 21l5-8 3 2"/>
+    <rect x="15" y="5" width="3" height="10" rx="1" transform="rotate(35 16.5 10)" ${SOLID}/>
+    <path d="M12 15l3-2"/>`),
+  hackSquat: ICON_WRAP(`
+    <path d="M3 21h18M7 21L17 5"/>
+    <rect x="14" y="4" width="7" height="2.6" rx="1.2" transform="rotate(-58 17.5 5.3)" ${SOLID}/>
+    <rect x="8" y="17.5" width="8" height="2.5" rx="1" ${SOLID}/>`),
+  backExt: ICON_WRAP(`
+    <path d="M3 21h18M6 21l6-9"/>
+    <rect x="9.5" y="9.5" width="7" height="2.6" rx="1.2" transform="rotate(-22 13 10.8)" ${SOLID}/>
+    <rect x="6" y="16" width="5" height="2.2" rx="1" ${SOLID}/>
+    <path d="M17 5v3"/>`),
 };

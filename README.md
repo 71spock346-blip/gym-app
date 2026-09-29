@@ -90,11 +90,16 @@ remembered if you close the app mid-session.
   start/finish photographs of the movement (cross-fading; tap to see them side by
   side), set-up steps, execution steps, form tips, and common mistakes. The photos
   are bundled with the app, so they work with no signal — basement gyms included.
-- **Form videos that work offline (YouTube Premium).** Every exercise's ▶ Video
-  button deep-links to one curated form video (many from NASM's technique
-  series). Settings → *Form video library* opens each training day as a
-  YouTube playlist: save it, download it with Premium, and the ▶ buttons then
-  play from your downloads with no signal.
+- **Form videos for learning at home (YouTube Premium for offline).** Every
+  exercise's Video button deep-links to one curated form video (many from
+  NASM's technique series). They're meant for learning the move before a
+  session; between sets the photos and cues are the reference. Settings →
+  *Form video library* opens each training day as a YouTube playlist: save it,
+  download it with Premium, and the buttons then play from your downloads with
+  no signal.
+- **One icon language.** A single monoline icon set (`js/icons.js`) and clean
+  equipment pictograms on every exercise card, instead of platform emoji and
+  stick figures, so the app looks the same on every phone.
 - **Week preview.** Use the ‹ › arrows to peek at next week's (or last week's) plan.
 
 Everything is stored locally on your phone (`localStorage`) — nothing leaves your device.
@@ -132,6 +137,7 @@ index.html            app shell (onboarding, workout, history, settings views)
 css/styles.css        mobile-first dark theme (black / charcoal / gold, from the icon)
 js/exercises.js       exercise database (115+ exercises with guides) + SVG pictograms
 js/videos.js          curated YouTube form video per exercise
+js/icons.js           monoline UI icon set
 js/demos.js           generated manifest of bundled demo photos
 img/demo/             start/finish photos per exercise (public domain)
 js/app.js             weekly plan generator, goals, equipment modes, history, UI

@@ -672,3 +672,38 @@ body.timer-on .main { padding-bottom: calc(180px + env(safe-area-inset-bottom));
 @media (prefers-reduced-motion: reduce) {
   .splash, .splash-logo, .splash-name, .splash-tag, .splash-dots i, .splash-glow { animation: none; transition: none; }
 }
+
+/* ------------------------------ icon system ------------------------------ */
+/* Inline monoline glyphs (js/icons.js) replace platform emoji everywhere. */
+.ico { width: 1.05em; height: 1.05em; display: inline-block; vertical-align: -0.18em; flex: 0 0 auto; }
+.exercise-icon svg { width: 34px; height: 34px; }
+.finisher-icon .ico { width: 30px; height: 30px; }
+.choice-emoji {
+  display: flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  width: 42px; height: 42px; border-radius: 12px;
+  color: var(--accent); background: var(--accent-dim);
+}
+.choice-emoji .ico { width: 22px; height: 22px; }
+.choice-badge { font-weight: 800; font-size: 0.82rem; letter-spacing: 0.03em; text-transform: uppercase; }
+.phase-badge { display: flex; color: var(--accent); }
+.phase-badge .ico { width: 20px; height: 20px; }
+.goal-pill { display: inline-flex; align-items: center; gap: 5px; }
+.goal-pill .ico { width: 13px; height: 13px; }
+.rest-emoji { display: flex; color: var(--accent); }
+.rest-emoji .ico { width: 28px; height: 28px; }
+.rest-timer.done .rest-emoji { color: var(--amber); }
+.burst span { color: var(--accent); }
+.burst .ico { width: 18px; height: 18px; }
+.chip .ico { width: 12px; height: 12px; vertical-align: -1.5px; }
+.chip-video .ico { width: 11px; height: 11px; }
+.hero-stats .ico { color: var(--accent); }
+.alt-btn .ico { width: 14px; height: 14px; color: var(--accent); }
+.note-card .ico, .warmup-card .ico { color: var(--accent); }
+.howto summary .ico { width: 16px; height: 16px; }
+.photo-hint .ico { width: 12px; height: 12px; }
+.pr-row .ico, .swap-note .ico, .weight-suggest .ico { color: var(--accent); }
+.primary-btn .ico, .update-btn .ico, .offline-status .ico, .toast .ico { vertical-align: -0.2em; }
+.vl-playlist .ico { color: var(--accent); }
+.video-box { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--border); text-align: center; }
+.video-box h4 { text-align: left; }
+.video-sub { text-align: left; }

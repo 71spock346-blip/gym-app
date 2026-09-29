@@ -6,35 +6,35 @@
 
 'use strict';
 
-const APP_VERSION = 23;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 24;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
  * ~10-rep load). Isolation moves never drop below 8 reps, even in strength week. */
 const PHASES = [
   {
-    key: 'hypertrophy', name: 'Hypertrophy', badge: '💪',
+    key: 'hypertrophy', name: 'Hypertrophy', icon: 'dumbbell',
     desc: 'Muscle-building week: moderate weight, controlled 2–3 second negatives.',
     sets: [3, 4], reps: [[8, 12], [10, 12]], rest: '60–90 s',
     tempo: '1 s up · squeeze · 2–3 s down', restSec: 75,
     pct: 1.0, isoPct: 1.0, isoReps: [[10, 12], [12, 15]],
   },
   {
-    key: 'strength', name: 'Strength', badge: '🏋️',
+    key: 'strength', name: 'Strength', icon: 'bolt',
     desc: 'Heavy week: bigger loads, fewer reps, full rests between sets.',
     sets: [4, 5], reps: [[4, 6], [5, 6]], rest: '2–3 min',
     tempo: 'drive up hard · 2 s down', restSec: 150,
     pct: 1.15, isoPct: 1.05, isoReps: [[8, 10], [8, 12]],
   },
   {
-    key: 'volume', name: 'Volume', badge: '🔥',
+    key: 'volume', name: 'Volume', icon: 'flame',
     desc: 'Pump week: lighter weight, high reps, short rests. Chase the burn.',
     sets: [3, 3], reps: [[12, 15], [15, 20]], rest: '45–60 s',
     tempo: 'steady rhythm · 1–2 s each way', restSec: 50,
     pct: 0.85, isoPct: 0.85, isoReps: [[15, 20], [12, 15]],
   },
   {
-    key: 'deload', name: 'Deload', badge: '🧘',
+    key: 'deload', name: 'Deload', icon: 'moon',
     desc: 'Recovery week: light and easy on purpose. Perfect form, leave energy in the tank — you grow while you recover.',
     sets: [2, 3], reps: [[10, 12], [10, 12]], rest: '60 s',
     tempo: 'slow & perfect · 3 s down', restSec: 60,
@@ -48,13 +48,13 @@ const PHASES = [
  * the goal chosen on each device adjusts reps, rests and weight suggestions. */
 const GOALS = {
   build: {
-    key: 'build', name: 'Build muscle', emoji: '💪',
+    key: 'build', name: 'Build muscle', icon: 'dumbbell',
     short: 'Strength & size',
     desc: 'Full rests and progressive overload — maximum strength and size.',
     repsDelta: 0, restMult: 1, pctMult: 1, finisher: false,
   },
   fatloss: {
-    key: 'fatloss', name: 'HIIT · Lean & toned', emoji: '🔥',
+    key: 'fatloss', name: 'HIIT · Lean & toned', icon: 'flame',
     short: 'HIIT, core & glutes',
     desc: 'Same training days as your partner, but higher reps, supersets and short rests to keep the heart rate up, core work on push and arm days, glute focus on leg day, and a HIIT finisher. No chest-building or heavy arm-isolation lifts.',
     repsDelta: 3, restMult: 0.6, restMin: 30, pctMult: 0.85, finisher: true, supersets: true,
@@ -77,11 +77,11 @@ const GOALS = {
 
 /* ------------------------------ equipment profiles ------------------------------ */
 const EQUIPMENT = {
-  gym:  { key: 'gym',  name: 'Full gym',      emoji: '🏢', allow: ['machine', 'free', 'body'],
+  gym:  { key: 'gym',  name: 'Full gym',      icon: 'machine', allow: ['machine', 'free', 'body'],
           desc: 'Machines, cables, racks and free weights — everything.' },
-  free: { key: 'free', name: 'Free weights',  emoji: '🏋️', allow: ['free', 'body'],
+  free: { key: 'free', name: 'Free weights',  icon: 'dumbbell', allow: ['free', 'body'],
           desc: 'Dumbbells, a barbell and a bench — home or garage gym.' },
-  body: { key: 'body', name: 'Calisthenics',  emoji: '🤸', allow: ['body'],
+  body: { key: 'body', name: 'Calisthenics',  icon: 'pullupBar', allow: ['body'],
           desc: 'Bodyweight only — a pull-up bar and a bench or box.' },
 };
 
@@ -540,7 +540,7 @@ function recordPR(ex, value, plates) {
   state.prs = state.prs.slice(0, 100);
   store.write('prs', state.prs);
   const shown = plates ? formatPlates(value) : formatWeight(value);
-  showToast(`🏆 New personal best — ${shown} on ${ex.name}!`);
+  showToast(`New personal best — ${shown} on ${ex.name}!`, 'trophy');
 }
 
 function findExercise(id) {
@@ -588,7 +588,7 @@ function renderHeader() {
 function choiceCards(cls, options, selectedKey, dataKey) {
   return options.map((o) => `
     <button class="choice ${cls} ${o.key === selectedKey ? 'active' : ''}" type="button" data-${dataKey}="${o.key}">
-      <span class="choice-emoji">${o.emoji}</span>
+      <span class="choice-emoji">${o.badge ? `<span class="choice-badge">${o.badge}</span>` : ico(o.icon)}</span>
       <span class="choice-text"><strong>${o.name}</strong><small>${o.short || o.desc}</small></span>
     </button>`).join('');
 }
@@ -609,7 +609,7 @@ function renderOnboarding() {
       <div class="choice-grid">${choiceCards('ob-goal', Object.values(GOALS), state.ob.goal, 'goal')}</div>
       <h3 class="ob-h">Your equipment</h3>
       <div class="choice-grid">${choiceCards('ob-equip', Object.values(EQUIPMENT), state.ob.equip, 'equip')}</div>
-      <button id="obStart" class="primary-btn" type="button">Let's go 💪</button>
+      <button id="obStart" class="primary-btn" type="button">Let's go ${ico('arrowRight')}</button>
       <p class="ob-note">Training with a partner? Each phone keeps its own goal and equipment — you'll still get the same
       muscle group on the same day.</p>
     </div>`;
@@ -625,7 +625,7 @@ function finishOnboarding() {
   store.write('equip', state.equip);
   state.view = 'workout';
   render();
-  showToast(name ? `Welcome, ${name} — let's build. 💪` : 'Welcome — let’s build. 💪');
+  showToast(name ? `Welcome, ${name} — let's build.` : 'Welcome — let’s build.', 'dumbbell');
 }
 
 /* ------------------------------ workout view ------------------------------ */
@@ -634,10 +634,10 @@ function renderPhaseBanner() {
   const goal = currentGoal();
   $('#phaseBanner').innerHTML = `
     <div class="phase-head">
-      <span class="phase-badge">${phase.badge}</span>
+      <span class="phase-badge">${ico(phase.icon)}</span>
       <span class="phase-name phase-${phase.key}">${phase.name} week</span>
       <button id="goalPill" class="goal-pill" type="button"
-        title="Tap to switch goal">${goal.emoji} ${goal.name} ⇄</button>
+        title="Tap to switch goal">${ico(goal.icon)} ${goal.name} ${ico('swap')}</button>
     </div>
     <p class="phase-desc">${phase.desc}</p>`;
 }
@@ -650,7 +650,7 @@ function renderTabs() {
     return `
     <button class="day-tab ${i === state.selectedDay ? 'active' : ''} ${s && s.completed ? 'done' : ''}" data-day="${i}" type="button">
       <span class="day-tab-dow">${day.label} <span class="day-tab-mark">${mark}</span></span>
-      <span class="day-tab-name">${day.emoji} ${dayName(day)}</span>
+      <span class="day-tab-name">${dayName(day)}</span>
     </button>`;
   }).join('');
   $('#dayTabs').innerHTML = tabs;
@@ -669,14 +669,14 @@ function renderDay() {
   const isToday = dateISO === todayISO();
   const dow = (new Date().getDay() + 6) % 7;
   const weekendNote = (state.weekOffset === 0 && dow > 4)
-    ? `<div class="note-card">😴 It’s the weekend — rest up! Here’s Monday’s ${dayName(day)} session.</div>` : '';
+    ? `<div class="note-card">${ico('moon')} It’s the weekend — rest up! Here’s Monday’s ${dayName(day)} session.</div>` : '';
 
   // Supersets (HIIT goal): exercises are paired A, B, C… — do both back to back, then rest.
   const supersets = currentGoal().supersets;
   const paired = supersets ? Math.floor(exercises.length / 2) * 2 : 0;
   const supersetLabel = (i) => (i < paired ? 'ABC'[Math.floor(i / 2)] : null);
   const hiitNote = supersets ? `
-    <div class="note-card hiit-note">🔗 <strong>Supersets:</strong> exercises marked A, B, C are pairs —
+    <div class="note-card hiit-note">${ico('link')} <strong>Supersets:</strong> exercises marked A, B, C are pairs —
       do both back to back with no rest, then rest once. Keeps the heart rate up and the session short.</div>` : '';
 
   const schemes = exercises.map((ex, i) => schemeFor(ex, phase, weekIdx, i));
@@ -686,7 +686,7 @@ function renderDay() {
   const cards = exercises.map((ex, i) => exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLabel(i), schemes[i], swappedFrom[i])).join('');
 
   const equipNote = currentEquip().key !== 'gym' ? `
-    <div class="note-card equip-note">${currentEquip().emoji} <strong>${currentEquip().name} mode</strong> —
+    <div class="note-card equip-note">${ico(currentEquip().icon)} <strong>${currentEquip().name} mode</strong> —
       every exercise below needs only ${currentEquip().key === 'body' ? 'your bodyweight' : 'free weights'}. Change it in Settings.</div>` : '';
 
   $('#content').innerHTML = `
@@ -694,7 +694,7 @@ function renderDay() {
     ${weekendNote}
     ${equipNote}
     <div class="warmup-card">
-      <strong>🔥 Warm-up first</strong>
+      <strong>${ico('flame')} Warm-up first</strong>
       <ol class="warmup-list">${day.warmup.map((s) => `<li>${s}</li>`).join('')}</ol>
     </div>
     ${hiitNote}
@@ -728,20 +728,20 @@ function heroCard(day, exercises, schemes, dateISO, isToday) {
   const name = state.profile && state.profile.name;
   const dateText = new Date(dateISO + 'T00:00:00Z').toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC' });
   const greeting = isToday
-    ? `${name ? `Hey, ${esc(name)} 👋` : 'Today’s session'}`
+    ? `${name ? `Hey, ${esc(name)}` : 'Today’s session'}`
     : dateText;
   const streak = weekStreak();
   const thisWeek = sessionsInWeek(currentWeekIndex());
   const r = 26, c = 2 * Math.PI * r;
-  const burst = complete ? `<div class="burst" aria-hidden="true">${'🎉💪⭐🔥✨🏆'.split('').map((e, i) => `<span style="--i:${i}">${e}</span>`).join('')}</div>` : '';
+  const burst = complete ? `<div class="burst" aria-hidden="true">${Array.from({ length: 8 }, (_, i) => `<span style="--i:${i}">${ico(i % 2 ? 'star' : 'dot')}</span>`).join('')}</div>` : '';
   return `
   <section class="hero ${complete ? 'complete' : ''}">
     ${burst}
     <div class="hero-main">
       <div class="hero-text">
         <div class="hero-greeting">${greeting}</div>
-        <div class="hero-title">${day.emoji} ${dayName(day)}</div>
-        <div class="hero-sub">${complete ? 'Session complete — great work! 🎉' :
+        <div class="hero-title">${dayName(day)}</div>
+        <div class="hero-sub">${complete ? 'Session complete — great work!' :
           done ? `${done} of ${total} sets done — keep going` : `${exercises.length} exercises · ${total} sets`}</div>
       </div>
       <div class="ring" role="img" aria-label="${pct}% of sets done">
@@ -751,9 +751,9 @@ function heroCard(day, exercises, schemes, dateISO, isToday) {
       </div>
     </div>
     <div class="hero-stats">
-      <span>🔥 ${streak} wk streak</span>
-      <span>📅 ${thisWeek}/5 this week</span>
-      <span>🏆 ${state.prs.length} PR${state.prs.length === 1 ? '' : 's'}</span>
+      <span>${ico('flame')} ${streak} wk streak</span>
+      <span>${ico('calendar')} ${thisWeek}/5 this week</span>
+      <span>${ico('trophy')} ${state.prs.length} PR${state.prs.length === 1 ? '' : 's'}</span>
     </div>
   </section>`;
 }
@@ -767,11 +767,11 @@ function finisherCard(weekIdx, dayIdx, phase) {
   const pool = hiit ? HIIT_FINISHERS : FINISHERS;
   const fin = pool[Math.floor(rng() * pool.length)];
   const video = fin.video
-    ? `<a class="video-link" href="https://www.youtube.com/watch?v=${fin.video}" target="_blank" rel="noopener">▶ Form video</a>` : '';
+    ? `<a class="video-link" href="https://www.youtube.com/watch?v=${fin.video}" target="_blank" rel="noopener">${ico('play')} Form video</a>` : '';
   return `
   <article class="exercise-card finisher-card">
     <div class="exercise-top">
-      <div class="exercise-icon finisher-icon">${hiit ? '⚡' : '🏃'}</div>
+      <div class="exercise-icon finisher-icon">${ico(hiit ? 'bolt' : 'activity')}</div>
       <div class="exercise-info">
         <h3 class="exercise-name">${hiit ? 'HIIT finisher' : 'Easy finisher'}: ${fin.name}</h3>
         <div class="exercise-meta">
@@ -783,7 +783,7 @@ function finisherCard(weekIdx, dayIdx, phase) {
     <p class="finisher-how">${fin.how}</p>
     ${video}
     <p class="finisher-note">Straight after your last set, while your heart rate is already up.
-    And remember: fat loss is won mostly in the kitchen — this builds the shape underneath. 🍎</p>
+    And remember: fat loss is won mostly in the kitchen — this builds the shape underneath.</p>
   </article>`;
 }
 
@@ -798,7 +798,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
     : '';
   const completed = doneCount(dateISO, ex.id);
   const isBodyweight = equipOf(ex) === 'body';
-  const equipTag = { machine: '🏢 machine', free: '🏋️ free weights', body: '🤸 bodyweight' }[equipOf(ex)];
+  const equipTag = { machine: `${ico('machine')} machine`, free: `${ico('dumbbell')} free weights`, body: `${ico('pullupBar')} bodyweight` }[equipOf(ex)];
 
   const bubbles = Array.from({ length: scheme.sets }, (_, s) => `
     <button class="set-bubble ${s < completed ? 'done' : ''}" type="button"
@@ -809,7 +809,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
     ? `<div class="weight-line"><span class="weight-suggest">Bodyweight — go to near-failure</span></div>`
     : `<div class="weight-line">
         <span class="weight-suggest">${weightText
-          ? `🎯 Suggested: <strong>${weightText}</strong>`
+          ? `${ico('target')} Suggested: <strong>${weightText}</strong>`
           : plates ? `Enter how many plates you use →` : `Set your weight to get weekly suggestions →`}</span>
         <span class="weight-input-wrap">
           <input class="weight-input" type="number" inputmode="decimal" min="1" step="0.5"
@@ -821,8 +821,8 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
       </div>`;
 
   const swapNote = swappedFrom ? `
-    <div class="swap-note"><span>🔄 Swapped in for <strong>${swappedFrom.name}</strong></span>
-      <button class="unswap-btn" type="button" data-ex="${swappedFrom.id}" data-date="${dateISO}">↩ Undo</button></div>` : '';
+    <div class="swap-note"><span>${ico('swap')} Swapped in for <strong>${swappedFrom.name}</strong></span>
+      <button class="unswap-btn" type="button" data-ex="${swappedFrom.id}" data-date="${dateISO}">${ico('undo')} Undo</button></div>` : '';
 
   return `
   <article class="exercise-card ${completed >= scheme.sets ? 'card-done' : ''} ${swappedFrom ? 'swapped' : ''}" data-ex="${ex.id}">
@@ -835,8 +835,8 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
           <span class="chip chip-gear">${ex.gear}</span>
           <span class="chip chip-muscle">${ex.muscles}</span>
           <span class="chip chip-equip">${equipTag}</span>
-          <a class="chip chip-video" href="${videoUrl(ex)}" target="_blank" rel="noopener">▶ Video</a>
-          ${supersetLabel ? `<span class="chip chip-superset">🔗 Superset ${supersetLabel}</span>` : ''}
+          <a class="chip chip-video" href="${videoUrl(ex)}" target="_blank" rel="noopener">${ico('play')} Video</a>
+          ${supersetLabel ? `<span class="chip chip-superset">${ico('link')} Superset ${supersetLabel}</span>` : ''}
         </div>
       </div>
     </div>
@@ -849,16 +849,9 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
     <div class="sets-row">${bubbles}</div>
     ${altChips(ex, day, chosenIds, weekIdx, dateISO, swappedFrom)}
     <details class="howto">
-      <summary>📖 How to do it</summary>
+      <summary>${ico('book')} How to do it</summary>
       <div class="howto-body">
         ${photoDemo(ex)}
-        <div class="video-box">
-          <a class="video-link" href="${videoUrl(ex)}" target="_blank" rel="noopener">
-            ▶ ${FORM_VIDEOS[ex.id] ? `Form video: ${FORM_VIDEOS[ex.id].title}` : 'Watch form videos on YouTube'}
-          </a>
-          <small class="video-sub">Plays offline if downloaded in YouTube (Premium) ·
-            <a class="video-more" href="${videoSearchUrl(ex)}" target="_blank" rel="noopener">more videos</a></small>
-        </div>
         <h4>Set-up</h4>
         <ol>${ex.setup.map((s) => `<li>${s}</li>`).join('')}</ol>
         <h4>Doing the exercise</h4>
@@ -867,6 +860,15 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
         <ul>${ex.tips.map((s) => `<li>${s}</li>`).join('')}</ul>
         ${ex.mistakes ? `<h4>Common mistakes</h4>
         <ul class="mistakes">${ex.mistakes.map((s) => `<li>${s}</li>`).join('')}</ul>` : ''}
+        <div class="video-box">
+          <h4>Watch before your session</h4>
+          <a class="video-link" href="${videoUrl(ex)}" target="_blank" rel="noopener">
+            ${ico('play')} ${FORM_VIDEOS[ex.id] ? `Form video: ${FORM_VIDEOS[ex.id].title}` : 'Watch form videos on YouTube'}
+          </a>
+          <small class="video-sub">Between sets, the photos and cues above are your reference — the video is for learning
+            the move at home. Plays offline if downloaded in YouTube (Premium) ·
+            <a class="video-more" href="${videoSearchUrl(ex)}" target="_blank" rel="noopener">more videos</a></small>
+        </div>
       </div>
     </details>
   </article>`;
@@ -883,7 +885,7 @@ function photoDemo(ex) {
       <img class="photo-frame photo-end" src="img/demo/${ex.id}-1.jpg" alt="${ex.name} — finish position" loading="lazy" />
       <span class="photo-tag photo-tag-start">Start</span>
       <span class="photo-tag photo-tag-end">Finish</span>
-      <span class="photo-hint">📷 Works offline · tap to compare</span>
+      <span class="photo-hint">${ico('camera')} Works offline · tap to compare</span>
     </div>`;
 }
 
@@ -899,9 +901,9 @@ function altChips(ex, day, chosenIds, weekIdx, dateISO, swappedFrom) {
   const add = (alt, icon, why) => {
     if (alt && !opts.some((o) => o.alt.id === alt.id)) opts.push({ alt, icon, why });
   };
-  add(swapSuggestion(ex, day.key, taken, weekIdx), '🔄', 'same kit');
-  if (mine === 'machine') add(altForEquip(ex, day.key, 'free', weekIdx, taken), '🏋️', 'free weights');
-  if (mine !== 'body') add(altForEquip(ex, day.key, 'body', weekIdx, taken), '🤸', 'bodyweight');
+  add(swapSuggestion(ex, day.key, taken, weekIdx), 'swap', 'same kit');
+  if (mine === 'machine') add(altForEquip(ex, day.key, 'free', weekIdx, taken), 'dumbbell', 'free weights');
+  if (mine !== 'body') add(altForEquip(ex, day.key, 'body', weekIdx, taken), 'pullupBar', 'bodyweight');
   if (!opts.length) return '';
   const plannedId = swappedFrom ? swappedFrom.id : ex.id;
   return `
@@ -909,7 +911,7 @@ function altChips(ex, day, chosenIds, weekIdx, dateISO, swappedFrom) {
       <span class="alts-label">${mine === 'body' ? 'Busy or too hard?' : 'Machine busy?'} Tap to swap:</span>
       ${opts.map((o) => `
         <button class="alt-btn" type="button" data-ex="${plannedId}" data-alt="${o.alt.id}" data-date="${dateISO}"
-          title="${o.why}">${o.icon} ${o.alt.name}</button>`).join('')}
+          title="${o.why}">${ico(o.icon)} ${o.alt.name}</button>`).join('')}
     </div>`;
 }
 
@@ -938,17 +940,17 @@ function renderHistory() {
   const list = sessions.slice(0, 40).map(([iso, s]) => `
     <div class="hist-row ${s.completed ? 'full' : ''}">
       <div class="hist-date">${new Date(iso + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}</div>
-      <div class="hist-main"><strong>${s.emoji} ${s.name}</strong><small>${s.ex.slice(0, 4).join(' · ')}${s.ex.length > 4 ? ' …' : ''}</small></div>
+      <div class="hist-main"><strong>${s.name}</strong><small>${s.ex.slice(0, 4).join(' · ')}${s.ex.length > 4 ? ' …' : ''}</small></div>
       <div class="hist-sets">${s.completed ? '✓' : ''} ${s.sets}/${s.total}</div>
     </div>`).join('');
 
   const prs = state.prs.slice(0, 12).map((p) => `
-    <div class="pr-row"><span>🏆 ${p.name}</span><strong>${p.plates ? formatPlates(p.w) : formatWeight(p.w)}</strong>
+    <div class="pr-row"><span>${ico('trophy')} ${p.name}</span><strong>${p.plates ? formatPlates(p.w) : formatWeight(p.w)}</strong>
       <small>${new Date(p.date + 'T00:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</small></div>`).join('');
 
   $('#view-history').innerHTML = `
     <div class="stats-grid">
-      <div class="stat"><div class="stat-num">${streak}</div><div class="stat-label">week streak 🔥</div></div>
+      <div class="stat"><div class="stat-num">${streak}</div><div class="stat-label">week streak</div></div>
       <div class="stat"><div class="stat-num">${completed}</div><div class="stat-label">sessions completed</div></div>
       <div class="stat"><div class="stat-num">${totalSets}</div><div class="stat-label">sets logged</div></div>
       <div class="stat"><div class="stat-num">${state.prs.length}</div><div class="stat-label">personal bests</div></div>
@@ -978,16 +980,16 @@ function renderSettings() {
     <p class="hint">${currentEquip().desc} Every day's plan is rebuilt from exercises that fit.</p>
     <h2 class="section-title">Units</h2>
     <div class="choice-grid two">
-      <button class="choice set-unit ${state.unit === 'kg' ? 'active' : ''}" type="button" data-unit="kg"><span class="choice-emoji">⚖️</span><span class="choice-text"><strong>Kilograms</strong><small>kg, 2.5 kg steps</small></span></button>
-      <button class="choice set-unit ${state.unit === 'lb' ? 'active' : ''}" type="button" data-unit="lb"><span class="choice-emoji">⚖️</span><span class="choice-text"><strong>Pounds</strong><small>lb, 5 lb steps</small></span></button>
+      <button class="choice set-unit ${state.unit === 'kg' ? 'active' : ''}" type="button" data-unit="kg"><span class="choice-emoji"><span class="choice-badge">kg</span></span><span class="choice-text"><strong>Kilograms</strong><small>kg, 2.5 kg steps</small></span></button>
+      <button class="choice set-unit ${state.unit === 'lb' ? 'active' : ''}" type="button" data-unit="lb"><span class="choice-emoji"><span class="choice-badge">lb</span></span><span class="choice-text"><strong>Pounds</strong><small>lb, 5 lb steps</small></span></button>
     </div>`;
 }
 
 /* ------------------------------ toast ------------------------------ */
 let toastTimer = null;
-function showToast(msg) {
+function showToast(msg, icon) {
   const el = $('#toast');
-  el.textContent = msg;
+  el.innerHTML = (icon ? ico(icon) + ' ' : '') + esc(msg);
   el.hidden = false;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { el.hidden = true; }, 3500);
@@ -1051,7 +1053,7 @@ function startRestTimer(seconds, label) {
   el.hidden = false;
   el.classList.remove('done');
   document.body.classList.add('timer-on');
-  $('#restEmoji').textContent = '⏳';
+  $('#restEmoji').innerHTML = ico('hourglass');
   $('#restLabel').textContent = label;
   updateRestTimer();
   rest.tick = setInterval(updateRestTimer, 250);
@@ -1073,7 +1075,7 @@ function finishRestTimer() {
   chime();
   const el = $('#restTimer');
   el.classList.add('done');
-  $('#restEmoji').textContent = '🔔';
+  $('#restEmoji').innerHTML = ico('bell');
   $('#restTime').textContent = '0:00';
   $('#restLabel').textContent = 'GO — start your next set!';
   $('#restFill').style.width = '100%';
@@ -1157,7 +1159,7 @@ document.addEventListener('click', (e) => {
       if (guide) guide.open = true;
       card.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-    showToast(`🔄 Swapped to ${target.name} — tap ↩ Undo to go back`);
+    showToast(`Swapped to ${target.name} — tap Undo to go back`, 'swap');
     return;
   }
   const unswap = e.target.closest('.unswap-btn');
@@ -1198,7 +1200,7 @@ document.addEventListener('change', (e) => {
   if (nameInput) {
     state.profile = { ...(state.profile || {}), name: nameInput.value.trim(), onboarded: true };
     store.write('profile', state.profile);
-    showToast('Saved 👍');
+    showToast('Saved', 'check');
     return;
   }
   const input = e.target.closest('.weight-input');
@@ -1241,14 +1243,14 @@ $('#unitToggle').addEventListener('click', () => {
 function renderVideoLibrary() {
   const el = $('#videoLibraryBody');
   if (!el) return;
-  const groups = DAYS.concat([{ key: 'core', label: 'Core', name: 'Core moves (HIIT mode)', emoji: '🧘' }]);
+  const groups = DAYS.concat([{ key: 'core', label: 'Core', name: 'Core moves (HIIT mode)' }]);
   const days = groups.map((day) => {
     const items = (day.key === 'core' ? EXERCISE_DB.core : dayPool(day.key)).filter((ex) => FORM_VIDEOS[ex.id]);
     const ids = items.map((ex) => FORM_VIDEOS[ex.id].id);
     return `
       <div class="vl-day">
         <a class="vl-playlist" href="${playlistUrl(ids)}" target="_blank" rel="noopener">
-          ${day.emoji} ${day.label} · ${day.name} — open as playlist (${ids.length} videos)
+          ${ico('play')} ${day.label} · ${day.name} — open as playlist (${ids.length} videos)
         </a>
         <details class="vl-list">
           <summary>Individual videos</summary>
@@ -1263,7 +1265,7 @@ function renderVideoLibrary() {
       <li>In YouTube tap <strong>⋮ → Save playlist</strong> (easiest in a laptop browser, then it appears in the app on your phone).</li>
       <li>Open the saved playlist in the YouTube app and tap <strong>Download</strong>.</li>
     </ol>
-    <p class="vl-note">After that, every <strong>▶ Video</strong> button in this app opens the downloaded video — no signal needed.
+    <p class="vl-note">After that, every <strong>Video</strong> button in this app opens the downloaded video — no signal needed.
     If "Save playlist" isn't offered on your phone, use "Individual videos" and download each with ⋮ → Download.</p>
     ${days}`;
 }
@@ -1287,9 +1289,9 @@ async function prefetchPhotos() {
     const total = wanted.length;
     const show = () => {
       status.classList.toggle('done', done === total);
-      status.textContent = done === total
-        ? '📷 All demo photos saved — the app works fully offline ✓'
-        : `📷 Saving demo photos for offline use… ${done}/${total}`;
+      status.innerHTML = ico('camera') + (done === total
+        ? ' All demo photos saved — the app works fully offline ✓'
+        : ` Saving demo photos for offline use… ${done}/${total}`);
     };
     show();
     const queue = missing.slice();
@@ -1300,7 +1302,7 @@ async function prefetchPhotos() {
       }
     };
     await Promise.all([worker(), worker(), worker()]);
-    if (done < total) status.textContent = `📷 ${done}/${total} demo photos saved — reopen with signal to finish`;
+    if (done < total) status.innerHTML = ico('camera') + ` ${done}/${total} demo photos saved — reopen with signal to finish`;
   } catch { /* storage unavailable (private mode) — photos still load live */ }
 }
 
@@ -1310,7 +1312,7 @@ async function prefetchPhotos() {
 async function forceUpdate() {
   const btn = $('#checkUpdate');
   btn.disabled = true;
-  btn.textContent = '⏳ Refreshing…';
+  btn.innerHTML = ico('hourglass') + ' Refreshing…';
   try {
     if ('serviceWorker' in navigator) {
       const regs = await navigator.serviceWorker.getRegistrations();
@@ -1331,6 +1333,8 @@ render();
 renderVideoLibrary();
 prefetchPhotos();
 hideSplash();
+$('#checkUpdate').innerHTML = ico('refresh') + ' Check for updates';
+$('#videoLibrary summary').innerHTML = ico('film') + ' Form video library &amp; offline setup (YouTube Premium)';
 
 /* The splash screen is in the HTML from the first paint; fade it out once
  * the app has rendered, but never before ~1.1 s so it reads as a real
