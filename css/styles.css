@@ -1,21 +1,23 @@
 /* Stay Strong — mobile-first dark theme */
 
-/* Brand palette drawn from the app icon: charcoal body, electric-blue and
- * orange swooshes, silver figure. --amber is the icon orange (name kept to
- * avoid touching every rule). */
+/* Brand palette drawn from the app icon: near-black ground, charcoal
+ * surfaces, one gold accent. Variable names --amber / --blue are kept from
+ * the earlier palette so every rule still resolves: --amber is now a deeper
+ * copper for secondary states, --blue a light champagne for links and chips. */
 :root {
   color-scheme: dark;   /* already dark — stops Android's "force dark" re-tinting it */
-  --bg: #0f1318;
-  --surface: #171c23;
-  --surface-2: #202834;
-  --border: #2c3644;
-  --text: #eef2f6;
-  --text-dim: #9aa7b4;
-  --accent: #2f9bff;
-  --accent-dim: rgba(47, 155, 255, 0.16);
-  --amber: #ff8c1a;
-  --blue: #7ec1ff;
-  --rose: #fb7185;
+  --bg: #0b0c0f;
+  --surface: #14161a;
+  --surface-2: #1c1f25;
+  --border: #272b32;
+  --text: #f2efe6;
+  --text-dim: #9a9ea6;
+  --accent: #d9a92f;
+  --accent-dim: rgba(217, 169, 47, 0.14);
+  --on-accent: #15110a;
+  --amber: #c0842a;
+  --blue: #e6c76b;
+  --rose: #e07a7a;
   --radius: 14px;
 }
 
@@ -34,7 +36,7 @@ body {
 /* ------------------------------ header ------------------------------ */
 .topbar {
   position: sticky; top: 0; z-index: 10;
-  background: rgba(16, 20, 24, 0.94);
+  background: rgba(11, 12, 15, 0.94);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
   padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
@@ -45,7 +47,7 @@ body {
 .brand { font-size: 1.25rem; letter-spacing: 0.02em; display: flex; align-items: center; gap: 8px; }
 .brand-icon { width: 30px; height: 30px; border-radius: 8px; display: block; }
 .brand-text {
-  background: linear-gradient(90deg, #2f9bff 20%, #ff8c1a 100%);
+  background: linear-gradient(90deg, #f3d27a 0%, #dba62e 55%, #b57c1c 100%);
   -webkit-background-clip: text; background-clip: text;
   color: transparent;
 }
@@ -207,7 +209,7 @@ body {
   background: var(--accent-dim); color: var(--accent);
   border-color: var(--accent); text-decoration: none; font-weight: 700;
 }
-.chip-superset { background: rgba(255, 140, 26, 0.16); color: var(--amber); border-color: var(--amber); font-weight: 700; }
+.chip-superset { background: rgba(192, 132, 42, 0.18); color: var(--blue); border-color: var(--amber); font-weight: 700; }
 .hiit-note { border-color: var(--amber); }
 .hiit-note strong { color: var(--amber); }
 
@@ -256,7 +258,7 @@ body {
 }
 .set-bubble:active { transform: scale(0.92); }
 .set-bubble.done {
-  background: var(--accent); border-color: var(--accent); color: #041018;
+  background: var(--accent); border-color: var(--accent); color: var(--on-accent);
 }
 
 /* ------------------------------ how-to ------------------------------ */
@@ -305,7 +307,7 @@ body {
   font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;
   padding: 3px 8px; border-radius: 999px;
 }
-.photo-tag-end { animation: photo-swap 3.2s ease-in-out infinite; background: var(--accent); color: #041018; }
+.photo-tag-end { animation: photo-swap 3.2s ease-in-out infinite; background: var(--accent); color: var(--on-accent); }
 .photo-hint {
   position: absolute; right: 8px; bottom: 6px;
   font-size: 0.68rem; color: rgba(255, 255, 255, 0.85);
@@ -371,7 +373,7 @@ body {
 .swap-note {
   display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
   margin: -4px 0 12px; padding: 8px 12px; border-radius: 10px;
-  background: rgba(255, 140, 26, 0.12); border: 1px solid rgba(255, 140, 26, 0.45);
+  background: rgba(192, 132, 42, 0.14); border: 1px solid rgba(192, 132, 42, 0.5);
   font-size: 0.8rem; color: var(--text-dim);
 }
 .swap-note strong { color: var(--text); }
@@ -445,7 +447,7 @@ body.onboarding .bottom-nav { display: none; }
 .bottom-nav {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
   display: flex; justify-content: space-around;
-  background: rgba(15, 19, 24, 0.96); backdrop-filter: blur(10px);
+  background: rgba(11, 12, 15, 0.96); backdrop-filter: blur(10px);
   border-top: 1px solid var(--border);
   padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
 }
@@ -454,7 +456,12 @@ body.onboarding .bottom-nav { display: none; }
   background: none; border: none; color: var(--text-dim);
   font-size: 0.72rem; font-weight: 700; padding: 6px 4px; border-radius: 12px; cursor: pointer;
 }
-.nav-btn .nav-icon { font-size: 1.25rem; }
+.nav-btn .nav-icon {
+  width: 24px; height: 24px; fill: none; stroke: currentColor;
+  stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round;
+}
+.nav-btn .nav-icon circle { fill: currentColor; stroke: none; }
+.nav-btn[data-view="settings"] .nav-icon circle { fill: none; stroke: currentColor; }
 .nav-btn.active { color: var(--accent); background: var(--accent-dim); }
 
 .toast {
@@ -475,10 +482,10 @@ body.timer-on .main { padding-bottom: calc(180px + env(safe-area-inset-bottom));
 /* ------------------------------ onboarding ------------------------------ */
 .ob { max-width: 520px; margin: 0 auto; padding: 28px 18px 40px; }
 .ob-hero { text-align: center; margin-bottom: 22px; }
-.ob-logo { width: 84px; height: 84px; border-radius: 20px; box-shadow: 0 10px 30px rgba(47, 155, 255, 0.25); }
+.ob-logo { width: 84px; height: 84px; border-radius: 20px; box-shadow: 0 10px 30px rgba(217, 169, 47, 0.22); }
 .ob-hero h1 {
   font-size: 2rem; margin-top: 12px;
-  background: linear-gradient(90deg, #2f9bff 20%, #ff8c1a 100%);
+  background: linear-gradient(90deg, #f3d27a 0%, #dba62e 55%, #b57c1c 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .ob-hero p { color: var(--text-dim); font-size: 0.92rem; margin-top: 6px; }
@@ -508,25 +515,25 @@ body.timer-on .main { padding-bottom: calc(180px + env(safe-area-inset-bottom));
 
 .primary-btn {
   display: block; width: 100%; margin-top: 22px;
-  background: linear-gradient(90deg, #2f9bff, #1f7fe0); color: #fff;
+  background: linear-gradient(90deg, #e9c25a, #c9962a); color: var(--on-accent);
   border: none; border-radius: 14px; padding: 15px;
   font-size: 1.05rem; font-weight: 800; cursor: pointer;
-  box-shadow: 0 8px 24px rgba(47, 155, 255, 0.35);
+  box-shadow: 0 8px 24px rgba(217, 169, 47, 0.3);
 }
 .primary-btn:active { transform: scale(0.98); }
 
 /* ------------------------------ hero ------------------------------ */
 .hero {
   position: relative; overflow: hidden;
-  background: linear-gradient(135deg, #16202c 0%, #121820 60%, #1a1f2a 100%);
+  background: linear-gradient(135deg, #1d1a12 0%, #14161a 60%, #1a1b20 100%);
   border: 1px solid var(--border); border-radius: 18px;
   padding: 16px; margin: 10px 0 14px;
 }
 .hero::before {
   content: ''; position: absolute; inset: -40% -30% auto auto; width: 220px; height: 220px;
-  background: radial-gradient(circle, rgba(47, 155, 255, 0.22), transparent 65%); pointer-events: none;
+  background: radial-gradient(circle, rgba(217, 169, 47, 0.18), transparent 65%); pointer-events: none;
 }
-.hero.complete { border-color: var(--accent); background: linear-gradient(135deg, #11283f 0%, #121820 70%); }
+.hero.complete { border-color: var(--accent); background: linear-gradient(135deg, #2c2410 0%, #14161a 70%); }
 .hero-main { display: flex; align-items: center; justify-content: space-between; gap: 12px; position: relative; }
 .hero-greeting { color: var(--text-dim); font-size: 0.82rem; }
 .hero-title { font-size: 1.4rem; font-weight: 800; margin-top: 2px; }
@@ -553,12 +560,12 @@ body.timer-on .main { padding-bottom: calc(180px + env(safe-area-inset-bottom));
   100% { transform: translate(calc(-50% + (var(--i) - 2.5) * 60px), calc(-50% - 90px)) scale(1.2) rotate(20deg); opacity: 0; }
 }
 
-.exercise-card.card-done { border-color: rgba(47, 155, 255, 0.5); }
+.exercise-card.card-done { border-color: rgba(217, 169, 47, 0.55); }
 .exercise-card.card-done .exercise-name::after { content: ' ✓'; color: var(--accent); }
 .chip-equip { background: var(--surface-2); color: var(--text-dim); }
 .equip-note { border-color: var(--accent); }
 .day-tab-mark { color: var(--accent); }
-.day-tab.done { border-color: rgba(47, 155, 255, 0.5); }
+.day-tab.done { border-color: rgba(217, 169, 47, 0.55); }
 
 /* ------------------------------ history ------------------------------ */
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
@@ -571,20 +578,20 @@ body.timer-on .main { padding-bottom: calc(180px + env(safe-area-inset-bottom));
   border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
   font-size: 0.72rem; color: var(--text-dim);
 }
-.cal-cell.part { background: rgba(255, 140, 26, 0.25); border-color: var(--amber); color: var(--text); }
-.cal-cell.full { background: var(--accent); border-color: var(--accent); color: #041018; font-weight: 800; }
+.cal-cell.part { background: var(--accent-dim); border-color: var(--accent); color: var(--text); }
+.cal-cell.full { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 800; }
 .cal-cell.today { box-shadow: 0 0 0 2px var(--text) inset; }
 .cal-cell.future { opacity: 0.35; }
 .cal-head { text-align: center; font-size: 0.68rem; font-weight: 700; color: var(--text-dim); letter-spacing: 0.04em; }
 .cal-key { font-size: 0.72rem; color: var(--text-dim); margin-top: 6px; }
 .key { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin: 0 4px 0 8px; vertical-align: middle; }
-.key.full { background: var(--accent); } .key.part { background: var(--amber); }
+.key.full { background: var(--accent); } .key.part { background: var(--accent-dim); border: 1px solid var(--accent); }
 .hist-row {
   display: flex; align-items: center; gap: 10px;
   background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
   padding: 10px 12px; margin-bottom: 8px;
 }
-.hist-row.full { border-color: rgba(47, 155, 255, 0.5); }
+.hist-row.full { border-color: rgba(217, 169, 47, 0.55); }
 .hist-date { font-size: 0.75rem; color: var(--text-dim); width: 74px; flex: 0 0 auto; }
 .hist-main { flex: 1; min-width: 0; }
 .hist-main strong { display: block; font-size: 0.92rem; }

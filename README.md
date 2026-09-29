@@ -129,7 +129,7 @@ python3 -m http.server 8000
 
 ```
 index.html            app shell (onboarding, workout, history, settings views)
-css/styles.css        mobile-first dark theme
+css/styles.css        mobile-first dark theme (black / charcoal / gold, from the icon)
 js/exercises.js       exercise database (115+ exercises with guides) + SVG pictograms
 js/videos.js          curated YouTube form video per exercise
 js/demos.js           generated manifest of bundled demo photos
