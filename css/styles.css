@@ -42,8 +42,8 @@ body {
 
 .topbar-row { display: flex; align-items: center; justify-content: space-between; }
 
-.brand { font-size: 1.25rem; letter-spacing: 0.02em; }
-.brand-icon { margin-right: 2px; }
+.brand { font-size: 1.25rem; letter-spacing: 0.02em; display: flex; align-items: center; gap: 8px; }
+.brand-icon { width: 30px; height: 30px; border-radius: 8px; display: block; }
 .brand-text {
   background: linear-gradient(90deg, #2f9bff 20%, #ff8c1a 100%);
   -webkit-background-clip: text; background-clip: text;
@@ -621,4 +621,47 @@ body.timer-on .main { padding-bottom: calc(180px + env(safe-area-inset-bottom));
   .phase-banner, .day-tabs { max-width: 640px; margin-left: auto; margin-right: auto; }
   .day-tabs { padding-left: 0; padding-right: 0; }
   .phase-banner { margin-top: 16px; }
+}
+
+/* ------------------------------ splash screen ------------------------------ */
+/* Shown from the first paint on every open, faded out once the app has
+ * rendered (minimum ~1 s so it never flickers). */
+.splash {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; background: var(--bg); color: var(--text);
+  padding-bottom: env(safe-area-inset-bottom);
+  transition: opacity 0.4s ease;
+}
+.splash.hide { opacity: 0; pointer-events: none; }
+.splash-glow {
+  position: absolute; width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 196, 64, 0.22) 0%, rgba(255, 196, 64, 0) 65%);
+  animation: splash-glow 1.6s ease-in-out infinite alternate;
+}
+.splash-logo {
+  width: 132px; height: 132px; border-radius: 30px; position: relative;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 196, 64, 0.25);
+  animation: splash-pop 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+.splash-name {
+  margin-top: 14px; font-size: 2rem; font-weight: 800; letter-spacing: 0.03em; position: relative;
+  background: linear-gradient(90deg, #f6d675 0%, #e0a92c 55%, #b8791a 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: splash-rise 0.6s ease-out 0.25s both;
+}
+.splash-tag { font-size: 0.9rem; color: var(--text-dim); animation: splash-rise 0.6s ease-out 0.4s both; position: relative; }
+.splash-dots { display: flex; gap: 7px; margin-top: 26px; position: relative; }
+.splash-dots i {
+  width: 7px; height: 7px; border-radius: 50%; background: #e0a92c; opacity: 0.35;
+  animation: splash-dot 1s ease-in-out infinite;
+}
+.splash-dots i:nth-child(2) { animation-delay: 0.15s; }
+.splash-dots i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes splash-pop { from { transform: scale(0.82); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes splash-rise { from { transform: translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes splash-dot { 0%, 100% { opacity: 0.35; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-4px); } }
+@keyframes splash-glow { from { transform: scale(0.9); opacity: 0.7; } to { transform: scale(1.1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .splash, .splash-logo, .splash-name, .splash-tag, .splash-dots i, .splash-glow { animation: none; transition: none; }
 }

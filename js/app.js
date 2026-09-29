@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 21;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 22;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -1330,3 +1330,21 @@ window.addEventListener('online', prefetchPhotos);
 render();
 renderVideoLibrary();
 prefetchPhotos();
+hideSplash();
+
+/* The splash screen is in the HTML from the first paint; fade it out once
+ * the app has rendered, but never before ~1.1 s so it reads as a real
+ * opening rather than a flicker. */
+function hideSplash() {
+  const el = $('#splash');
+  if (!el) return;
+  const MIN_MS = 1100;
+  const elapsed = (typeof performance !== 'undefined' && performance.now) ? performance.now() : MIN_MS;
+  const go = () => {
+    el.classList.add('hide');
+    const remove = () => el.remove();
+    el.addEventListener('transitionend', remove, { once: true });
+    setTimeout(remove, 600);   // in case transitions are disabled
+  };
+  setTimeout(go, Math.max(0, MIN_MS - elapsed));
+}

@@ -13,12 +13,20 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Stay Strong" />
-  <link rel="stylesheet" href="css/styles.css?v=21" />
+  <link rel="stylesheet" href="css/styles.css?v=22" />
 </head>
 <body>
+  <div id="splash" class="splash" role="status" aria-label="Stay Strong is loading">
+    <div class="splash-glow"></div>
+    <img class="splash-logo" src="icons/icon-512.png" alt="" />
+    <div class="splash-name">Stay Strong</div>
+    <div class="splash-tag">Train together · different every week</div>
+    <div class="splash-dots"><i></i><i></i><i></i></div>
+  </div>
+
   <header class="topbar">
     <div class="topbar-row">
-      <h1 class="brand"><span class="brand-icon">🏋️</span> <span class="brand-text">Stay Strong</span></h1>
+      <h1 class="brand"><img class="brand-icon" src="icons/icon-192.png" alt="" /> <span class="brand-text">Stay Strong</span></h1>
       <button id="unitToggle" class="unit-toggle" type="button" aria-label="Switch weight unit">kg</button>
     </div>
     <div class="week-nav">
@@ -83,10 +91,10 @@
     <button class="nav-btn" type="button" data-view="settings"><span class="nav-icon">⚙️</span>Settings</button>
   </nav>
 
-  <script src="js/exercises.js?v=21"></script>
-  <script src="js/demos.js?v=21"></script>
-  <script src="js/videos.js?v=21"></script>
-  <script src="js/app.js?v=21"></script>
+  <script src="js/exercises.js?v=22"></script>
+  <script src="js/demos.js?v=22"></script>
+  <script src="js/videos.js?v=22"></script>
+  <script src="js/app.js?v=22"></script>
   <script>
     // Register the offline cache, and auto-reload once a new version has
     // installed — so updates apply on the first open, no relaunch dance.

@@ -14,7 +14,8 @@ and every day's plan is built to fit.
 
 ## First open
 
-A short welcome asks three things — your first name, your **goal** and your
+A branded splash screen (icon, wordmark, tagline) shows for about a second on
+every launch and fades into the app. A short welcome then asks three things — your first name, your **goal** and your
 **equipment** — then drops you straight into today's session. All three can be
 changed later in **Settings**.
 
