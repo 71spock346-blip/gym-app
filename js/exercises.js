@@ -362,6 +362,188 @@ const EXERCISE_DB = {
         'Dropping the plate down fast — the lowering half is half the exercise.',
       ],
     },
+    {
+      id: 'sh-bent-rear-fly', name: 'Bent-Over Dumbbell Rear Delt Fly',
+      gear: 'Light dumbbells', icon: 'dumbbell', equip: 'free',
+      tags: ['isolation', 'rear'], muscles: 'Rear delts, upper back',
+      video: 'bent over dumbbell rear delt fly proper form',
+      setup: [
+        'Hinge forward until your torso is nearly parallel to the floor, dumbbells hanging under your chest, slight elbow bend.',
+      ],
+      execution: [
+        'Raise both arms out to the sides until they are level with your shoulders.',
+        'Pause, then lower slowly. Keep the hinge — the torso never moves.',
+      ],
+      tips: [
+        'Lead with the elbows and think "thumbs down" at the top to hit the rear delt rather than the traps.',
+      ],
+      mistakes: [
+        'Standing up as you raise the weights.',
+        'Going heavy and swinging.',
+      ],
+    },
+    {
+      id: 'sh-pike-pushup', name: 'Pike Push-Up',
+      gear: 'Bodyweight (floor)', icon: 'pushup', equip: 'body',
+      tags: ['compound', 'press'], muscles: 'Shoulders, triceps',
+      video: 'pike push up proper form',
+      setup: [
+        'From a push-up position, walk your feet in and lift your hips high so your body makes an upside-down V.',
+        'Hands slightly wider than shoulders, head between your arms.',
+      ],
+      execution: [
+        'Bend the elbows to lower the top of your head toward the floor between your hands.',
+        'Press back up to straight arms. Elevate your feet on a bench to make it harder.',
+      ],
+      tips: [
+        'The more vertical your torso, the more it becomes a shoulder press.',
+      ],
+      mistakes: [
+        'Letting the hips drop — that turns it into a regular push-up.',
+        'Nodding the head forward instead of lowering it straight down.',
+      ],
+    },
+    {
+      id: 'sh-handstand-hold', name: 'Wall Handstand Hold',
+      gear: 'Bodyweight (wall)', icon: 'pushup', equip: 'body',
+      tags: ['compound', 'press'], muscles: 'Shoulders, triceps, core',
+      video: 'wall handstand hold beginner tutorial',
+      setup: [
+        'Kick up into a handstand with your heels resting on a wall, hands about a hand-length from it.',
+        'Beginners: walk your feet up the wall from a plank with your back to it instead.',
+      ],
+      execution: [
+        'Push the floor away, lock the elbows, squeeze glutes and hold for the time shown (reps = seconds).',
+      ],
+      tips: [
+        'Look at the floor between your hands, not at the wall.',
+      ],
+      mistakes: [
+        'Banana back — squeeze your abs and ribs in.',
+        'Bent elbows.',
+      ],
+    },
+    {
+      id: 'sh-prone-y', name: 'Prone Y-Raise',
+      gear: 'Bodyweight (floor or bench)', icon: 'pushup', equip: 'body',
+      tags: ['isolation', 'rear'], muscles: 'Rear delts, lower traps',
+      video: 'prone Y raise bodyweight rear delt exercise tutorial',
+      setup: [
+        'Lie face down, arms stretched overhead in a Y shape, thumbs up.',
+      ],
+      execution: [
+        'Lift both arms as high as you can, squeezing your shoulder blades down and together.',
+        'Hold a second, lower slowly.',
+      ],
+      tips: [
+        'Tiny movement, huge posture payoff — hold a water bottle in each hand once it gets easy.',
+      ],
+      mistakes: [
+        'Shrugging the shoulders up to the ears.',
+        'Arching the lower back to lift higher.',
+      ],
+    },
+    {
+      id: 'sh-handstand-pushup', name: 'Wall Handstand Push-Up',
+      gear: 'Bodyweight (wall)', icon: 'pushup', equip: 'body',
+      tags: ['compound', 'press'], muscles: 'Shoulders, triceps, upper chest',
+      video: 'wall handstand push up tutorial progression',
+      setup: [
+        'Kick up into a handstand with your heels on a wall, hands a little wider than shoulders.',
+        'Not there yet? Do the pike push-up with feet on a bench instead — same pattern, less load.',
+      ],
+      execution: [
+        'Bend the elbows and lower under control until the top of your head touches the floor (or a cushion).',
+        'Press back to straight arms. Reps are low — this is your heaviest “press” without weights.',
+      ],
+      tips: [
+        'Stack a cushion or two under your head to shorten the range while you build strength.',
+      ],
+      mistakes: [
+        'Flaring the elbows straight out to the sides — keep them at about 45°.',
+        'Dropping fast onto your head — own the lowering phase.',
+      ],
+    },
+    {
+      id: 'sh-arm-circles', name: 'Arm Circles Burnout',
+      gear: 'Bodyweight (add water bottles to progress)', icon: 'pushup', equip: 'body',
+      tags: ['isolation', 'side'], muscles: 'Side delts',
+      video: 'arm circles shoulder exercise proper form',
+      setup: [
+        'Stand tall, arms straight out to the sides at shoulder height, palms down.',
+      ],
+      execution: [
+        'Draw slow, controlled circles about the size of a dinner plate — forward for the reps shown, then backward.',
+        'Keep the arms at shoulder height the whole time. Reps here = seconds per direction.',
+      ],
+      tips: [
+        'It burns because the side delts hold the arms up for the whole set — that is the point. Add 500 ml bottles when 60 s feels easy.',
+      ],
+      mistakes: [
+        'Letting the arms sink below shoulder height as they tire.',
+        'Fast, floppy circles — small and slow is harder.',
+      ],
+    },
+    {
+      id: 'sh-lateral-plank-walk', name: 'Lateral Plank Walk',
+      gear: 'Bodyweight (floor)', icon: 'pushup', equip: 'body',
+      tags: ['compound', 'side'], muscles: 'Side delts, core, chest',
+      video: 'lateral plank walk shoulder exercise',
+      setup: [
+        'Start in a straight-arm plank, hands under shoulders, feet hip-width.',
+      ],
+      execution: [
+        'Step your right hand and right foot out to the side, then follow with the left — travel sideways 4–6 “steps”.',
+        'Come back the other way. Each direction = 1 rep.',
+      ],
+      tips: [
+        'Keep the hips level and quiet — the shoulders do the walking, not the hips.',
+      ],
+      mistakes: [
+        'Sagging hips or a piked bum.',
+        'Crossing the hands over each other — step, don’t reach.',
+      ],
+    },
+    {
+      id: 'sh-wall-lateral-iso', name: 'Wall Lateral Raise Hold',
+      gear: 'Bodyweight (door frame or wall)', icon: 'pushup', equip: 'body',
+      tags: ['isolation', 'side'], muscles: 'Side delts',
+      video: 'isometric lateral raise against wall shoulder',
+      setup: [
+        'Stand side-on to a wall or in a door frame, the back of your hand and wrist pressed against it, arm straight by your side.',
+      ],
+      execution: [
+        'Push outward into the wall as if doing a lateral raise, as hard as you can — hold for the time shown (reps = seconds).',
+        'Swap sides. Then, if you can, do 2–3 slow “reps” in the open air with a bottle or bag for the pump.',
+      ],
+      tips: [
+        'Build the push up over 2–3 s and breathe — don’t hold your breath.',
+      ],
+      mistakes: [
+        'Leaning your whole body into the wall instead of pushing with the shoulder.',
+        'Shrugging up to the ear.',
+      ],
+    },
+    {
+      id: 'sh-prone-t', name: 'Prone T-Raise',
+      gear: 'Bodyweight (floor or bench)', icon: 'pushup', equip: 'body',
+      tags: ['isolation', 'rear'], muscles: 'Rear delts, mid traps',
+      video: 'prone T raise rear delt bodyweight',
+      setup: [
+        'Lie face down, arms straight out to the sides in a T, thumbs pointing up.',
+      ],
+      execution: [
+        'Squeeze the shoulder blades together and lift both arms as high as they go.',
+        'Pause a second at the top, lower slowly.',
+      ],
+      tips: [
+        'Think of pinching a pencil between your shoulder blades. Water bottles in each hand when it gets easy.',
+      ],
+      mistakes: [
+        'Lifting the chest off the floor to cheat the arms higher.',
+        'Bending the elbows.',
+      ],
+    },
   ],
 
   /* -------------------------------- BACK -------------------------------- */
@@ -646,6 +828,205 @@ const EXERCISE_DB = {
         'Standing up a little on every rep to bounce the weight.',
         'Rounding the lower back as the set gets hard.',
         'Rowing to the chest instead of the lower ribs.',
+      ],
+    },
+    {
+      id: 'bk-pullup', name: 'Pull-Up',
+      gear: 'Pull-up bar', icon: 'pullup', equip: 'body',
+      tags: ['compound', 'vertical'], muscles: 'Lats, biceps, grip',
+      video: 'pull up proper form',
+      setup: [
+        'Hang from the bar with an overhand grip just outside shoulder width, arms straight.',
+      ],
+      execution: [
+        'Pull your chest toward the bar, driving the elbows down and back, until your chin clears it.',
+        'Lower all the way to straight arms every rep.',
+      ],
+      tips: [
+        'Can’t do one yet? Jump to the top and lower yourself over 5 seconds — "negatives" build pull-ups fast.',
+      ],
+      mistakes: [
+        'Kipping or swinging.',
+        'Half reps that never reach a full hang.',
+      ],
+    },
+    {
+      id: 'bk-chinup', name: 'Chin-Up',
+      gear: 'Pull-up bar', icon: 'pullup', equip: 'body', also: ['arms'],
+      tags: ['compound', 'vertical', 'biceps'], muscles: 'Lats, biceps',
+      video: 'chin up proper form',
+      setup: [
+        'Hang from the bar with an underhand grip, hands shoulder-width apart.',
+      ],
+      execution: [
+        'Pull until your chin passes the bar, elbows finishing tight to your ribs.',
+        'Lower under control to a dead hang.',
+      ],
+      tips: [
+        'The underhand grip makes this the best bodyweight biceps exercise there is.',
+      ],
+      mistakes: [
+        'Craning the neck to get the chin over.',
+        'Dropping fast from the top.',
+      ],
+    },
+    {
+      id: 'bk-inverted-row', name: 'Inverted Row',
+      gear: 'Bar at hip height (Smith bar, rack, or sturdy table)', icon: 'pullup', equip: 'body',
+      tags: ['compound', 'horizontal'], muscles: 'Mid back, lats, biceps',
+      video: 'inverted row proper form',
+      setup: [
+        'Set a bar at hip height. Lie under it, grab it overhand, heels on the floor, body straight.',
+      ],
+      execution: [
+        'Pull your chest to the bar, squeezing the shoulder blades together.',
+        'Lower slowly to straight arms. Raise the bar to make it easier, or put your feet on a bench to make it harder.',
+      ],
+      tips: [
+        'The bodyweight answer to every row machine — and a great pull-up builder.',
+      ],
+      mistakes: [
+        'Hips sagging toward the floor.',
+        'Chin poking forward at the top.',
+      ],
+    },
+    {
+      id: 'bk-inverted-row-under', name: 'Underhand Inverted Row',
+      gear: 'Bar at hip height', icon: 'pullup', equip: 'body', also: ['arms'],
+      tags: ['compound', 'horizontal', 'biceps'], muscles: 'Lats, biceps',
+      video: 'underhand inverted row bodyweight bicep tutorial',
+      setup: [
+        'As for the inverted row, but grab the bar underhand at shoulder width.',
+      ],
+      execution: [
+        'Row your lower chest to the bar, elbows sliding along your sides.',
+        'Lower slowly, body rigid as a plank.',
+      ],
+      tips: [
+        'Underhand grip shifts more work to the biceps — the arm-day bodyweight option.',
+      ],
+      mistakes: [
+        'Bending at the hips to shorten the pull.',
+      ],
+    },
+    {
+      id: 'bk-superman', name: 'Superman Hold',
+      gear: 'Mat', icon: 'pushup', equip: 'body',
+      tags: ['isolation', 'lower'], muscles: 'Lower back, glutes',
+      video: 'superman exercise proper form back',
+      setup: [
+        'Lie face down, arms stretched out in front, legs straight.',
+      ],
+      execution: [
+        'Lift arms, chest and legs off the floor together and hold for 2 seconds.',
+        'Lower slowly. Each lift is one rep.',
+      ],
+      tips: [
+        'Look at the floor to keep your neck neutral.',
+      ],
+      mistakes: [
+        'Jerking up with momentum.',
+      ],
+    },
+    {
+      id: 'bk-db-pullover', name: 'Dumbbell Pullover',
+      gear: 'One dumbbell + bench', icon: 'dumbbell', equip: 'free',
+      tags: ['isolation', 'vertical'], muscles: 'Lats, chest',
+      video: 'dumbbell pullover proper form',
+      setup: [
+        'Lie across or along a bench, holding one dumbbell with both hands above your chest.',
+      ],
+      execution: [
+        'With a slight elbow bend, lower the dumbbell in an arc behind your head until you feel a lat stretch.',
+        'Pull it back over your chest using your lats.',
+      ],
+      tips: [
+        'Keep the ribs down — the stretch should be in the lats, not the lower back.',
+      ],
+      mistakes: [
+        'Bending the elbows into a triceps extension.',
+        'Flaring the ribs and arching the back.',
+      ],
+    },
+    {
+      id: 'bk-two-db-row', name: 'Bent-Over Two-Dumbbell Row',
+      gear: 'Dumbbells', icon: 'dumbbell', equip: 'free',
+      tags: ['compound', 'horizontal'], muscles: 'Whole back, biceps',
+      video: 'bent over two dumbbell row proper form',
+      setup: [
+        'Hinge to ~45° with a flat back, a dumbbell in each hand hanging under your shoulders.',
+      ],
+      execution: [
+        'Row both dumbbells to your hips, elbows driving back, squeeze, and lower slowly.',
+      ],
+      tips: [
+        'The free-weight stand-in for any row machine — hold the hinge for the whole set.',
+      ],
+      mistakes: [
+        'Standing up to heave the weight.',
+        'Rounding the lower back.',
+      ],
+    },
+    {
+      id: 'bk-scap-pullup', name: 'Scapular Pull-Up',
+      gear: 'Pull-up bar', icon: 'pullup', equip: 'body',
+      tags: ['isolation', 'vertical'], muscles: 'Lats, lower traps',
+      video: 'scapular pull up tutorial',
+      setup: [
+        'Hang from the bar with straight arms, shoulder-width overhand grip, body still.',
+      ],
+      execution: [
+        'Without bending the elbows, pull the shoulder blades down and back so your body rises a few centimetres.',
+        'Hold a second at the top, then let the shoulders rise slowly back to a full hang.',
+      ],
+      tips: [
+        'This is the first inch of every pull-up — master it and full pull-ups follow. Add a 3 s hold to progress.',
+      ],
+      mistakes: [
+        'Bending the elbows — the arms stay locked the whole time.',
+        'Rushing; the movement is small and should be slow.',
+      ],
+    },
+    {
+      id: 'bk-feet-elevated-row', name: 'Feet-Elevated Inverted Row',
+      gear: 'Bar at hip height + bench or box for the feet', icon: 'pullup', equip: 'body',
+      tags: ['compound', 'horizontal'], muscles: 'Lats, mid back, biceps',
+      video: 'feet elevated inverted row',
+      setup: [
+        'Set a bar at about hip height, lie under it and put your heels up on a bench so your body is horizontal.',
+        'Overhand grip just wider than shoulders, body straight from head to heels.',
+      ],
+      execution: [
+        'Pull the chest to the bar, driving the elbows back and squeezing the shoulder blades together.',
+        'Lower under control to straight arms.',
+      ],
+      tips: [
+        'Body horizontal means you are rowing most of your bodyweight — the hardest inverted row, one step from pull-ups.',
+      ],
+      mistakes: [
+        'Hips sagging toward the floor.',
+        'Half reps — chest to the bar every time.',
+      ],
+    },
+    {
+      id: 'bk-towel-door-row', name: 'Towel Door Row',
+      gear: 'Two towels (or a bedsheet) and a solid door', icon: 'pullup', equip: 'body',
+      tags: ['compound', 'horizontal'], muscles: 'Lats, mid back, biceps',
+      video: 'towel row door at home back exercise',
+      setup: [
+        'Drape two towels over the top of a door and close it so the ends hang on your side. Check the door is solid.',
+        'Grab a towel in each hand, feet by the door, and lean back until the arms are straight.',
+      ],
+      execution: [
+        'Row your chest up to your hands, elbows driving back, shoulder blades pinching.',
+        'Lower slowly. Walk the feet closer to the door to make it harder.',
+      ],
+      tips: [
+        'No bar, no problem — this is the home version of the inverted row.',
+      ],
+      mistakes: [
+        'Bending at the hips — keep a straight line from head to heels.',
+        'Yanking with the arms instead of pulling with the back.',
       ],
     },
   ],
@@ -1058,6 +1439,224 @@ const EXERCISE_DB = {
         'Leaning forward instead of sitting straight down.',
       ],
     },
+    {
+      id: 'lg-bw-squat', name: 'Bodyweight Squat',
+      gear: 'Bodyweight', icon: 'pushup', equip: 'body',
+      tags: ['compound', 'quad'], muscles: 'Quads, glutes',
+      video: 'bodyweight squat proper form',
+      setup: [
+        'Feet shoulder-width, toes slightly out, arms out in front for balance.',
+      ],
+      execution: [
+        'Sit down between your heels until thighs are at least parallel, chest up.',
+        'Stand up driving through the whole foot. Slow the lowering to 3 seconds to make it harder.',
+      ],
+      tips: [
+        'Pause at the bottom for a second — bodyweight squats get hard fast that way.',
+      ],
+      mistakes: [
+        'Heels lifting.',
+        'Knees caving inward.',
+      ],
+    },
+    {
+      id: 'lg-pistol', name: 'Assisted Pistol Squat',
+      gear: 'Bodyweight + post or door frame to hold', icon: 'pushup', equip: 'body',
+      tags: ['compound', 'quad', 'glute'], muscles: 'Quads, glutes, balance',
+      video: 'assisted pistol squat progression tutorial',
+      setup: [
+        'Hold a post lightly with both hands, stand on one leg, other leg straight out in front.',
+      ],
+      execution: [
+        'Lower on the standing leg as deep as you can, using the post only for balance.',
+        'Drive back up. All reps, then switch legs.',
+      ],
+      tips: [
+        'Squat down to a bench or box first if a full pistol is too much — that is the leg press of calisthenics.',
+      ],
+      mistakes: [
+        'Pulling yourself up with the arms.',
+        'Knee collapsing inward.',
+      ],
+    },
+    {
+      id: 'lg-reverse-lunge', name: 'Reverse Lunge',
+      gear: 'Bodyweight (add dumbbells to progress)', icon: 'pushup', equip: 'body',
+      tags: ['compound', 'quad', 'glute'], muscles: 'Quads, glutes',
+      video: 'reverse lunge proper form',
+      setup: [
+        'Stand tall, feet hip-width.',
+      ],
+      execution: [
+        'Step one foot back and lower until both knees are at 90°, front shin vertical.',
+        'Push through the front heel to return. Alternate legs; each step is one rep.',
+      ],
+      tips: [
+        'Easier on the knees than forward lunges and better for the glutes.',
+      ],
+      mistakes: [
+        'Short steps that jam the front knee forward.',
+        'Leaning forward.',
+      ],
+    },
+    {
+      id: 'lg-bw-bulgarian', name: 'Bodyweight Bulgarian Split Squat',
+      gear: 'Bodyweight + bench or chair', icon: 'pushup', equip: 'body',
+      tags: ['compound', 'quad', 'glute'], muscles: 'Quads, glutes',
+      video: 'bulgarian split squat proper form',
+      setup: [
+        'Rear foot on a bench behind you, front foot a big step forward.',
+      ],
+      execution: [
+        'Lower straight down until the front thigh is parallel, then drive up through the heel.',
+        'All reps, then switch legs.',
+      ],
+      tips: [
+        'Hardest bodyweight leg exercise there is — hold dumbbells when 15 reps gets easy.',
+      ],
+      mistakes: [
+        'Pushing off the back foot.',
+        'Front foot too close to the bench.',
+      ],
+    },
+    {
+      id: 'lg-glute-bridge', name: 'Glute Bridge',
+      gear: 'Mat (add a dumbbell across the hips to progress)', icon: 'pushup', equip: 'body',
+      tags: ['compound', 'glute', 'ham'], muscles: 'Glutes, hamstrings',
+      video: 'glute bridge proper form',
+      setup: [
+        'Lie on your back, knees bent, feet flat and close to your glutes, arms by your sides.',
+      ],
+      execution: [
+        'Drive through the heels to lift your hips until your body is straight from shoulders to knees.',
+        'Squeeze the glutes for a second at the top, lower slowly.',
+      ],
+      tips: [
+        'Tuck your chin and keep the ribs down — the lift comes from the glutes, not the lower back.',
+      ],
+      mistakes: [
+        'Overarching the back at the top.',
+        'Pushing through the toes.',
+      ],
+    },
+    {
+      id: 'lg-sl-glute-bridge', name: 'Single-Leg Glute Bridge',
+      gear: 'Mat', icon: 'pushup', equip: 'body',
+      tags: ['compound', 'glute', 'ham'], muscles: 'Glutes, hamstrings',
+      video: 'single leg glute bridge proper form',
+      setup: [
+        'Glute bridge position, then straighten one leg and hold it in line with the other thigh.',
+      ],
+      execution: [
+        'Drive the planted heel down to lift the hips, keeping them level.',
+        'Lower slowly. All reps, then switch.',
+      ],
+      tips: [
+        'Level hips are the whole game — if one side drops, slow down and shorten the range.',
+      ],
+      mistakes: [
+        'Hips rotating toward the lifted leg.',
+        'Rushing the reps.',
+      ],
+    },
+    {
+      id: 'lg-nordic', name: 'Nordic Hamstring Curl',
+      gear: 'Bodyweight + something to anchor the heels', icon: 'pushup', equip: 'body',
+      tags: ['isolation', 'ham'], muscles: 'Hamstrings',
+      video: 'nordic hamstring curl proper form beginner',
+      setup: [
+        'Kneel with your ankles anchored under a bar, bench, or a partner’s hands; body upright.',
+      ],
+      execution: [
+        'Lower your torso forward as slowly as possible, hamstrings fighting gravity, hands ready to catch you.',
+        'Push off the floor lightly to return. Reps = slow lowers.',
+      ],
+      tips: [
+        'The strongest hamstring exercise in the world needs no equipment — 3 slow reps beats 10 fast ones.',
+      ],
+      mistakes: [
+        'Bending at the hips — keep a straight line from knees to shoulders.',
+        'Dropping fast.',
+      ],
+    },
+    {
+      id: 'lg-bw-calf', name: 'Bodyweight Calf Raise',
+      gear: 'Bodyweight + step or stair', icon: 'calf', equip: 'body',
+      tags: ['isolation', 'calf'], muscles: 'Calves',
+      video: 'bodyweight calf raise proper form step',
+      setup: [
+        'Balls of your feet on the edge of a step, heels hanging off, a hand on the wall for balance.',
+      ],
+      execution: [
+        'Drop the heels into a deep stretch, then rise as high onto your toes as possible.',
+        'Do them one leg at a time to make it harder.',
+      ],
+      tips: [
+        'Pause 2 seconds at the bottom and 1 at the top — that is where the calves grow.',
+      ],
+      mistakes: [
+        'Bouncing.',
+        'Skipping the stretch at the bottom.',
+      ],
+    },
+    {
+      id: 'lg-jump-squat', name: 'Jump Squat',
+      gear: 'Bodyweight', icon: 'pushup', equip: 'body',
+      tags: ['compound', 'quad', 'finisher'], muscles: 'Quads, glutes, power',
+      video: 'jump squat proper form',
+      setup: [
+        'Feet shoulder-width, arms ready to swing.',
+      ],
+      execution: [
+        'Squat to parallel, then explode up as high as you can.',
+        'Land softly on the balls of your feet, sinking straight into the next rep.',
+      ],
+      tips: [
+        'Quiet landings — if you can hear them, absorb more with the legs.',
+      ],
+      mistakes: [
+        'Landing with straight legs.',
+        'Knees caving on landing.',
+      ],
+    },
+    {
+      id: 'lg-db-calf', name: 'Dumbbell Calf Raise',
+      gear: 'Dumbbells + step', icon: 'dumbbell', equip: 'free',
+      tags: ['isolation', 'calf'], muscles: 'Calves',
+      video: 'standing dumbbell calf raise proper form',
+      setup: [
+        'Stand with the balls of your feet on a step, a dumbbell in one hand, the other hand on the wall.',
+      ],
+      execution: [
+        'Lower the heels into a full stretch, then rise all the way onto the toes and squeeze.',
+      ],
+      tips: [
+        'One leg at a time with the dumbbell on that side is brutal and effective.',
+      ],
+      mistakes: [
+        'Short bouncy reps.',
+      ],
+    },
+    {
+      id: 'lg-sl-calf', name: 'Single-Leg Calf Raise',
+      gear: 'Bodyweight + step (hold a wall for balance)', icon: 'calf', equip: 'body',
+      tags: ['isolation', 'calf'], muscles: 'Calves',
+      video: 'single leg calf raise bodyweight',
+      setup: [
+        'Ball of one foot on the edge of a step, the other foot tucked behind, fingertips on a wall for balance.',
+      ],
+      execution: [
+        'Lower the heel below the step for a full stretch, then rise as high as you can onto the toes.',
+        'Pause at the top, 2–3 s down. Do all reps, then swap legs.',
+      ],
+      tips: [
+        'One leg doubles the load without any weight — and evens out a weaker calf.',
+      ],
+      mistakes: [
+        'Leaning on the wall instead of just balancing.',
+        'Bouncing out of the bottom.',
+      ],
+    },
   ],
 
   /* -------------------------------- CORE -------------------------------- */
@@ -1448,6 +2047,180 @@ const EXERCISE_DB = {
         'Descending past a comfortable stretch and straining the shoulder.',
       ],
     },
+    {
+      id: 'ch-decline-pushup', name: 'Decline Push-Up',
+      gear: 'Bodyweight + bench (feet elevated)', icon: 'pushup', equip: 'body',
+      tags: ['compound', 'press', 'upper'], muscles: 'Upper chest, shoulders, triceps',
+      video: 'decline push up proper form',
+      setup: [
+        'Feet on a bench or step, hands on the floor slightly wider than shoulders.',
+      ],
+      execution: [
+        'Lower your chest toward the floor with elbows at ~45°, press back to straight arms.',
+      ],
+      tips: [
+        'Feet up = the bodyweight incline press. Higher feet = harder.',
+      ],
+      mistakes: [
+        'Letting the hips sag.',
+        'Dropping the head first.',
+      ],
+    },
+    {
+      id: 'ch-diamond-pushup', name: 'Diamond Push-Up',
+      gear: 'Bodyweight (floor)', icon: 'pushup', equip: 'body', also: ['arms'],
+      tags: ['compound', 'press', 'triceps'], muscles: 'Triceps, inner chest',
+      video: 'diamond push up proper form',
+      setup: [
+        'Hands together under your chest, thumbs and index fingers forming a diamond.',
+      ],
+      execution: [
+        'Lower your chest to your hands with elbows tucked back, then press up hard.',
+      ],
+      tips: [
+        'The heaviest bodyweight triceps exercise you can do — drop to the knees if needed and keep the form.',
+      ],
+      mistakes: [
+        'Elbows flaring out.',
+        'Hands too far forward of the chest.',
+      ],
+    },
+    {
+      id: 'ch-wide-pushup', name: 'Wide Push-Up',
+      gear: 'Bodyweight (floor)', icon: 'pushup', equip: 'body',
+      tags: ['isolation', 'fly'], muscles: 'Chest (outer)',
+      video: 'wide grip push up proper form',
+      setup: [
+        'Hands about 1.5× shoulder width, fingers pointing slightly out.',
+      ],
+      execution: [
+        'Lower until your chest is a fist from the floor, feeling the chest stretch, then press up.',
+      ],
+      tips: [
+        'The bodyweight stand-in for a chest fly — wide hands, slow reps, big stretch.',
+      ],
+      mistakes: [
+        'Going so wide the shoulders take over.',
+        'Half reps.',
+      ],
+    },
+    {
+      id: 'ch-bar-dips', name: 'Parallel Bar Dips',
+      gear: 'Dip bars (or two sturdy chairs)', icon: 'dip', equip: 'body', also: ['arms'],
+      tags: ['compound', 'press', 'lower', 'triceps'], muscles: 'Lower chest, triceps',
+      video: 'parallel bar dips proper form calisthenics',
+      setup: [
+        'Support yourself on straight arms between the bars, feet crossed behind you.',
+      ],
+      execution: [
+        'Lower with a slight forward lean until your upper arms are parallel to the floor.',
+        'Press back up without locking the elbows harshly.',
+      ],
+      tips: [
+        'Lean forward for chest, stay upright for triceps.',
+      ],
+      mistakes: [
+        'Dropping too deep with cold shoulders.',
+        'Shrugging at the top.',
+      ],
+    },
+    {
+      id: 'ch-incline-pushup', name: 'Incline Push-Up',
+      gear: 'Bodyweight + bench or bar (hands elevated)', icon: 'pushup', equip: 'body',
+      tags: ['compound', 'press'], muscles: 'Chest, triceps',
+      video: 'incline push up proper form',
+      setup: [
+        'Hands on a bench, bar or step, body in a straight line from head to heels.',
+      ],
+      execution: [
+        'Lower your chest to the edge, elbows at ~45°, then press back up.',
+      ],
+      tips: [
+        'The easiest push-up variation — perfect for high-rep pump sets and beginners. Lower the surface as you get stronger.',
+      ],
+      mistakes: [
+        'Hips piking up.',
+        'Hands too far apart.',
+      ],
+    },
+    {
+      id: 'ch-floor-press', name: 'Dumbbell Floor Press',
+      gear: 'Dumbbells (no bench needed)', icon: 'dumbbell', equip: 'free',
+      tags: ['compound', 'press'], muscles: 'Chest, triceps',
+      video: 'dumbbell floor press proper form',
+      setup: [
+        'Lie on the floor, knees bent, dumbbells pressed over your chest.',
+      ],
+      execution: [
+        'Lower until your upper arms touch the floor, pause, and press back up.',
+      ],
+      tips: [
+        'No bench? This is your bench press — and it is kinder on the shoulders.',
+      ],
+      mistakes: [
+        'Bouncing the elbows off the floor.',
+      ],
+    },
+    {
+      id: 'ch-plyo-pushup', name: 'Plyo (Clap) Push-Up',
+      gear: 'Bodyweight (floor)', icon: 'pushup', equip: 'body',
+      tags: ['compound', 'press'], muscles: 'Chest, triceps, front delts',
+      video: 'plyometric clap push up tutorial',
+      setup: [
+        'Standard push-up position, hands just wider than shoulders, body rigid.',
+      ],
+      execution: [
+        'Lower with control, then drive up as explosively as you can so the hands leave the floor — clap if you can.',
+        'Land softly with slightly bent elbows and go straight into the next rep.',
+      ],
+      tips: [
+        'Not there yet? Do it from the knees, or just push hard enough to get the hands an inch off the floor.',
+      ],
+      mistakes: [
+        'Landing on locked elbows.',
+        'Hips piking or sagging on landing.',
+      ],
+    },
+    {
+      id: 'ch-archer-pushup', name: 'Archer Push-Up',
+      gear: 'Bodyweight (floor)', icon: 'pushup', equip: 'body',
+      tags: ['compound', 'press'], muscles: 'Chest, triceps (one side at a time)',
+      video: 'archer push up tutorial',
+      setup: [
+        'Hands set very wide, fingers pointing outward, body straight.',
+      ],
+      execution: [
+        'Lower toward one hand, bending that elbow while the other arm stays straight and slides out to the side.',
+        'Press back up through the working arm. Alternate sides each rep.',
+      ],
+      tips: [
+        'Halfway to a one-arm push-up — the straight arm is only there for balance, so give it as little work as you can.',
+      ],
+      mistakes: [
+        'Twisting the hips toward the working side.',
+        'Bending the “straight” arm and turning it into a wide push-up.',
+      ],
+    },
+    {
+      id: 'ch-sliding-fly', name: 'Sliding Push-Up Fly',
+      gear: 'Two towels or sliders on a smooth floor', icon: 'pushup', equip: 'body',
+      tags: ['isolation', 'fly'], muscles: 'Chest (stretch focus)',
+      video: 'slider push up fly',
+      setup: [
+        'Push-up position with a towel or slider under each hand on a smooth floor. From the knees is fine to start.',
+      ],
+      execution: [
+        'Keep the arms nearly straight and slide the hands apart, lowering the chest toward the floor.',
+        'Squeeze the chest to drag the hands back together. Small range first — it is much harder than it looks.',
+      ],
+      tips: [
+        'This is the bodyweight cable fly: the further the hands travel, the harder it is.',
+      ],
+      mistakes: [
+        'Letting the hips drop as the hands slide out.',
+        'Bending the elbows and turning it into a wide push-up.',
+      ],
+    },
   ],
 
   /* -------------------------------- ARMS -------------------------------- */
@@ -1670,6 +2443,107 @@ const EXERCISE_DB = {
       ],
     },
     {
+      id: 'ar-body-tricep-press', name: 'Bodyweight Triceps Extension',
+      gear: 'Bar at hip-to-chest height (Smith bar, rack, or a sturdy table edge)', icon: 'pushup', equip: 'body',
+      tags: ['triceps'], muscles: 'Triceps (long head)',
+      video: 'bodyweight triceps extension on bar tutorial',
+      setup: [
+        'Grip the bar shoulder-width, step back so your body is a straight line leaning into it, arms straight.',
+      ],
+      execution: [
+        'Keep the upper arms still and bend only the elbows so your head passes under the bar.',
+        'Drive with the triceps back to straight arms. Lower bar = harder.',
+      ],
+      tips: [
+        'Keep the elbows tucked in and squeeze your glutes so the body stays rigid.',
+      ],
+      mistakes: [
+        'Bending at the hips or shoulders instead of the elbows.',
+        'Letting the elbows flare out wide.',
+      ],
+    },
+    {
+      id: 'ar-triceps-dip', name: 'Triceps Dips (upright)',
+      gear: 'Dip bars (or two sturdy chairs)', icon: 'dip', equip: 'body',
+      tags: ['compound', 'triceps'], muscles: 'Triceps, front delts',
+      video: 'triceps dips proper form upright torso',
+      setup: [
+        'Support yourself on the bars with straight arms, torso upright, legs straight down or slightly bent.',
+      ],
+      execution: [
+        'Bend the elbows straight back and lower until the upper arms are about parallel to the floor.',
+        'Press back up until the elbows lock — squeeze the triceps hard at the top.',
+      ],
+      tips: [
+        'Staying upright with elbows back keeps this on the triceps; leaning forward turns it into the chest version.',
+      ],
+      mistakes: [
+        'Dropping too deep with the shoulders rolled forward.',
+        'Flaring the elbows out to the sides.',
+      ],
+    },
+    {
+      id: 'ar-negative-chinup', name: 'Negative Chin-Up',
+      gear: 'Pull-up bar + box or jump', icon: 'pullup', equip: 'body',
+      tags: ['compound', 'biceps'], muscles: 'Biceps, lats',
+      video: 'negative chin up eccentric tutorial',
+      setup: [
+        'Jump or step up so your chin is over the bar, palms facing you, shoulder-width grip.',
+      ],
+      execution: [
+        'Lower yourself as slowly as you can — aim for 4–6 seconds — until the arms are straight.',
+        'Step back up and repeat. The slow lowering is the whole exercise.',
+      ],
+      tips: [
+        'This is how you earn full chin-ups: the lowering phase builds strength fastest.',
+      ],
+      mistakes: [
+        'Dropping quickly through the bottom half — that is where it counts.',
+        'Swinging or kipping to get back up.',
+      ],
+    },
+    {
+      id: 'ar-chinup-hold', name: 'Chin-Up Hold',
+      gear: 'Pull-up bar', icon: 'pullup', equip: 'body',
+      tags: ['biceps'], muscles: 'Biceps (isometric), lats',
+      video: 'chin up isometric hold flexed arm hang',
+      setup: [
+        'Palms facing you, pull (or jump) up until your elbows are bent to about 90°.',
+      ],
+      execution: [
+        'Hold that position for the time shown (reps = seconds), elbows tight, shoulders down.',
+        'Lower slowly and rest between holds.',
+      ],
+      tips: [
+        'Three positions to rotate through: chin over bar, 90°, and just off straight — each burns differently.',
+      ],
+      mistakes: [
+        'Letting the shoulders creep up to the ears.',
+        'Holding your breath — keep breathing steadily.',
+      ],
+    },
+    {
+      id: 'ar-bw-curl', name: 'Bodyweight Curl',
+      gear: 'Low bar at hip height (Smith bar, rack, rings, or a table edge)', icon: 'pullup', equip: 'body',
+      tags: ['biceps'], muscles: 'Biceps',
+      video: 'bodyweight bicep curl on bar tutorial',
+      setup: [
+        'Lie under the bar and grab it palms facing you, shoulder-width, body straight from head to heels.',
+        'The more horizontal you are, the harder it is.',
+      ],
+      execution: [
+        'Keep the upper arms pointing at the bar and bend only the elbows, curling your forehead up to your hands.',
+        'Lower slowly to straight arms.',
+      ],
+      tips: [
+        'Unlike an inverted row, the elbows stay in front of you — that keeps it on the biceps, not the back.',
+      ],
+      mistakes: [
+        'Pulling the elbows back and rowing instead of curling.',
+        'Hips sagging.',
+      ],
+    },
+    {
       id: 'ar-concentration', name: 'Concentration Curl',
       gear: 'One dumbbell + bench', icon: 'dumbbell',
       tags: ['biceps'], muscles: 'Biceps (peak focus)',
@@ -1772,8 +2646,56 @@ const EXERCISE_DB = {
         'Going heavy and shortening the lockout.',
       ],
     },
+    {
+      id: 'ar-db-curl', name: 'Standing Dumbbell Curl',
+      gear: 'Dumbbells', icon: 'dumbbell', equip: 'free',
+      tags: ['biceps'], muscles: 'Biceps',
+      video: 'standing dumbbell bicep curl proper form',
+      setup: [
+        'Stand tall, a dumbbell in each hand, palms forward, elbows at your sides.',
+      ],
+      execution: [
+        'Curl both dumbbells to shoulder height without moving the elbows, squeeze, lower slowly.',
+      ],
+      tips: [
+        'Alternate arms if you want to go heavier with strict form.',
+      ],
+      mistakes: [
+        'Swinging the torso.',
+        'Elbows drifting forward.',
+      ],
+    },
+    {
+      id: 'ar-db-skull', name: 'Lying Dumbbell Triceps Extension',
+      gear: 'Dumbbells + bench (or floor)', icon: 'dumbbell', equip: 'free',
+      tags: ['triceps'], muscles: 'Triceps',
+      video: 'lying dumbbell triceps extension proper form',
+      setup: [
+        'Lie back holding dumbbells over your chest, palms facing each other.',
+      ],
+      execution: [
+        'Bend only the elbows to lower the dumbbells beside your ears, then extend back up.',
+      ],
+      tips: [
+        'The dumbbell skull crusher — upper arms stay vertical the whole time.',
+      ],
+      mistakes: [
+        'Upper arms drifting toward the hips.',
+        'Going too heavy and flaring the elbows.',
+      ],
+    },
   ],
 };
+
+/* Which of the three equipment profiles an exercise needs. Explicit `equip`
+ * on the exercise wins; otherwise it is inferred from the gear description. */
+function equipOf(ex) {
+  if (ex.equip) return ex.equip;
+  const g = ex.gear;
+  if (/machine|cable|smith|pulley|leverage|station|tower|stack|extension bench/i.test(g)) return 'machine';
+  if (/dumbbell|barbell|kettlebell|ez[ -]|plate/i.test(g)) return 'free';
+  return 'body';
+}
 
 /* ------------------------- machine pictograms ------------------------- */
 /* Simple line-art SVGs. Stroke colour inherits from CSS currentColor.   */

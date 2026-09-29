@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0f1318" />
   <meta name="color-scheme" content="dark" />
-  <meta name="description" content="Your weekly gym plan: Shoulders, Back, Legs, Chest and Arms — different every week." />
+  <meta name="description" content="Your weekly gym plan — different every week, with real-photo form guides. Works offline." />
   <title>Stay Strong — Gym Planner</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icons/icon-192.png" type="image/png" />
@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Stay Strong" />
-  <link rel="stylesheet" href="css/styles.css?v=18" />
+  <link rel="stylesheet" href="css/styles.css?v=19" />
 </head>
 <body>
   <header class="topbar">
@@ -24,18 +24,39 @@
     <div class="week-nav">
       <button id="prevWeek" class="week-arrow" type="button" aria-label="Previous week">‹</button>
       <div class="week-label">
-        <div id="weekTitle" class="week-title">Week 31</div>
+        <div id="weekTitle" class="week-title">Week</div>
         <div id="weekDates" class="week-dates"></div>
       </div>
       <button id="nextWeek" class="week-arrow" type="button" aria-label="Next week">›</button>
     </div>
   </header>
 
-  <section id="phaseBanner" class="phase-banner" aria-live="polite"></section>
+  <main class="main">
+    <section id="view-onboarding" class="view" hidden></section>
 
-  <nav id="dayTabs" class="day-tabs" aria-label="Training days"></nav>
+    <section id="view-workout" class="view">
+      <section id="phaseBanner" class="phase-banner" aria-live="polite"></section>
+      <nav id="dayTabs" class="day-tabs" aria-label="Training days"></nav>
+      <div id="content" class="content"></div>
+    </section>
 
-  <main id="content" class="content"></main>
+    <section id="view-history" class="view content" hidden></section>
+
+    <section id="view-settings" class="view content" hidden>
+      <div id="settingsBody"></div>
+      <h2 class="section-title">Offline &amp; videos</h2>
+      <details id="videoLibrary" class="video-library">
+        <summary>🎬 Form video library &amp; offline setup (YouTube Premium)</summary>
+        <div id="videoLibraryBody"></div>
+      </details>
+      <p id="offlineStatus" class="offline-status"></p>
+      <h2 class="section-title">About</h2>
+      <p class="about">Plans rotate automatically every week — exercises, sets, reps and weights all change.
+      Photos: free-exercise-db (public domain). Everything is stored on this phone only.</p>
+      <p id="appVersion" class="app-version"></p>
+      <button id="checkUpdate" class="update-btn" type="button">🔄 Check for updates</button>
+    </section>
+  </main>
 
   <div id="restTimer" class="rest-timer" hidden>
     <div class="rest-progress"><div id="restFill" class="rest-fill"></div></div>
@@ -54,22 +75,18 @@
     </div>
   </div>
 
-  <footer class="footer">
-    <p>Plans rotate automatically every week — exercises, sets, reps and weights all change.
-    Set your working weight on each exercise and Stay Strong will suggest loads for every phase.</p>
-    <details id="videoLibrary" class="video-library">
-      <summary>🎬 Form video library &amp; offline setup (YouTube Premium)</summary>
-      <div id="videoLibraryBody"></div>
-    </details>
-    <p id="offlineStatus" class="offline-status"></p>
-    <p id="appVersion" class="app-version"></p>
-    <button id="checkUpdate" class="update-btn" type="button">🔄 Check for updates</button>
-  </footer>
+  <div id="toast" class="toast" hidden></div>
 
-  <script src="js/exercises.js?v=18"></script>
-  <script src="js/demos.js?v=18"></script>
-  <script src="js/videos.js?v=18"></script>
-  <script src="js/app.js?v=18"></script>
+  <nav class="bottom-nav" aria-label="Sections">
+    <button class="nav-btn active" type="button" data-view="workout"><span class="nav-icon">🏋️</span>Workout</button>
+    <button class="nav-btn" type="button" data-view="history"><span class="nav-icon">📈</span>History</button>
+    <button class="nav-btn" type="button" data-view="settings"><span class="nav-icon">⚙️</span>Settings</button>
+  </nav>
+
+  <script src="js/exercises.js?v=19"></script>
+  <script src="js/demos.js?v=19"></script>
+  <script src="js/videos.js?v=19"></script>
+  <script src="js/app.js?v=19"></script>
   <script>
     // Register the offline cache, and auto-reload once a new version has
     // installed — so updates apply on the first open, no relaunch dance.

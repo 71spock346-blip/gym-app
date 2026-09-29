@@ -1,7 +1,7 @@
 {
   "name": "Stay Strong — Gym Planner",
   "short_name": "Stay Strong",
-  "description": "Your weekly gym plan: Shoulders, Back, Legs, Chest and Arms — different every week.",
+  "description": "Your weekly gym plan: Shoulders, Back, Legs, Chest and Arms — different every week. Full gym, free weights or calisthenics; works offline.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

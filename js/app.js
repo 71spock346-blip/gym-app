@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 18;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 19;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -49,18 +49,20 @@ const PHASES = [
 const GOALS = {
   build: {
     key: 'build', name: 'Build muscle', emoji: '💪',
+    short: 'Strength & size',
     desc: 'Full rests and progressive overload — maximum strength and size.',
     repsDelta: 0, restMult: 1, pctMult: 1, finisher: false,
   },
   fatloss: {
     key: 'fatloss', name: 'HIIT · Lean & toned', emoji: '🔥',
-    desc: 'Built for her: same training days as your partner, but higher reps, supersets and short rests to keep the heart rate up, core work on push and arm days, glute focus on leg day, and a HIIT finisher. No chest-building or heavy arm-isolation lifts.',
+    short: 'HIIT, core & glutes',
+    desc: 'Same training days as your partner, but higher reps, supersets and short rests to keep the heart rate up, core work on push and arm days, glute focus on leg day, and a HIIT finisher. No chest-building or heavy arm-isolation lifts.',
     repsDelta: 3, restMult: 0.6, restMin: 30, pctMult: 0.85, finisher: true, supersets: true,
     // Never scheduled in this mode (chest growth / heavy arm isolation / traps).
     avoid: [
       'ch-bench-press', 'ch-smith-flat', 'ch-smith-incline', 'ch-pec-deck', 'ch-cable-cross',
-      'ch-flat-fly', 'ch-low-cable-fly', 'ch-flat-db-press', 'ch-dips',
-      'ar-concentration', 'ar-skull', 'ar-spider-curl', 'ar-cgbp', 'ar-preacher',
+      'ch-flat-fly', 'ch-low-cable-fly', 'ch-flat-db-press', 'ch-dips', 'ch-floor-press',
+      'ar-concentration', 'ar-skull', 'ar-spider-curl', 'ar-cgbp', 'ar-preacher', 'ar-db-skull',
       'bk-shrug',
     ],
     // Guaranteed per day on top of the shared plan.
@@ -71,6 +73,16 @@ const GOALS = {
       arms: [{ tag: 'core', count: 1 }],
     },
   },
+};
+
+/* ------------------------------ equipment profiles ------------------------------ */
+const EQUIPMENT = {
+  gym:  { key: 'gym',  name: 'Full gym',      emoji: '🏢', allow: ['machine', 'free', 'body'],
+          desc: 'Machines, cables, racks and free weights — everything.' },
+  free: { key: 'free', name: 'Free weights',  emoji: '🏋️', allow: ['free', 'body'],
+          desc: 'Dumbbells, a barbell and a bench — home or garage gym.' },
+  body: { key: 'body', name: 'Calisthenics',  emoji: '🤸', allow: ['body'],
+          desc: 'Bodyweight only — a pull-up bar and a bench or box.' },
 };
 
 function dayName(day) { return currentGoal().supersets && day.hiitName ? day.hiitName : day.name; }
@@ -108,9 +120,12 @@ const HIIT_FINISHERS = [
 ];
 
 function currentGoal() { return GOALS[state.goal] || GOALS.build; }
+function currentEquip() { return EQUIPMENT[state.equip] || EQUIPMENT.gym; }
+function allowed(ex) { return currentEquip().allow.includes(equipOf(ex)); }
 
 const KG_PER_LB = 0.45359237;
 const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 // A Monday long before any user data, so week indices are stable positive ints.
 const WEEK_EPOCH = Date.UTC(2001, 0, 1);
 
@@ -130,23 +145,38 @@ const store = {
 };
 
 const state = {
+  view: 'workout',                                 // 'workout' | 'history' | 'settings'
   weekOffset: 0,                                   // 0 = current week
   selectedDay: defaultDayIndex(),
   unit: store.read('unit', 'kg'),                  // 'kg' | 'lb'
-  goal: store.read('goal', null),                  // 'build' | 'fatloss' | null = ask
-  baselines: store.read('baselines', {}),          // { exId: { w: kg, c: cycleWhenSet } }
+  goal: store.read('goal', null),                  // 'build' | 'fatloss'
+  equip: store.read('equip', 'gym'),               // 'gym' | 'free' | 'body'
+  profile: store.read('profile', null),            // { name, onboarded }
+  baselines: store.read('baselines', {}),          // { exId: { w: kg, c: cycleWhenSet, plates } }
   done: store.read('done', {}),                    // { 'YYYY-MM-DD': { exId: completedSets } }
+  sessions: store.read('sessions', {}),            // { 'YYYY-MM-DD': { day, name, sets, total, completed, ex } }
+  prs: store.read('prs', []),                      // [{ id, name, w, plates, date }]
+  ob: { goal: 'build', equip: 'gym' },             // onboarding choices in progress
 };
+// Phones that picked a goal before onboarding existed skip straight in.
+if (!state.profile && state.goal) { state.profile = { name: '', onboarded: true }; store.write('profile', state.profile); }
 
 /* ------------------------------ date helpers ------------------------------ */
 function startOfWeekUTC(date) {
   const d = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
   const dow = (new Date(d).getUTCDay() + 6) % 7;   // Mon=0 … Sun=6
-  return d - dow * 24 * 60 * 60 * 1000;
+  return d - dow * MS_PER_DAY;
 }
 
 function currentWeekIndex() {
   return Math.floor((startOfWeekUTC(new Date()) - WEEK_EPOCH) / MS_PER_WEEK);
+}
+
+function weekIndexOfISO(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  const utc = Date.UTC(y, m - 1, d);
+  const dow = (new Date(utc).getUTCDay() + 6) % 7;
+  return Math.floor((utc - dow * MS_PER_DAY - WEEK_EPOCH) / MS_PER_WEEK);
 }
 
 function displayedWeekIndex() { return currentWeekIndex() + state.weekOffset; }
@@ -163,8 +193,13 @@ function isoWeekNumber(date) {
 }
 
 function dayDateISO(dayIdx) {
-  const d = new Date(displayedWeekMonday().getTime() + dayIdx * 24 * 60 * 60 * 1000);
+  const d = new Date(displayedWeekMonday().getTime() + dayIdx * MS_PER_DAY);
   return d.toISOString().slice(0, 10);
+}
+
+function todayISO() {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
 }
 
 function defaultDayIndex() {
@@ -204,7 +239,7 @@ function cycleForWeek(weekIdx) { return Math.floor(weekIdx / 4); }
  *  - WEEK FLAVOUR: strength weeks prefer big compound lifts, volume weeks
  *    prefer isolation/cable pump work — each type of week feels different.
  * Selection never depends on the device's goal, so two people training
- * together still see the same exercises. */
+ * together (with the same equipment) still see the same exercises. */
 const ANTI_REPEAT_ANCHOR = Math.floor((Date.UTC(2026, 0, 5) - WEEK_EPOCH) / MS_PER_WEEK);
 
 function pickExercises(day, weekIdx, dayIdx) {
@@ -225,16 +260,32 @@ function pickExercises(day, weekIdx, dayIdx) {
  * the same day's pool — with last week's substitutions sent to the back of
  * the queue so they rotate too. Everything not touched stays identical to the
  * partner's plan, so most of the session is still shared. */
+/* The exercises a training day can draw from: its own pool, plus moves from
+ * other pools that list it under `also` (e.g. chin-ups and dips double as arm
+ * work). Borrowed moves come after the day's own, so they only get picked when
+ * the native pool runs short — which is exactly the calisthenics case. */
+function dayPool(dayKey) {
+  const own = EXERCISE_DB[dayKey] || [];
+  const borrowed = Object.entries(EXERCISE_DB)
+    .filter(([k]) => k !== dayKey)
+    .flatMap(([, list]) => list.filter((ex) => ex.also && ex.also.includes(dayKey)));
+  return own.concat(borrowed);
+}
+function isBorrowed(ex, dayKey) { return !!(ex.also && ex.also.includes(dayKey)); }
+
 function applyGoal(picks, day, weekIdx, dayIdx, prevMine) {
   const goal = currentGoal();
   if (!goal.avoid) return picks;
   const avoid = new Set(goal.avoid);
   const rng = mulberry32(weekIdx * 4241 + dayIdx * 613 + 7);
-  const pool = seededShuffle(EXERCISE_DB[day.key].concat(EXERCISE_DB.core), rng)
+  const pool = seededShuffle(dayPool(day.key).concat(EXERCISE_DB.core), rng)
     .map((ex, i) => ({ ex, i }))
-    .sort((a, b) => (prevMine.has(a.ex.id) - prevMine.has(b.ex.id)) || (a.i - b.i))
+    .sort((a, b) =>
+      (prevMine.has(a.ex.id) - prevMine.has(b.ex.id)) ||
+      (isBorrowed(a.ex, day.key) - isBorrowed(b.ex, day.key)) ||
+      (a.i - b.i))
     .map((o) => o.ex)
-    .filter((ex) => !avoid.has(ex.id));
+    .filter((ex) => !avoid.has(ex.id) && allowed(ex));
   const out = picks.filter((ex) => !avoid.has(ex.id));
   const taken = new Set(out.map((ex) => ex.id));
   const has = (ex, tag) => ex.tags.includes(tag);
@@ -260,7 +311,9 @@ function applyGoal(picks, day, weekIdx, dayIdx, prevMine) {
     for (let i = out.length - 1; i >= 0 && idx < 0; i--) if (removable(i)) idx = i;
     out.splice(idx < 0 ? out.length - 1 : idx, 1);
   }
-  out.sort((a, b) => (has(a, 'core') - has(b, 'core')) || (has(b, 'compound') - has(a, 'compound')));
+  // Same ordering as the shared plan: compounds first, finishers late, core last.
+  out.sort((a, b) => (has(a, 'core') - has(b, 'core')) || (has(a, 'finisher') - has(b, 'finisher')) ||
+    (has(b, 'compound') - has(a, 'compound')));
   return out;
 }
 
@@ -272,13 +325,15 @@ function pickWeek(day, weekIdx, dayIdx, prevIds) {
     if (phase.key === 'volume') return ex.tags.includes('compound') ? 1 : 0;
     return 0;
   };
-  const pool = seededShuffle(EXERCISE_DB[day.key], rng)
+  const pool = seededShuffle(dayPool(day.key), rng)
     .map((ex, i) => ({ ex, i }))
     .sort((a, b) =>
       (prevIds.has(a.ex.id) - prevIds.has(b.ex.id)) ||
+      (isBorrowed(a.ex, day.key) - isBorrowed(b.ex, day.key)) ||
       (flavour(a.ex) - flavour(b.ex)) ||
       (a.i - b.i))
-    .map((o) => o.ex);
+    .map((o) => o.ex)
+    .filter(allowed);
 
   const chosen = [];
   const taken = new Set();
@@ -337,9 +392,11 @@ function hashId(id) {
  * sharing a specific tag (quad, press, biceps, …) that aren't already in
  * today's plan; deterministic per week so it doesn't jump around. */
 const GENERIC_TAGS = new Set(['compound', 'isolation', 'finisher']);
+function specificTags(ex) { return ex.tags.filter((t) => !GENERIC_TAGS.has(t)); }
+
 function swapSuggestion(ex, dayKey, chosenIds, weekIdx) {
-  const pool = ex.tags.includes('core') ? EXERCISE_DB.core : EXERCISE_DB[dayKey];
-  const specific = ex.tags.filter((t) => !GENERIC_TAGS.has(t));
+  const pool = (ex.tags.includes('core') ? EXERCISE_DB.core : dayPool(dayKey)).filter(allowed);
+  const specific = specificTags(ex);
   const rank = (e) => {
     if (e.id === ex.id) return -1;
     const shared = e.tags.some((t) => specific.includes(t));
@@ -351,6 +408,18 @@ function swapSuggestion(ex, dayKey, chosenIds, weekIdx) {
   const top = candidates.filter((e) => rank(e) === rank(candidates[0]));
   const rng = mulberry32(weekIdx * 52711 + hashId(ex.id));
   return top[Math.floor(rng() * top.length)];
+}
+
+/* The same movement for another equipment profile ("no machine? do this"). */
+function altForEquip(ex, dayKey, equipKey, weekIdx) {
+  const pool = ex.tags.includes('core') ? EXERCISE_DB.core : dayPool(dayKey);
+  const specific = specificTags(ex);
+  const avoid = new Set(currentGoal().avoid || []);
+  const c = pool.filter((e) => e.id !== ex.id && equipOf(e) === equipKey && !avoid.has(e.id) &&
+    e.tags.some((t) => specific.includes(t)));
+  if (!c.length) return null;
+  const rng = mulberry32(weekIdx * 7331 + hashId(ex.id) + equipKey.length);
+  return c[Math.floor(rng() * c.length)];
 }
 
 /* Exact video per exercise (deep link → plays from YouTube app downloads
@@ -399,7 +468,9 @@ function parseWeightInput(text) {
   return state.unit === 'lb' ? n * KG_PER_LB : n;
 }
 
-/* ------------------------------ set tracking ------------------------------ */
+/* ------------------------------ set tracking & sessions ------------------------------ */
+let currentPlan = null;   // { dateISO, dayIdx, exercises, schemes, sets: { exId: n } }
+
 function doneCount(dateISO, exId) {
   return (state.done[dateISO] && state.done[dateISO][exId]) || 0;
 }
@@ -409,6 +480,7 @@ function setDoneCount(dateISO, exId, count) {
   state.done[dateISO][exId] = count;
   pruneDone();
   store.write('done', state.done);
+  logSession(dateISO);
 }
 
 function pruneDone() {
@@ -416,19 +488,79 @@ function pruneDone() {
   while (keys.length > 60) delete state.done[keys.shift()];
 }
 
+/* Keep a compact record of every session touched, for History. */
+function logSession(dateISO) {
+  if (!currentPlan || currentPlan.dateISO !== dateISO) return;
+  const day = DAYS[currentPlan.dayIdx];
+  const total = Object.values(currentPlan.sets).reduce((a, b) => a + b, 0);
+  const sets = currentPlan.exercises.reduce((n, ex) => n + Math.min(doneCount(dateISO, ex.id), currentPlan.sets[ex.id]), 0);
+  if (sets === 0) { delete state.sessions[dateISO]; }
+  else {
+    state.sessions[dateISO] = {
+      day: day.key, name: dayName(day), emoji: day.emoji, sets, total,
+      completed: total > 0 && sets >= total,
+      ex: currentPlan.exercises.map((ex) => ex.name),
+    };
+  }
+  const keys = Object.keys(state.sessions).sort();
+  while (keys.length > 200) delete state.sessions[keys.shift()];
+  store.write('sessions', state.sessions);
+}
+
+function sessionsInWeek(weekIdx) {
+  return Object.keys(state.sessions).filter((d) => weekIndexOfISO(d) === weekIdx).length;
+}
+
+/* Consecutive weeks (ending now, or last week if this week hasn't started)
+ * with at least two sessions each. */
+function weekStreak() {
+  let w = currentWeekIndex();
+  if (sessionsInWeek(w) < 2) w--;
+  let streak = 0;
+  while (sessionsInWeek(w) >= 2) { streak++; w--; }
+  return streak;
+}
+
+function recordPR(ex, value, plates) {
+  state.prs.unshift({ id: ex.id, name: ex.name, w: value, plates, date: todayISO() });
+  state.prs = state.prs.slice(0, 100);
+  store.write('prs', state.prs);
+  const shown = plates ? formatPlates(value) : formatWeight(value);
+  showToast(`🏆 New personal best — ${shown} on ${ex.name}!`);
+}
+
+function findExercise(id) {
+  for (const list of Object.values(EXERCISE_DB)) {
+    const hit = list.find((ex) => ex.id === id);
+    if (hit) return hit;
+  }
+  return null;
+}
+
 /* ------------------------------ rendering ------------------------------ */
 const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 function render() {
+  const onboarded = state.profile && state.profile.onboarded;
+  document.body.classList.toggle('onboarding', !onboarded);
+  document.body.classList.toggle('view-workout', onboarded && state.view === 'workout');
+  for (const v of ['onboarding', 'workout', 'history', 'settings']) {
+    const el = $('#view-' + v);
+    el.hidden = onboarded ? v !== state.view : v !== 'onboarding';
+  }
+  document.querySelectorAll('.nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.view === state.view));
   renderHeader();
-  renderPhaseBanner();
-  renderTabs();
-  renderDay();
+  if (!onboarded) { renderOnboarding(); return; }
+  if (state.view === 'workout') { renderPhaseBanner(); renderTabs(); renderDay(); }
+  else if (state.view === 'history') renderHistory();
+  else renderSettings();
 }
 
 function renderHeader() {
   const monday = displayedWeekMonday();
-  const friday = new Date(monday.getTime() + 4 * 24 * 60 * 60 * 1000);
+  const friday = new Date(monday.getTime() + 4 * MS_PER_DAY);
   const fmt = (d) => d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', timeZone: 'UTC' });
   const offsetNote = state.weekOffset === 0 ? '' :
     state.weekOffset > 0 ? ` · in ${state.weekOffset} wk` : ` · ${-state.weekOffset} wk ago`;
@@ -438,6 +570,51 @@ function renderHeader() {
   $('#appVersion').textContent = `Stay Strong v${APP_VERSION}`;
 }
 
+/* ------------------------------ onboarding ------------------------------ */
+function choiceCards(cls, options, selectedKey, dataKey) {
+  return options.map((o) => `
+    <button class="choice ${cls} ${o.key === selectedKey ? 'active' : ''}" type="button" data-${dataKey}="${o.key}">
+      <span class="choice-emoji">${o.emoji}</span>
+      <span class="choice-text"><strong>${o.name}</strong><small>${o.short || o.desc}</small></span>
+    </button>`).join('');
+}
+
+function renderOnboarding() {
+  $('#view-onboarding').innerHTML = `
+    <div class="ob">
+      <div class="ob-hero">
+        <img class="ob-logo" src="icons/icon-192.png" alt="" />
+        <h1>Stay Strong</h1>
+        <p>A plan that changes every week, real-photo form guides, a rest timer that chimes —
+        and it all works with no signal.</p>
+      </div>
+      <label class="ob-field">What should we call you?
+        <input id="obName" type="text" maxlength="24" placeholder="Your first name" autocomplete="given-name" value="${esc(state.ob.name || '')}" />
+      </label>
+      <h3 class="ob-h">Your goal</h3>
+      <div class="choice-grid">${choiceCards('ob-goal', Object.values(GOALS), state.ob.goal, 'goal')}</div>
+      <h3 class="ob-h">Your equipment</h3>
+      <div class="choice-grid">${choiceCards('ob-equip', Object.values(EQUIPMENT), state.ob.equip, 'equip')}</div>
+      <button id="obStart" class="primary-btn" type="button">Let's go 💪</button>
+      <p class="ob-note">Training with a partner? Each phone keeps its own goal and equipment — you'll still get the same
+      muscle group on the same day.</p>
+    </div>`;
+}
+
+function finishOnboarding() {
+  const name = ($('#obName').value || '').trim();
+  state.profile = { name, onboarded: true };
+  state.goal = state.ob.goal;
+  state.equip = state.ob.equip;
+  store.write('profile', state.profile);
+  store.write('goal', state.goal);
+  store.write('equip', state.equip);
+  state.view = 'workout';
+  render();
+  showToast(name ? `Welcome, ${name} — let's build. 💪` : 'Welcome — let’s build. 💪');
+}
+
+/* ------------------------------ workout view ------------------------------ */
 function renderPhaseBanner() {
   const phase = phaseForWeek(displayedWeekIndex());
   const goal = currentGoal();
@@ -452,11 +629,16 @@ function renderPhaseBanner() {
 }
 
 function renderTabs() {
-  const tabs = DAYS.map((day, i) => `
-    <button class="day-tab ${i === state.selectedDay ? 'active' : ''}" data-day="${i}" type="button">
-      <span class="day-tab-dow">${day.label}</span>
+  const tabs = DAYS.map((day, i) => {
+    const iso = dayDateISO(i);
+    const s = state.sessions[iso];
+    const mark = s ? (s.completed ? '✓' : '·') : '';
+    return `
+    <button class="day-tab ${i === state.selectedDay ? 'active' : ''} ${s && s.completed ? 'done' : ''}" data-day="${i}" type="button">
+      <span class="day-tab-dow">${day.label} <span class="day-tab-mark">${mark}</span></span>
       <span class="day-tab-name">${day.emoji} ${dayName(day)}</span>
-    </button>`).join('');
+    </button>`;
+  }).join('');
   $('#dayTabs').innerHTML = tabs;
 }
 
@@ -467,9 +649,7 @@ function renderDay() {
   const day = DAYS[dayIdx];
   const exercises = pickExercises(day, weekIdx, dayIdx);
   const dateISO = dayDateISO(dayIdx);
-  const todayISO = new Date().toISOString().slice(0, 10);
-
-  const isToday = dateISO === todayISO;
+  const isToday = dateISO === todayISO();
   const dow = (new Date().getDay() + 6) % 7;
   const weekendNote = (state.weekOffset === 0 && dow > 4)
     ? `<div class="note-card">😴 It’s the weekend — rest up! Here’s Monday’s ${dayName(day)} session.</div>` : '';
@@ -482,27 +662,20 @@ function renderDay() {
     <div class="note-card hiit-note">🔗 <strong>Supersets:</strong> exercises marked A, B, C are pairs —
       do both back to back with no rest, then rest once. Keeps the heart rate up and the session short.</div>` : '';
 
-  const chosenIds = new Set(exercises.map((ex) => ex.id));
-  const cards = exercises.map((ex, i) => exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLabel(i))).join('');
+  const schemes = exercises.map((ex, i) => schemeFor(ex, phase, weekIdx, i));
+  currentPlan = { dateISO, dayIdx, exercises, schemes, isToday, sets: Object.fromEntries(exercises.map((ex, i) => [ex.id, schemes[i].sets])) };
 
-  // Until this phone has explicitly picked a goal, show a one-time pointer
-  // to the switch — that's all the setup a second person needs.
-  const goalHint = state.goal === null ? `
-    <div class="note-card goal-hint">👋 Training as a pair? This phone is set to
-      <strong>💪 Build muscle</strong>. Tap the pill at the top to switch to
-      <strong>🔥 HIIT · Lean &amp; toned</strong> — same training days, her own programme.
-      Each phone keeps its own choice.
-      <button id="goalHintDismiss" class="hint-dismiss" type="button">Got it 👍</button>
-    </div>` : '';
+  const chosenIds = new Set(exercises.map((ex) => ex.id));
+  const cards = exercises.map((ex, i) => exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLabel(i), schemes[i])).join('');
+
+  const equipNote = currentEquip().key !== 'gym' ? `
+    <div class="note-card equip-note">${currentEquip().emoji} <strong>${currentEquip().name} mode</strong> —
+      every exercise below needs only ${currentEquip().key === 'body' ? 'your bodyweight' : 'free weights'}. Change it in Settings.</div>` : '';
 
   $('#content').innerHTML = `
-    ${goalHint}
+    ${heroCard(day, exercises, schemes, dateISO, isToday)}
     ${weekendNote}
-    <div class="day-heading">
-      <h2>${day.emoji} ${dayName(day)}</h2>
-      <span class="day-date ${isToday ? 'today' : ''}">${isToday ? 'Today' : new Date(dateISO + 'T00:00:00Z')
-        .toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC' })}</span>
-    </div>
+    ${equipNote}
     <div class="warmup-card">
       <strong>🔥 Warm-up first</strong>
       <ol class="warmup-list">${day.warmup.map((s) => `<li>${s}</li>`).join('')}</ol>
@@ -510,6 +683,62 @@ function renderDay() {
     ${hiitNote}
     ${cards}
     ${finisherCard(weekIdx, dayIdx, phase)}`;
+}
+
+/* After a set is ticked: update bubbles, card state, hero and tabs in place —
+ * no full re-render, so an open how-to guide stays open and the page doesn't jump. */
+function refreshProgress() {
+  if (!currentPlan) return;
+  const { dateISO, dayIdx, exercises, schemes, isToday } = currentPlan;
+  $$('.exercise-card[data-ex]').forEach((card) => {
+    const id = card.dataset.ex;
+    const sets = currentPlan.sets[id] || 0;
+    const done = doneCount(dateISO, id);
+    card.classList.toggle('card-done', sets > 0 && done >= sets);
+    card.querySelectorAll('.set-bubble').forEach((b, i) => b.classList.toggle('done', i < done));
+  });
+  const hero = $('.hero');
+  if (hero) hero.outerHTML = heroCard(DAYS[dayIdx], exercises, schemes, dateISO, isToday);
+  renderTabs();
+}
+
+/* The big card at the top of the workout: greeting, progress ring, streak. */
+function heroCard(day, exercises, schemes, dateISO, isToday) {
+  const total = schemes.reduce((n, s) => n + s.sets, 0);
+  const done = exercises.reduce((n, ex, i) => n + Math.min(doneCount(dateISO, ex.id), schemes[i].sets), 0);
+  const pct = total ? Math.round((100 * done) / total) : 0;
+  const complete = total > 0 && done >= total;
+  const name = state.profile && state.profile.name;
+  const dateText = new Date(dateISO + 'T00:00:00Z').toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const greeting = isToday
+    ? `${name ? `Hey, ${esc(name)} 👋` : 'Today’s session'}`
+    : dateText;
+  const streak = weekStreak();
+  const thisWeek = sessionsInWeek(currentWeekIndex());
+  const r = 26, c = 2 * Math.PI * r;
+  const burst = complete ? `<div class="burst" aria-hidden="true">${'🎉💪⭐🔥✨🏆'.split('').map((e, i) => `<span style="--i:${i}">${e}</span>`).join('')}</div>` : '';
+  return `
+  <section class="hero ${complete ? 'complete' : ''}">
+    ${burst}
+    <div class="hero-main">
+      <div class="hero-text">
+        <div class="hero-greeting">${greeting}</div>
+        <div class="hero-title">${day.emoji} ${dayName(day)}</div>
+        <div class="hero-sub">${complete ? 'Session complete — great work! 🎉' :
+          done ? `${done} of ${total} sets done — keep going` : `${exercises.length} exercises · ${total} sets`}</div>
+      </div>
+      <div class="ring" role="img" aria-label="${pct}% of sets done">
+        <svg viewBox="0 0 64 64"><circle class="ring-bg" cx="32" cy="32" r="${r}"/>
+          <circle class="ring-fg" cx="32" cy="32" r="${r}" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - pct / 100)}"/></svg>
+        <div class="ring-label">${complete ? '✓' : pct + '%'}</div>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <span>🔥 ${streak} wk streak</span>
+      <span>📅 ${thisWeek}/5 this week</span>
+      <span>🏆 ${state.prs.length} PR${state.prs.length === 1 ? '' : 's'}</span>
+    </div>
+  </section>`;
 }
 
 /* The lean-and-toned goal ends every session with a rotating HIIT finisher
@@ -541,8 +770,7 @@ function finisherCard(weekIdx, dayIdx, phase) {
   </article>`;
 }
 
-function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLabel) {
-  const scheme = schemeFor(ex, phase, weekIdx, i);
+function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLabel, scheme) {
   const suggested = suggestedWeightKg(ex, scheme, weekIdx);
   const base = state.baselines[ex.id];
   // Plate mode: for stacks with unmarked plates, the number IS the plate count.
@@ -552,7 +780,8 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
     ? (plates ? base.w : state.unit === 'lb' ? Math.round(base.w / KG_PER_LB) : Math.round(base.w * 10) / 10)
     : '';
   const completed = doneCount(dateISO, ex.id);
-  const isBodyweight = /bodyweight/i.test(ex.gear);
+  const isBodyweight = equipOf(ex) === 'body';
+  const equipTag = { machine: '🏢 machine', free: '🏋️ free weights', body: '🤸 bodyweight' }[equipOf(ex)];
 
   const bubbles = Array.from({ length: scheme.sets }, (_, s) => `
     <button class="set-bubble ${s < completed ? 'done' : ''}" type="button"
@@ -575,7 +804,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
       </div>`;
 
   return `
-  <article class="exercise-card">
+  <article class="exercise-card ${completed >= scheme.sets ? 'card-done' : ''}" data-ex="${ex.id}">
     <div class="exercise-top">
       <div class="exercise-icon">${ICONS[ex.icon] || ICONS.dumbbell}</div>
       <div class="exercise-info">
@@ -583,6 +812,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
         <div class="exercise-meta">
           <span class="chip chip-gear">${ex.gear}</span>
           <span class="chip chip-muscle">${ex.muscles}</span>
+          <span class="chip chip-equip">${equipTag}</span>
           <a class="chip chip-video" href="${videoUrl(ex)}" target="_blank" rel="noopener">▶ Video</a>
           ${supersetLabel ? `<span class="chip chip-superset">🔗 Superset ${supersetLabel}</span>` : ''}
         </div>
@@ -596,7 +826,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
     ${weightBlock}
     <div class="sets-row">${bubbles}</div>
     <details class="howto">
-      <summary>📖 How to use this machine</summary>
+      <summary>📖 How to do it</summary>
       <div class="howto-body">
         ${photoDemo(ex)}
         <div class="video-box">
@@ -615,6 +845,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
         ${ex.mistakes ? `<h4>Common mistakes</h4>
         <ul class="mistakes">${ex.mistakes.map((s) => `<li>${s}</li>`).join('')}</ul>` : ''}
         ${swapLine(ex, day, chosenIds, weekIdx)}
+        ${altLines(ex, day, weekIdx)}
       </div>
     </details>
   </article>`;
@@ -639,6 +870,101 @@ function swapLine(ex, day, chosenIds, weekIdx) {
   const alt = swapSuggestion(ex, day.key, chosenIds, weekIdx);
   if (!alt) return '';
   return `<div class="swap-line">🔄 <strong>Machine busy?</strong> Swap for: ${alt.name} (${alt.gear.toLowerCase()})</div>`;
+}
+
+/* "No machine? do this" — the same movement with other equipment. */
+function altLines(ex, day, weekIdx) {
+  const mine = equipOf(ex);
+  const lines = [];
+  if (mine === 'machine') {
+    const f = altForEquip(ex, day.key, 'free', weekIdx);
+    if (f) lines.push(`🏋️ <strong>No machine?</strong> Free weights: ${f.name}`);
+  }
+  if (mine !== 'body') {
+    const b = altForEquip(ex, day.key, 'body', weekIdx);
+    if (b) lines.push(`🤸 <strong>No equipment?</strong> Bodyweight: ${b.name}`);
+  }
+  return lines.length ? `<div class="alt-lines">${lines.map((l) => `<div>${l}</div>`).join('')}</div>` : '';
+}
+
+/* ------------------------------ history view ------------------------------ */
+function renderHistory() {
+  const sessions = Object.entries(state.sessions).sort((a, b) => (a[0] < b[0] ? 1 : -1));
+  const completed = sessions.filter(([, s]) => s.completed).length;
+  const totalSets = sessions.reduce((n, [, s]) => n + s.sets, 0);
+  const streak = weekStreak();
+
+  // The last four weeks, Monday to Sunday, ending with this week.
+  const today = todayISO();
+  const cells = [];
+  const thisMonday = WEEK_EPOCH + currentWeekIndex() * MS_PER_WEEK;
+  for (let w = 3; w >= 0; w--) {
+    for (let d = 0; d < 7; d++) {
+      const date = new Date(thisMonday - w * MS_PER_WEEK + d * MS_PER_DAY);
+      const iso = date.toISOString().slice(0, 10);
+      const s = state.sessions[iso];
+      const cls = s ? (s.completed ? 'full' : 'part') : (iso > today ? 'future' : '');
+      cells.push(`<div class="cal-cell ${cls} ${iso === today ? 'today' : ''}" title="${iso}${s ? ` · ${s.name} ${s.sets}/${s.total}` : ''}"><span>${date.getUTCDate()}</span></div>`);
+    }
+  }
+  const calHead = ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d) => `<div class="cal-head">${d}</div>`).join('');
+
+  const list = sessions.slice(0, 40).map(([iso, s]) => `
+    <div class="hist-row ${s.completed ? 'full' : ''}">
+      <div class="hist-date">${new Date(iso + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}</div>
+      <div class="hist-main"><strong>${s.emoji} ${s.name}</strong><small>${s.ex.slice(0, 4).join(' · ')}${s.ex.length > 4 ? ' …' : ''}</small></div>
+      <div class="hist-sets">${s.completed ? '✓' : ''} ${s.sets}/${s.total}</div>
+    </div>`).join('');
+
+  const prs = state.prs.slice(0, 12).map((p) => `
+    <div class="pr-row"><span>🏆 ${p.name}</span><strong>${p.plates ? formatPlates(p.w) : formatWeight(p.w)}</strong>
+      <small>${new Date(p.date + 'T00:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</small></div>`).join('');
+
+  $('#view-history').innerHTML = `
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-num">${streak}</div><div class="stat-label">week streak 🔥</div></div>
+      <div class="stat"><div class="stat-num">${completed}</div><div class="stat-label">sessions completed</div></div>
+      <div class="stat"><div class="stat-num">${totalSets}</div><div class="stat-label">sets logged</div></div>
+      <div class="stat"><div class="stat-num">${state.prs.length}</div><div class="stat-label">personal bests</div></div>
+    </div>
+    <h2 class="section-title">Last 4 weeks</h2>
+    <div class="cal">${calHead}${cells.join('')}</div>
+    <p class="cal-key"><span class="key full"></span> completed <span class="key part"></span> partial</p>
+    <h2 class="section-title">Personal bests</h2>
+    ${prs || '<p class="empty">Raise a saved weight on any exercise and it lands here.</p>'}
+    <h2 class="section-title">Sessions</h2>
+    ${list || '<p class="empty">Tick off your first set and your history starts here.</p>'}`;
+}
+
+/* ------------------------------ settings view ------------------------------ */
+function renderSettings() {
+  const name = (state.profile && state.profile.name) || '';
+  $('#settingsBody').innerHTML = `
+    <h2 class="section-title">Profile</h2>
+    <label class="ob-field">Name
+      <input id="setName" type="text" maxlength="24" placeholder="Your first name" value="${esc(name)}" />
+    </label>
+    <h2 class="section-title">Goal</h2>
+    <div class="choice-grid">${choiceCards('set-goal', Object.values(GOALS), currentGoal().key, 'goal')}</div>
+    <p class="hint">${currentGoal().desc}</p>
+    <h2 class="section-title">Equipment</h2>
+    <div class="choice-grid">${choiceCards('set-equip', Object.values(EQUIPMENT), currentEquip().key, 'equip')}</div>
+    <p class="hint">${currentEquip().desc} Every day's plan is rebuilt from exercises that fit.</p>
+    <h2 class="section-title">Units</h2>
+    <div class="choice-grid two">
+      <button class="choice set-unit ${state.unit === 'kg' ? 'active' : ''}" type="button" data-unit="kg"><span class="choice-emoji">⚖️</span><span class="choice-text"><strong>Kilograms</strong><small>kg, 2.5 kg steps</small></span></button>
+      <button class="choice set-unit ${state.unit === 'lb' ? 'active' : ''}" type="button" data-unit="lb"><span class="choice-emoji">⚖️</span><span class="choice-text"><strong>Pounds</strong><small>lb, 5 lb steps</small></span></button>
+    </div>`;
+}
+
+/* ------------------------------ toast ------------------------------ */
+let toastTimer = null;
+function showToast(msg) {
+  const el = $('#toast');
+  el.textContent = msg;
+  el.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.hidden = true; }, 3500);
 }
 
 /* ------------------------------ rest timer ------------------------------ */
@@ -754,14 +1080,26 @@ $('#restPlus').addEventListener('click', () => {
 
 /* ------------------------------ events ------------------------------ */
 document.addEventListener('click', (e) => {
+  const nav = e.target.closest('.nav-btn');
+  if (nav) { state.view = nav.dataset.view; render(); window.scrollTo(0, 0); return; }
+
+  // onboarding
+  const obGoal = e.target.closest('.ob-goal');
+  if (obGoal) { state.ob.goal = obGoal.dataset.goal; state.ob.name = $('#obName').value; renderOnboarding(); return; }
+  const obEquip = e.target.closest('.ob-equip');
+  if (obEquip) { state.ob.equip = obEquip.dataset.equip; state.ob.name = $('#obName').value; renderOnboarding(); return; }
+  if (e.target.closest('#obStart')) { finishOnboarding(); return; }
+
+  // settings
+  const setGoal = e.target.closest('.set-goal');
+  if (setGoal) { state.goal = setGoal.dataset.goal; store.write('goal', state.goal); render(); return; }
+  const setEquip = e.target.closest('.set-equip');
+  if (setEquip) { state.equip = setEquip.dataset.equip; store.write('equip', state.equip); render(); return; }
+  const setUnit = e.target.closest('.set-unit');
+  if (setUnit) { state.unit = setUnit.dataset.unit; store.write('unit', state.unit); render(); return; }
+
   if (e.target.closest('#goalPill')) {
     state.goal = currentGoal().key === 'build' ? 'fatloss' : 'build';
-    store.write('goal', state.goal);
-    render();
-    return;
-  }
-  if (e.target.closest('#goalHintDismiss')) {
-    state.goal = 'build';        // explicit choice = hint never comes back
     store.write('goal', state.goal);
     render();
     return;
@@ -796,22 +1134,32 @@ document.addEventListener('click', (e) => {
     if (completing) {
       ensureAudio();   // user tap = the moment we're allowed to unlock sound
       const restSec = Number(bubble.dataset.rest) || 60;
-      const exercise = EXERCISE_DB[DAYS[state.selectedDay].key].find((x) => x.id === ex);
+      const exercise = findExercise(ex);
       startRestTimer(restSec, `Rest — ${exercise ? exercise.name : 'set'} · set ${setNum} done`);
     }
-    renderDay();
+    refreshProgress();
   }
 });
 
 document.addEventListener('change', (e) => {
+  const nameInput = e.target.closest('#setName');
+  if (nameInput) {
+    state.profile = { ...(state.profile || {}), name: nameInput.value.trim(), onboarded: true };
+    store.write('profile', state.profile);
+    showToast('Saved 👍');
+    return;
+  }
   const input = e.target.closest('.weight-input');
   if (!input) return;
   const exId = input.dataset.ex;
-  const plates = !!(state.baselines[exId] && state.baselines[exId].plates);
+  const prev = state.baselines[exId];
+  const plates = !!(prev && prev.plates);
   const raw = parseFloat(String(input.value).replace(',', '.'));
   const value = plates ? (isFinite(raw) && raw > 0 ? raw : null) : parseWeightInput(input.value);
   if (value) {
     state.baselines[exId] = { w: value, c: cycleForWeek(currentWeekIndex()), plates };
+    // Beating a previously saved weight is a personal best.
+    if (prev && prev.w && value > prev.w) { const ex = findExercise(exId); if (ex) recordPR(ex, value, plates); }
   } else if (plates) {
     state.baselines[exId] = { w: null, plates: true };   // keep the mode, drop the number
   } else {
@@ -819,6 +1167,10 @@ document.addEventListener('change', (e) => {
   }
   store.write('baselines', state.baselines);
   renderDay();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.id === 'obName') finishOnboarding();
 });
 
 $('#prevWeek').addEventListener('click', () => { state.weekOffset--; render(); });
@@ -839,7 +1191,7 @@ function renderVideoLibrary() {
   if (!el) return;
   const groups = DAYS.concat([{ key: 'core', label: 'Core', name: 'Core moves (HIIT mode)', emoji: '🧘' }]);
   const days = groups.map((day) => {
-    const items = EXERCISE_DB[day.key].filter((ex) => FORM_VIDEOS[ex.id]);
+    const items = (day.key === 'core' ? EXERCISE_DB.core : dayPool(day.key)).filter((ex) => FORM_VIDEOS[ex.id]);
     const ids = items.map((ex) => FORM_VIDEOS[ex.id].id);
     return `
       <div class="vl-day">
