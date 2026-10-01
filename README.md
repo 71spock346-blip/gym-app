@@ -90,6 +90,13 @@ remembered if you close the app mid-session.
   start/finish photographs of the movement (cross-fading; tap to see them side by
   side), set-up steps, execution steps, form tips, and common mistakes. The photos
   are bundled with the app, so they work with no signal — basement gyms included.
+- **Animated demos.** Exercises listed in `js/anims.js` show a looping clip
+  (`img/anim/<id>.webm` + `.mp4`, poster `.jpg`) in place of the photos, with the
+  working muscle highlighted in gold. Clips play while the guide is open, pause on
+  tap, are saved for offline use with the photos, and the service worker answers
+  the byte-range requests video players make, so they play offline on iPhone too.
+  `tools/mannequin_curl.py` renders the mannequin-style clips headless in Blender;
+  `tools/encode_anim.sh` encodes any source clip to the right formats.
 - **Form videos for learning at home (YouTube Premium for offline).** Every
   exercise's Video button deep-links to one curated form video (many from
   NASM's technique series). They're meant for learning the move before a

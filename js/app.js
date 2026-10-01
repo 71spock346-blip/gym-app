@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 24;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 25;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -877,7 +877,22 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
 /* Real start/finish photographs (public domain, bundled with the app so they
  * work with no signal). The two frames cross-fade to show the movement;
  * tap to hold them side by side. */
+/* Animated loop where one exists (img/anim), otherwise real start/finish
+ * photographs (public domain, bundled so they work with no signal). The two
+ * photo frames cross-fade to show the movement; tap to hold them side by side.
+ * Clips don't autoplay: the guide's toggle handler starts them when opened. */
 function photoDemo(ex) {
+  const anim = (typeof DEMO_ANIMS !== 'undefined') && DEMO_ANIMS[ex.id];
+  if (anim) return `
+    <div class="anim-demo" data-ex="${ex.id}">
+      <video class="anim-video" muted loop playsinline preload="metadata" poster="img/anim/${ex.id}.jpg"
+        aria-label="${ex.name} — animated demonstration">
+        <source src="img/anim/${ex.id}.webm" type="video/webm" />
+        <source src="img/anim/${ex.id}.mp4" type="video/mp4" />
+      </video>
+      <span class="anim-tag">${ico('play')} ${anim.muscle || ex.muscles} working</span>
+      <span class="photo-hint">${ico('camera')} Works offline · tap to pause</span>
+    </div>`;
   if (!DEMO_PHOTOS[ex.id]) return '';
   return `
     <div class="photo-demo" data-ex="${ex.id}">
@@ -1177,6 +1192,11 @@ document.addEventListener('click', (e) => {
     renderTabs(); renderDay();
     return;
   }
+  const vid = e.target.closest('video.anim-video');
+  if (vid) {
+    if (vid.paused) { const p = vid.play(); if (p && p.catch) p.catch(() => {}); } else vid.pause();
+    return;
+  }
   const bubble = e.target.closest('.set-bubble');
   if (bubble) {
     const { ex, set, date } = bubble.dataset;
@@ -1194,6 +1214,16 @@ document.addEventListener('click', (e) => {
     refreshProgress();
   }
 });
+
+/* Animated demos play only while their guide is open (battery), and a tap pauses/resumes. */
+document.addEventListener('toggle', (e) => {
+  const guide = e.target.closest && e.target.closest('.howto');
+  if (!guide) return;
+  guide.querySelectorAll('video.anim-video').forEach((v) => {
+    if (guide.open) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
+    else v.pause();
+  });
+}, true);
 
 document.addEventListener('change', (e) => {
   const nameInput = e.target.closest('#setName');
@@ -1281,7 +1311,8 @@ async function prefetchPhotos() {
   if (!('caches' in window) || !navigator.onLine) return;
   try {
     const cache = await caches.open(PHOTO_CACHE);
-    const wanted = Object.keys(DEMO_PHOTOS).flatMap((id) => [`img/demo/${id}-0.jpg`, `img/demo/${id}-1.jpg`]);
+    const wanted = Object.keys(DEMO_PHOTOS).flatMap((id) => [`img/demo/${id}-0.jpg`, `img/demo/${id}-1.jpg`])
+      .concat(Object.keys(DEMO_ANIMS).flatMap((id) => [`img/anim/${id}.jpg`, `img/anim/${id}.webm`, `img/anim/${id}.mp4`]));
     const have = new Set((await cache.keys()).map((req) => new URL(req.url).pathname));
     const base = new URL('.', location.href).pathname;
     const missing = wanted.filter((p) => !have.has(base + p));
@@ -1290,8 +1321,8 @@ async function prefetchPhotos() {
     const show = () => {
       status.classList.toggle('done', done === total);
       status.innerHTML = ico('camera') + (done === total
-        ? ' All demo photos saved — the app works fully offline ✓'
-        : ` Saving demo photos for offline use… ${done}/${total}`);
+        ? ' All demo photos and clips saved — the app works fully offline ✓'
+        : ` Saving demo photos and clips for offline use… ${done}/${total}`);
     };
     show();
     const queue = missing.slice();
@@ -1302,7 +1333,7 @@ async function prefetchPhotos() {
       }
     };
     await Promise.all([worker(), worker(), worker()]);
-    if (done < total) status.innerHTML = ico('camera') + ` ${done}/${total} demo photos saved — reopen with signal to finish`;
+    if (done < total) status.innerHTML = ico('camera') + ` ${done}/${total} demo files saved — reopen with signal to finish`;
   } catch { /* storage unavailable (private mode) — photos still load live */ }
 }
 
