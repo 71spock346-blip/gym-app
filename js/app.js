@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 25;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 26;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -885,10 +885,10 @@ function photoDemo(ex) {
   const anim = (typeof DEMO_ANIMS !== 'undefined') && DEMO_ANIMS[ex.id];
   if (anim) return `
     <div class="anim-demo" data-ex="${ex.id}">
-      <video class="anim-video" muted loop playsinline preload="metadata" poster="img/anim/${ex.id}.jpg"
+      <video class="anim-video" muted loop playsinline preload="metadata" poster="${animUrl(ex.id, 'jpg')}"
         aria-label="${ex.name} — animated demonstration">
-        <source src="img/anim/${ex.id}.webm" type="video/webm" />
-        <source src="img/anim/${ex.id}.mp4" type="video/mp4" />
+        <source src="${animUrl(ex.id, 'webm')}" type="video/webm" />
+        <source src="${animUrl(ex.id, 'mp4')}" type="video/mp4" />
       </video>
       <span class="anim-tag">${ico('play')} ${anim.muscle || ex.muscles} working</span>
       <span class="photo-hint">${ico('camera')} Works offline · tap to pause</span>
@@ -1312,9 +1312,13 @@ async function prefetchPhotos() {
   try {
     const cache = await caches.open(PHOTO_CACHE);
     const wanted = Object.keys(DEMO_PHOTOS).flatMap((id) => [`img/demo/${id}-0.jpg`, `img/demo/${id}-1.jpg`])
-      .concat(Object.keys(DEMO_ANIMS).flatMap((id) => [`img/anim/${id}.jpg`, `img/anim/${id}.webm`, `img/anim/${id}.mp4`]));
-    const have = new Set((await cache.keys()).map((req) => new URL(req.url).pathname));
+      .concat(Object.keys(DEMO_ANIMS).flatMap((id) => ['jpg', 'webm', 'mp4'].map((ext) => animUrl(id, ext))));
     const base = new URL('.', location.href).pathname;
+    const keys = await cache.keys();
+    const have = new Set(keys.map((req) => req.url.slice(new URL(req.url).origin.length)));
+    const wantedSet = new Set(wanted.map((p) => base + p));
+    // old revisions of re-rendered clips are no longer wanted: drop them
+    await Promise.all(keys.filter((req) => req.url.includes('/img/anim/') && !wantedSet.has(req.url.slice(new URL(req.url).origin.length))).map((req) => cache.delete(req)));
     const missing = wanted.filter((p) => !have.has(base + p));
     let done = wanted.length - missing.length;
     const total = wanted.length;

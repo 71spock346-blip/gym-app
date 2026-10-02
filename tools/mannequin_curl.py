@@ -145,7 +145,7 @@ def dumbbell(s):
     bpy.context.view_layer.objects.active = h; bpy.ops.object.join()
     db = bpy.context.object; db.name = f'dumbbell{s}'
     hx, hy, hz = BONES[f'hand{s}'][1]
-    attach(db, f'hand{s}', Matrix.Translation((hx, hy - 0.02, hz + 0.04)))
+    attach(db, f'hand{s}', Matrix.Translation((hx, hy - 0.02, hz + 0.04)) @ Matrix.Rotation(math.radians(90), 4, 'Y'))   # handle left-right, plates facing out
 for s in 'LR': dumbbell(s)
 
 # ------------------------------------------------------------------ animation: curl (elbow flexion 12° -> 135° -> 12°)
