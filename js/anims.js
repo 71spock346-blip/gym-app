@@ -8,7 +8,7 @@
  * phone by URL, and the revision is part of the URL. */
 
 const DEMO_ANIMS = {
-  'ar-db-curl': { muscle: 'Biceps', source: 'mannequin', rev: 2 },
+  'ar-db-curl': { muscle: 'Biceps', source: 'mannequin', rev: 3 },
 };
 
 function animUrl(id, ext) {
