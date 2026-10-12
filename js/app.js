@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 28;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 29;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -64,6 +64,7 @@ const GOALS = {
       'ch-flat-fly', 'ch-low-cable-fly', 'ch-flat-db-press', 'ch-dips', 'ch-floor-press',
       'ar-concentration', 'ar-skull', 'ar-spider-curl', 'ar-cgbp', 'ar-preacher', 'ar-db-skull',
       'bk-shrug',
+      'ch-incline-bb', 'ch-decline-db', 'ch-incline-fly', 'ch-incline-machine', 'ch-cable-press', 'ch-squeeze-press', 'ar-decline-skull', 'ar-db-preacher',
     ],
     // Guaranteed per day on top of the shared plan.
     extraSlots: {
@@ -265,16 +266,23 @@ function cycleForWeek(weekIdx) { return Math.floor(weekIdx / 4); }
 const ANTI_REPEAT_ANCHOR = Math.floor((Date.UTC(2026, 0, 5) - WEEK_EPOCH) / MS_PER_WEEK);
 
 function pickExercises(day, weekIdx, dayIdx) {
-  let prevIds = new Set();      // last week's shared plan
-  let prevMine = new Set();     // last week's goal-adjusted plan
+  const lastUsed = {};   // exercise id -> last week it was in the shared plan
+  const lastMine = {};   // same for the goal-adjusted plan
   let mine = null;
   for (let w = Math.min(weekIdx, ANTI_REPEAT_ANCHOR); w <= weekIdx; w++) {
-    const picks = pickWeek(day, w, dayIdx, prevIds);
-    prevIds = new Set(picks.map((ex) => ex.id));
-    mine = applyGoal(picks, day, w, dayIdx, prevMine);
-    prevMine = new Set(mine.map((ex) => ex.id));
+    const picks = pickWeek(day, w, dayIdx, lastUsed);
+    picks.forEach((ex) => { lastUsed[ex.id] = w; });
+    mine = applyGoal(picks, day, w, dayIdx, lastMine);
+    mine.forEach((ex) => { lastMine[ex.id] = w; });
   }
   return mine;
+}
+
+/* How long ago an exercise was last scheduled, capped at 3: anything unused
+ * for three weeks or more counts the same, so the weekly flavour (compounds
+ * on strength weeks, pump work on volume weeks) still decides among them. */
+function staleness(lastWeek, weekIdx, id) {
+  return Math.min(3, weekIdx - (id in lastWeek ? lastWeek[id] : -99));
 }
 
 /* Goal-specific adjustments on top of the shared plan: drop anything the
@@ -295,7 +303,7 @@ function dayPool(dayKey) {
 }
 function isBorrowed(ex, dayKey) { return !!(ex.also && ex.also.includes(dayKey)); }
 
-function applyGoal(picks, day, weekIdx, dayIdx, prevMine) {
+function applyGoal(picks, day, weekIdx, dayIdx, lastMine) {
   const goal = currentGoal();
   if (!goal.avoid) return picks;
   const avoid = new Set(goal.avoid);
@@ -303,7 +311,7 @@ function applyGoal(picks, day, weekIdx, dayIdx, prevMine) {
   const pool = seededShuffle(dayPool(day.key).concat(EXERCISE_DB.core), rng)
     .map((ex, i) => ({ ex, i }))
     .sort((a, b) =>
-      (prevMine.has(a.ex.id) - prevMine.has(b.ex.id)) ||
+      (staleness(lastMine, weekIdx, b.ex.id) - staleness(lastMine, weekIdx, a.ex.id)) ||
       (isBorrowed(a.ex, day.key) - isBorrowed(b.ex, day.key)) ||
       (a.i - b.i))
     .map((o) => o.ex)
@@ -347,7 +355,7 @@ function applyGoal(picks, day, weekIdx, dayIdx, prevMine) {
   return out;
 }
 
-function pickWeek(day, weekIdx, dayIdx, prevIds) {
+function pickWeek(day, weekIdx, dayIdx, lastUsed) {
   const rng = mulberry32(weekIdx * 7919 + dayIdx * 104729 + 17);
   const phase = phaseForWeek(weekIdx);
   // With weights available, loaded exercises come before bodyweight ones.
@@ -360,7 +368,7 @@ function pickWeek(day, weekIdx, dayIdx, prevIds) {
   const sorted = seededShuffle(dayPool(day.key), rng)
     .map((ex, i) => ({ ex, i }))
     .sort((a, b) =>
-      (prevIds.has(a.ex.id) - prevIds.has(b.ex.id)) ||
+      (staleness(lastUsed, weekIdx, b.ex.id) - staleness(lastUsed, weekIdx, a.ex.id)) ||
       (isBorrowed(a.ex, day.key) - isBorrowed(b.ex, day.key)) ||
       (loadedLast(a.ex) - loadedLast(b.ex)) ||
       (flavour(a.ex) - flavour(b.ex)) ||

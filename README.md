@@ -63,11 +63,11 @@ remembered if you close the app mid-session.
 ## What it does
 
 - **A different plan every week.** Each calendar week gets its own combination of
-  exercises, drawn from a pool of **115+ movements** (machine, free-weight and
+  exercises, drawn from a pool of **160+ movements** (machine, free-weight and
   bodyweight). Selection rules keep every session balanced.
-- **Anti-repeat rotation.** Exercises used last week go to the back of the queue,
-  so consecutive weeks genuinely rotate through the pool instead of re-picking
-  favourites. Strength weeks also lean into big compound lifts while volume weeks
+- **Anti-repeat rotation.** The planner remembers when each exercise was last
+  scheduled and prefers anything unused for three weeks or more, so a move never
+  comes back within two weeks and each day cycles through most of its pool. Strength weeks also lean into big compound lifts while volume weeks
   favour cable/isolation pump work, so each type of week feels different.
 - **Reps and sets rotate through a 4-week training cycle:**
   1. **Hypertrophy** — 3–4 sets × 8–12 reps, moderate weight
@@ -146,7 +146,7 @@ python3 -m http.server 8000
 ```
 index.html            app shell (onboarding, workout, history, settings views)
 css/styles.css        mobile-first dark theme (black / charcoal / gold, from the icon)
-js/exercises.js       exercise database (115+ exercises with guides) + SVG pictograms
+js/exercises.js       exercise database (160+ exercises with guides) + SVG pictograms
 js/videos.js          curated YouTube form video per exercise
 js/icons.js           monoline UI icon set
 js/demos.js           generated manifest of bundled demo photos

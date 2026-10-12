@@ -544,6 +544,206 @@ const EXERCISE_DB = {
         'Bending the elbows.',
       ],
     },
+    {
+      id: 'sh-seated-db-press', name: 'Seated Dumbbell Shoulder Press',
+      gear: 'Dumbbells + upright bench', icon: 'dumbbell', equip: 'free',
+      tags: ['compound', 'press'], muscles: 'Shoulders, triceps',
+      video: 'seated dumbbell shoulder press proper form',
+      setup: [
+        'Set the bench just short of vertical. Sit back with the dumbbells at shoulder height, palms forward, elbows under the wrists.',
+      ],
+      execution: [
+        'Press both dumbbells up and slightly in until the arms are straight, without clanking them together.',
+        'Lower under control until the dumbbells are level with your ears.',
+      ],
+      tips: [
+        'The back support lets you go heavier than standing — this is your main strength press on shoulder day.',
+      ],
+      mistakes: [
+        'Lifting the hips off the seat to heave the weight.',
+        'Stopping the lowering phase at the top of the head.',
+      ],
+    },
+    {
+      id: 'sh-push-press', name: 'Barbell Push Press',
+      gear: 'Barbell + rack', icon: 'barbell', equip: 'free',
+      tags: ['compound', 'press'], muscles: 'Shoulders, triceps, legs',
+      video: 'barbell push press how to proper form',
+      setup: [
+        'Unrack the bar on the front of your shoulders, grip just outside shoulder width, elbows slightly in front of the bar.',
+        'Feet hip-width, core braced.',
+      ],
+      execution: [
+        'Dip a few centimetres by bending the knees, keeping the torso upright, then drive up hard through the legs.',
+        'Use that momentum to press the bar overhead to lockout, head through at the top. Lower to the shoulders and reset.',
+      ],
+      tips: [
+        'The leg drive lets you handle more than a strict press — great for strength weeks.',
+      ],
+      mistakes: [
+        'Dipping forward instead of straight down.',
+        'Pressing before the legs have finished driving.',
+      ],
+    },
+    {
+      id: 'sh-landmine-press', name: 'Landmine Press',
+      gear: 'Barbell in a landmine (or wedged in a corner)', icon: 'barbell', equip: 'free',
+      tags: ['compound', 'press'], muscles: 'Front delts, upper chest, triceps',
+      video: 'landmine press shoulders how to',
+      setup: [
+        'Stand facing the bar end with it held in one hand at the shoulder, feet staggered, core tight.',
+      ],
+      execution: [
+        'Press the bar up and forward along its arc until the arm is straight, letting the torso lean in slightly.',
+        'Lower it back to the shoulder under control. Do all reps, then swap hands.',
+      ],
+      tips: [
+        'The angled path is easy on cranky shoulders — a good press when overhead feels tight.',
+      ],
+      mistakes: [
+        'Arching the lower back at the top.',
+        'Letting the bar drift away from the shoulder at the bottom.',
+      ],
+    },
+    {
+      id: 'sh-cable-front-raise', name: 'Cable Front Raise',
+      gear: 'Cable tower, straight bar or handle on the low pulley', icon: 'cable', equip: 'machine',
+      tags: ['isolation', 'front'], muscles: 'Front delts',
+      video: 'cable front raise proper form',
+      setup: [
+        'Stand facing away from the low pulley with the cable running between your legs, bar held at thigh height, arms straight.',
+      ],
+      execution: [
+        'Raise the bar in front of you to eye level with a slight elbow bend, pause, and lower slowly.',
+      ],
+      tips: [
+        'Constant cable tension keeps the delts working at the bottom where dumbbells go slack.',
+      ],
+      mistakes: [
+        'Swinging the torso back to start the rep.',
+        'Raising above eye level — the traps take over.',
+      ],
+    },
+    {
+      id: 'sh-db-upright-row', name: 'Dumbbell Upright Row',
+      gear: 'Dumbbells', icon: 'dumbbell', equip: 'free',
+      tags: ['compound', 'side'], muscles: 'Side delts, upper traps',
+      video: 'dumbbell upright row proper form',
+      setup: [
+        'Stand tall with a dumbbell in each hand in front of the thighs, hands about shoulder-width apart.',
+      ],
+      execution: [
+        'Lead with the elbows and pull the dumbbells up along the body until the elbows reach shoulder height.',
+        'Pause, then lower under control.',
+      ],
+      tips: [
+        'Dumbbells let the hands drift wider than a bar, which is kinder to the shoulders. Keep the elbows above the wrists.',
+      ],
+      mistakes: [
+        'Pulling the hands higher than the elbows.',
+        'Shrugging the shoulders up to the ears at the top.',
+      ],
+    },
+    {
+      id: 'sh-cable-upright-row', name: 'Cable Upright Row',
+      gear: 'Cable tower, rope or wide bar on the low pulley', icon: 'cable', equip: 'machine',
+      tags: ['compound', 'side'], muscles: 'Side delts, upper traps',
+      video: 'cable upright row how to',
+      setup: [
+        'Stand facing the low pulley holding the rope with both hands, arms straight, a small step back for tension.',
+      ],
+      execution: [
+        'Pull the rope up along the body, elbows wide and high, until the hands reach the upper chest.',
+        'Lower slowly to straight arms.',
+      ],
+      tips: [
+        'The rope lets your hands spread at the top, which keeps the move in the side delts rather than the wrists.',
+      ],
+      mistakes: [
+        'Leaning back and turning it into a row.',
+        'Rushing the lowering phase.',
+      ],
+    },
+    {
+      id: 'sh-seated-lat-raise', name: 'Seated Dumbbell Lateral Raise',
+      gear: 'Dumbbells + bench', icon: 'dumbbell', equip: 'free',
+      tags: ['isolation', 'side'], muscles: 'Side delts',
+      video: 'seated dumbbell lateral raise proper form',
+      setup: [
+        'Sit on the end of a bench, dumbbells hanging at your sides, torso leaning a touch forward.',
+      ],
+      execution: [
+        'Raise both arms out to the sides to shoulder height, elbows slightly bent, little fingers leading.',
+        'Hold a second, then lower slowly.',
+      ],
+      tips: [
+        'Sitting removes the leg drive, so the weight is honest — expect to use less than standing.',
+      ],
+      mistakes: [
+        'Rocking the torso to swing the weight.',
+        'Raising above shoulder height.',
+      ],
+    },
+    {
+      id: 'sh-incline-lat-raise', name: 'Incline One-Arm Lateral Raise',
+      gear: 'One dumbbell + incline bench', icon: 'dumbbell', equip: 'free',
+      tags: ['isolation', 'side'], muscles: 'Side delts (full stretch)',
+      video: 'incline one arm lateral raise dumbbell how to',
+      setup: [
+        'Set a bench to about 45° and lie on your side against it, top arm hanging straight down with the dumbbell across the body.',
+      ],
+      execution: [
+        'Raise the arm out and up until it is just past parallel to the floor, pause, and lower all the way back across the body.',
+        'Do all reps, then turn over for the other side.',
+      ],
+      tips: [
+        'The lean puts tension on the delt from the very bottom of the movement — a stretch a standing raise never gives.',
+      ],
+      mistakes: [
+        'Letting the elbow bend as you tire.',
+        'Rolling the shoulder forward on the way up.',
+      ],
+    },
+    {
+      id: 'sh-lying-rear-raise', name: 'Incline Bench Rear Delt Raise',
+      gear: 'Dumbbells + incline bench', icon: 'dumbbell', equip: 'free',
+      tags: ['isolation', 'rear'], muscles: 'Rear delts, mid traps',
+      video: 'incline bench rear delt raise lying dumbbell how to',
+      setup: [
+        'Set a bench to a low incline and lie chest-down on it, dumbbells hanging straight below the shoulders.',
+      ],
+      execution: [
+        'Raise both arms out to the sides, elbows slightly bent, until they reach shoulder height.',
+        'Squeeze the shoulder blades a second, then lower slowly.',
+      ],
+      tips: [
+        'The bench takes the lower back out of it, so there is no cheating — go light and feel the rear delts.',
+      ],
+      mistakes: [
+        'Lifting the chest off the pad to swing.',
+        'Pulling the elbows back like a row instead of out to the sides.',
+      ],
+    },
+    {
+      id: 'sh-rear-delt-row', name: 'Dumbbell Rear Delt Row',
+      gear: 'Dumbbells', icon: 'dumbbell', equip: 'free',
+      tags: ['compound', 'rear'], muscles: 'Rear delts, upper back',
+      video: 'dumbbell rear delt row how to',
+      setup: [
+        'Hinge forward at the hips until the torso is just above horizontal, dumbbells hanging below the shoulders, back flat.',
+      ],
+      execution: [
+        'Row the dumbbells up and out with the elbows wide, pointing to the sides, until the upper arms are level with the torso.',
+        'Pause, then lower under control.',
+      ],
+      tips: [
+        'Elbows wide is the whole difference from a normal row — wide elbows hit the rear delts, tucked elbows hit the lats.',
+      ],
+      mistakes: [
+        'Standing up as you row.',
+        'Letting the elbows drift in toward the ribs.',
+      ],
+    },
   ],
 
   /* -------------------------------- BACK -------------------------------- */
@@ -1027,6 +1227,147 @@ const EXERCISE_DB = {
       mistakes: [
         'Bending at the hips — keep a straight line from head to heels.',
         'Yanking with the arms instead of pulling with the back.',
+      ],
+    },
+    {
+      id: 'bk-neutral-pulldown', name: 'Neutral-Grip Lat Pulldown',
+      gear: 'Lat pulldown machine, V-handle or parallel-grip bar', icon: 'latPulldown', equip: 'machine',
+      tags: ['compound', 'vertical'], muscles: 'Lats, mid back, biceps',
+      video: 'neutral grip lat pulldown how to proper form',
+      setup: [
+        'Attach the parallel-grip handle. Sit with the thighs locked under the pads and grab it with palms facing each other.',
+      ],
+      execution: [
+        'Lean back slightly, then pull the elbows down and back until the handle reaches the upper chest.',
+        'Return slowly until the arms are straight and you feel the lats stretch.',
+      ],
+      tips: [
+        'The neutral grip is the friendliest on the shoulders and lets most people pull the heaviest.',
+      ],
+      mistakes: [
+        'Rocking the torso back and forth to move the weight.',
+        'Not going all the way up between reps.',
+      ],
+    },
+    {
+      id: 'bk-underhand-pulldown', name: 'Underhand Lat Pulldown',
+      gear: 'Lat pulldown machine, straight bar', icon: 'latPulldown', equip: 'machine',
+      tags: ['compound', 'vertical', 'biceps'], muscles: 'Lower lats, biceps',
+      video: 'underhand lat pulldown proper form',
+      setup: [
+        'Grip the bar shoulder-width with palms facing you, thighs under the pads, chest up.',
+      ],
+      execution: [
+        'Pull the bar to the top of the chest, driving the elbows down and back behind you.',
+        'Lower under control to straight arms.',
+      ],
+      tips: [
+        'The underhand grip brings the biceps in and lets the elbows travel further back — great for lower lats.',
+      ],
+      mistakes: [
+        'Pulling with the arms and leaving the shoulder blades up.',
+        'Leaning back past about 20°.',
+      ],
+    },
+    {
+      id: 'bk-single-arm-pulldown', name: 'Single-Arm Cable Pulldown',
+      gear: 'Cable tower, single handle on the high pulley', icon: 'cable', equip: 'machine',
+      tags: ['compound', 'vertical'], muscles: 'Lats (one side at a time)',
+      video: 'single arm cable lat pulldown how to',
+      setup: [
+        'Kneel or sit side-on to a high pulley with one handle, arm straight overhead, the other hand on your hip.',
+      ],
+      execution: [
+        'Pull the elbow down and in toward the hip, finishing with the hand beside the shoulder.',
+        'Let the arm return slowly to full stretch. Do all reps, then swap sides.',
+      ],
+      tips: [
+        'Working one side at a time shows up the weaker lat — start with it.',
+      ],
+      mistakes: [
+        'Twisting the torso to help the pull.',
+        'Short, choppy reps without the stretch at the top.',
+      ],
+    },
+    {
+      id: 'bk-smith-row', name: 'Smith Machine Bent-Over Row',
+      gear: 'Smith machine', icon: 'smith', equip: 'machine',
+      tags: ['compound', 'horizontal'], muscles: 'Lats, mid back, rear delts',
+      video: 'smith machine bent over row proper form',
+      setup: [
+        'Set the bar at knee height. Stand with shins close to it, hinge forward until the torso is about 45°, overhand grip just outside the knees.',
+      ],
+      execution: [
+        'Row the bar to the lower ribs, elbows driving back, squeezing the shoulder blades.',
+        'Lower until the arms are straight without letting the torso rise.',
+      ],
+      tips: [
+        'The fixed path means no balancing — you can focus on the squeeze and load it hard.',
+      ],
+      mistakes: [
+        'Standing up a little on every rep.',
+        'Rounding the lower back.',
+      ],
+    },
+    {
+      id: 'bk-chest-db-row', name: 'Chest-Supported Dumbbell Row',
+      gear: 'Dumbbells + incline bench', icon: 'dumbbell', equip: 'free',
+      tags: ['compound', 'horizontal'], muscles: 'Mid back, lats, rear delts',
+      video: 'chest supported dumbbell row incline bench how to',
+      setup: [
+        'Set a bench to 30–45° and lie chest-down with a dumbbell in each hand hanging straight down, feet planted.',
+      ],
+      execution: [
+        'Row both dumbbells to the hips, elbows close to the body, until the shoulder blades pinch.',
+        'Lower slowly to full stretch at the bottom.',
+      ],
+      tips: [
+        'With the chest on the pad there is nothing to cheat with — pure back.',
+      ],
+      mistakes: [
+        'Lifting the chest off the pad.',
+        'Flaring the elbows wide, which turns it into a rear-delt move.',
+      ],
+    },
+    {
+      id: 'bk-rack-pull', name: 'Rack Pull',
+      gear: 'Barbell in a rack, pins just below the knees', icon: 'barbell', equip: 'free',
+      tags: ['compound'], muscles: 'Upper back, traps, glutes, hamstrings',
+      video: 'rack pull proper form how to',
+      setup: [
+        'Set the safety pins just below knee height with the bar on them. Stand with shins touching the bar, overhand grip just outside the legs.',
+      ],
+      execution: [
+        'Brace, then stand up with the bar, keeping it against the thighs, and finish tall with the shoulders pulled back.',
+        'Lower it back to the pins under control and reset before the next rep.',
+      ],
+      tips: [
+        'A short, heavy pull that builds the whole upper back — use straps if grip gives out first.',
+      ],
+      mistakes: [
+        'Leaning back and hyperextending at the top.',
+        'Bouncing the bar off the pins.',
+      ],
+    },
+    {
+      id: 'bk-deadlift', name: 'Barbell Deadlift',
+      gear: 'Barbell + plates', icon: 'barbell', equip: 'free',
+      tags: ['compound'], muscles: 'Whole back, glutes, hamstrings',
+      video: 'conventional barbell deadlift proper form beginner',
+      setup: [
+        'Feet hip-width with the bar over the middle of the feet. Hinge down, grip just outside the legs, shins touching the bar, chest up, back flat.',
+      ],
+      execution: [
+        'Push the floor away and stand up, keeping the bar against the legs the whole way, finishing tall with the glutes squeezed.',
+        'Hinge back down under control until the plates touch the floor.',
+      ],
+      tips: [
+        'Brace hard before every rep — big breath into the belly, then pull. Take plenty of rest between sets.',
+      ],
+      mistakes: [
+        'Rounding the lower back.',
+        'Letting the bar drift forward away from the shins.',
+        'Yanking the bar off the floor instead of pushing with the legs.',
       ],
     },
   ],
@@ -1657,6 +1998,167 @@ const EXERCISE_DB = {
         'Bouncing out of the bottom.',
       ],
     },
+    {
+      id: 'lg-back-squat', name: 'Barbell Back Squat',
+      gear: 'Barbell + squat rack', icon: 'barbell', equip: 'free',
+      tags: ['compound', 'quad', 'glute'], muscles: 'Quads, glutes, hamstrings, core',
+      video: 'barbell back squat proper form how to',
+      setup: [
+        'Bar on the upper traps, hands just outside the shoulders, step back and set the feet shoulder-width, toes slightly out.',
+      ],
+      execution: [
+        'Brace, then sit down and back, knees tracking over the toes, until the thighs are at least parallel.',
+        'Drive through the whole foot back to standing.',
+      ],
+      tips: [
+        'Keep the chest up and the bar over the middle of the foot — if the heels lift, raise them on small plates or try a wider stance.',
+      ],
+      mistakes: [
+        'Knees caving inward.',
+        'Cutting the depth short as the weight goes up.',
+        'Looking up at the ceiling, which tips the back.',
+      ],
+    },
+    {
+      id: 'lg-front-squat', name: 'Barbell Front Squat',
+      gear: 'Barbell + squat rack', icon: 'barbell', equip: 'free',
+      tags: ['compound', 'quad'], muscles: 'Quads, core',
+      video: 'barbell front squat how to proper form',
+      setup: [
+        'Bar across the front of the shoulders, elbows high, fingertips under the bar (or arms crossed). Feet shoulder-width.',
+      ],
+      execution: [
+        'Squat straight down, keeping the elbows up and the torso upright, as deep as you can with a flat back.',
+        'Stand up driving the elbows up first.',
+      ],
+      tips: [
+        'The upright torso puts the work on the quads — a lighter bar than the back squat, same effort.',
+      ],
+      mistakes: [
+        'Elbows dropping and the bar rolling forward.',
+        'Leaning forward out of the hole.',
+      ],
+    },
+    {
+      id: 'lg-good-morning', name: 'Barbell Good Morning',
+      gear: 'Barbell + rack', icon: 'barbell', equip: 'free',
+      tags: ['isolation', 'ham'], muscles: 'Hamstrings, glutes, lower back',
+      video: 'barbell good morning exercise proper form',
+      setup: [
+        'Bar on the upper back as for a squat, feet hip-width, soft knees.',
+      ],
+      execution: [
+        'Push the hips back and hinge forward with a flat back until the torso is near parallel to the floor.',
+        'Drive the hips forward to stand tall.',
+      ],
+      tips: [
+        'Go light — this is a stretch-and-squeeze movement for the hamstrings, not a strength lift.',
+      ],
+      mistakes: [
+        'Rounding the back.',
+        'Bending the knees and turning it into a squat.',
+      ],
+    },
+    {
+      id: 'lg-bb-rdl', name: 'Barbell Romanian Deadlift',
+      gear: 'Barbell', icon: 'barbell', equip: 'free',
+      tags: ['compound', 'ham', 'glute'], muscles: 'Hamstrings, glutes',
+      video: 'barbell romanian deadlift proper form how to',
+      setup: [
+        'Stand tall with the bar at the thighs, overhand grip, soft knees, shoulders back.',
+      ],
+      execution: [
+        'Push the hips back and lower the bar down the legs, keeping it close, until you feel a strong hamstring stretch (about mid-shin).',
+        'Drive the hips forward to stand, squeezing the glutes.',
+      ],
+      tips: [
+        'The bar should brush the thighs and shins the whole way — if it drifts forward the back takes over.',
+      ],
+      mistakes: [
+        'Bending the knees too much.',
+        'Rounding the back to reach lower.',
+      ],
+    },
+    {
+      id: 'lg-sl-rdl', name: 'Single-Leg Dumbbell RDL',
+      gear: 'One dumbbell', icon: 'dumbbell', equip: 'free',
+      tags: ['isolation', 'ham', 'glute'], muscles: 'Hamstrings, glutes, balance',
+      video: 'single leg dumbbell romanian deadlift how to',
+      setup: [
+        'Stand on one leg holding a dumbbell in the opposite hand, soft knee, hips square.',
+      ],
+      execution: [
+        'Hinge forward, letting the free leg travel back, until the torso and leg are near parallel to the floor.',
+        'Drive the standing hip forward to come back up. Do all reps, then swap legs.',
+      ],
+      tips: [
+        'Hold a rack or post with the free hand if the balance gets in the way — the hamstring work is the point.',
+      ],
+      mistakes: [
+        'Hips rotating open.',
+        'Rounding the back.',
+      ],
+    },
+    {
+      id: 'lg-db-reverse-lunge', name: 'Dumbbell Reverse Lunge',
+      gear: 'Dumbbells', icon: 'dumbbell', equip: 'free',
+      tags: ['compound', 'quad', 'glute'], muscles: 'Quads, glutes',
+      video: 'dumbbell reverse lunge proper form',
+      setup: [
+        'Stand tall with a dumbbell in each hand at your sides, feet hip-width.',
+      ],
+      execution: [
+        'Step one foot back and lower until the back knee nearly touches the floor, front shin vertical.',
+        'Push through the front heel to return. Alternate legs or do one side at a time.',
+      ],
+      tips: [
+        'Stepping back rather than forward keeps the front knee happy and the glutes busy.',
+      ],
+      mistakes: [
+        'Leaning forward.',
+        'Letting the front knee collapse inward.',
+      ],
+    },
+    {
+      id: 'lg-pullthrough', name: 'Cable Pull-Through',
+      gear: 'Cable tower, rope on the low pulley', icon: 'cable', equip: 'machine',
+      tags: ['compound', 'ham', 'glute'], muscles: 'Glutes, hamstrings',
+      video: 'cable pull through glutes hamstrings how to',
+      setup: [
+        'Face away from the low pulley with the rope between your legs, walk out until there is tension, feet shoulder-width.',
+      ],
+      execution: [
+        'Push the hips back and hinge, letting the rope travel back between the legs, until the hamstrings stretch.',
+        'Drive the hips forward to stand tall and squeeze the glutes.',
+      ],
+      tips: [
+        'All hip hinge, no spine load — a great way to learn the deadlift pattern.',
+      ],
+      mistakes: [
+        'Squatting instead of hinging.',
+        'Pulling with the arms.',
+      ],
+    },
+    {
+      id: 'lg-bb-calf', name: 'Smith Machine Calf Raise',
+      gear: 'Smith machine (or barbell) + step', icon: 'smith', equip: 'machine',
+      tags: ['isolation', 'calf'], muscles: 'Calves',
+      video: 'smith machine standing calf raise how to',
+      setup: [
+        'Put a step or plate under the bar. Bar on the upper back, balls of the feet on the edge, heels hanging.',
+      ],
+      execution: [
+        'Lower the heels for a full stretch, then rise as high as possible onto the toes.',
+        'Pause at the top, lower in 2–3 seconds.',
+      ],
+      tips: [
+        'The Smith bar removes the balance problem, so you can load this heavy.',
+      ],
+      mistakes: [
+        'Bouncing out of the bottom.',
+        'Bending the knees to help.',
+      ],
+    },
   ],
 
   /* -------------------------------- CORE -------------------------------- */
@@ -2221,6 +2723,124 @@ const EXERCISE_DB = {
         'Bending the elbows and turning it into a wide push-up.',
       ],
     },
+    {
+      id: 'ch-incline-bb', name: 'Incline Barbell Bench Press',
+      gear: 'Barbell + incline bench', icon: 'bench', equip: 'free',
+      tags: ['compound', 'press', 'upper'], muscles: 'Upper chest, front delts, triceps',
+      video: 'incline barbell bench press proper form',
+      setup: [
+        'Bench at 30–45°. Lie back with eyes under the bar, grip just wider than shoulders, shoulder blades pinched, feet flat.',
+      ],
+      execution: [
+        'Unrack and lower the bar to the upper chest, elbows about 45° from the body.',
+        'Press back up and slightly back to lockout over the shoulders.',
+      ],
+      tips: [
+        'Keep the ribs down and the shoulder blades pinned — the bench does the arching, not your lower back.',
+      ],
+      mistakes: [
+        'Bouncing the bar off the chest.',
+        'Flaring the elbows straight out.',
+      ],
+    },
+    {
+      id: 'ch-decline-db', name: 'Decline Dumbbell Press',
+      gear: 'Dumbbells + decline bench', icon: 'bench', equip: 'free',
+      tags: ['compound', 'press', 'lower'], muscles: 'Lower chest, triceps',
+      video: 'decline dumbbell press proper form',
+      setup: [
+        'Hook the feet under the pad, sit with the dumbbells on the thighs, then lie back and kick them up to the chest.',
+      ],
+      execution: [
+        'Press the dumbbells up over the chest until the arms are straight, then lower until the upper arms are just below the bench.',
+      ],
+      tips: [
+        'The decline shortens the range a little, so most people can press more here than flat — keep it controlled.',
+      ],
+      mistakes: [
+        'Letting the dumbbells drift toward the face.',
+        'Clanking them together at the top.',
+      ],
+    },
+    {
+      id: 'ch-incline-fly', name: 'Incline Dumbbell Fly',
+      gear: 'Dumbbells + incline bench', icon: 'bench', equip: 'free',
+      tags: ['isolation', 'fly', 'upper'], muscles: 'Upper chest',
+      video: 'incline dumbbell fly proper form',
+      setup: [
+        'Bench at 30–45°. Lie back with the dumbbells over the chest, palms facing, a soft bend in the elbows.',
+      ],
+      execution: [
+        'Open the arms in a wide arc until you feel a stretch across the chest, keeping the elbow angle fixed.',
+        'Squeeze the chest to bring the dumbbells back over the chest.',
+      ],
+      tips: [
+        'Think of hugging a barrel — the elbows stay slightly bent the whole way.',
+      ],
+      mistakes: [
+        'Going too deep and straining the shoulders.',
+        'Pressing the weight up instead of arcing it.',
+      ],
+    },
+    {
+      id: 'ch-incline-machine', name: 'Incline Chest Press Machine',
+      gear: 'Incline chest press machine (plate-loaded or stack)', icon: 'pressMachine', equip: 'machine',
+      tags: ['compound', 'press', 'upper'], muscles: 'Upper chest, front delts, triceps',
+      video: 'incline chest press machine how to',
+      setup: [
+        'Set the seat so the handles start level with the upper chest. Sit back with the shoulder blades pulled together, feet flat.',
+      ],
+      execution: [
+        'Press the handles up and forward until the arms are straight, without lifting the shoulders off the pad.',
+        'Return slowly until you feel the chest stretch.',
+      ],
+      tips: [
+        'The machine path means you can push close to failure safely — great for the last set.',
+      ],
+      mistakes: [
+        'Seat too low, so the handles start at the stomach.',
+        'Shrugging the shoulders during the press.',
+      ],
+    },
+    {
+      id: 'ch-cable-press', name: 'Standing Cable Chest Press',
+      gear: 'Cable crossover, handles at chest height', icon: 'cable', equip: 'machine',
+      tags: ['compound', 'press'], muscles: 'Chest, front delts, triceps',
+      video: 'standing cable chest press how to',
+      setup: [
+        'Set both pulleys at chest height, take a handle in each hand, and step forward into a staggered stance so the cables are taut behind you.',
+      ],
+      execution: [
+        'Press both handles forward until the arms are straight and the hands come together.',
+        'Let them return slowly until the hands are beside the chest.',
+      ],
+      tips: [
+        'Constant tension through the whole range, and it works the core too — use it when the benches are busy.',
+      ],
+      mistakes: [
+        'Leaning the whole body into the press.',
+        'Letting the hands drift up or down.',
+      ],
+    },
+    {
+      id: 'ch-squeeze-press', name: 'Dumbbell Squeeze Press',
+      gear: 'Dumbbells + flat bench', icon: 'bench', equip: 'free',
+      tags: ['compound', 'press'], muscles: 'Inner chest, triceps',
+      video: 'dumbbell squeeze press hex press how to',
+      setup: [
+        'Lie on a flat bench with the dumbbells pressed together over the chest, palms facing each other.',
+      ],
+      execution: [
+        'Squeeze the dumbbells into each other as hard as you can, and keep squeezing as you lower them to the chest and press back up.',
+      ],
+      tips: [
+        'The squeeze is the exercise — the weight is secondary. Elbows stay tucked.',
+      ],
+      mistakes: [
+        'Letting the dumbbells separate.',
+        'Flaring the elbows.',
+      ],
+    },
   ],
 
   /* -------------------------------- ARMS -------------------------------- */
@@ -2682,6 +3302,182 @@ const EXERCISE_DB = {
       mistakes: [
         'Upper arms drifting toward the hips.',
         'Going too heavy and flaring the elbows.',
+      ],
+    },
+    {
+      id: 'ar-bb-curl', name: 'Barbell Curl',
+      gear: 'Barbell', icon: 'barbell', equip: 'free',
+      tags: ['biceps'], muscles: 'Biceps',
+      video: 'standing barbell curl proper form',
+      setup: [
+        'Stand tall with the bar at the thighs, underhand grip shoulder-width, elbows at the sides.',
+      ],
+      execution: [
+        'Curl the bar up to the shoulders without moving the elbows, squeeze, and lower in 2–3 seconds to straight arms.',
+      ],
+      tips: [
+        'The straight bar loads the biceps hardest in the stretched position — if the wrists complain, use the EZ bar instead.',
+      ],
+      mistakes: [
+        'Leaning back and swinging.',
+        'Elbows drifting forward at the top.',
+      ],
+    },
+    {
+      id: 'ar-reverse-curl', name: 'Reverse-Grip Barbell Curl',
+      gear: 'Barbell or EZ bar', icon: 'barbell', equip: 'free',
+      tags: ['biceps'], muscles: 'Brachialis, forearms, biceps',
+      video: 'reverse grip barbell curl how to forearms',
+      setup: [
+        'Hold the bar with an overhand grip, shoulder-width, elbows at the sides.',
+      ],
+      execution: [
+        'Curl to the shoulders keeping the wrists straight and the elbows still, then lower slowly.',
+      ],
+      tips: [
+        'Go much lighter than a normal curl — the overhand grip builds the brachialis under the biceps, which pushes the peak up.',
+      ],
+      mistakes: [
+        'Letting the wrists bend back.',
+        'Swinging the elbows forward.',
+      ],
+    },
+    {
+      id: 'ar-cross-hammer', name: 'Cross-Body Hammer Curl',
+      gear: 'Dumbbells', icon: 'dumbbell', equip: 'free',
+      tags: ['biceps'], muscles: 'Biceps, brachialis',
+      video: 'cross body hammer curl how to',
+      setup: [
+        'Stand tall with a dumbbell in each hand, palms facing the thighs.',
+      ],
+      execution: [
+        'Curl one dumbbell across the body toward the opposite shoulder, keeping the palm facing in.',
+        'Lower slowly and repeat with the other arm.',
+      ],
+      tips: [
+        'The cross-body path hits the outer biceps and brachialis hard — alternate arms and keep the torso still.',
+      ],
+      mistakes: [
+        'Rotating the torso toward the working arm.',
+        'Stopping short of the shoulder.',
+      ],
+    },
+    {
+      id: 'ar-cable-curl-single', name: 'Single-Arm Cable Curl',
+      gear: 'Cable tower, single handle on the low pulley', icon: 'cable', equip: 'machine',
+      tags: ['biceps'], muscles: 'Biceps (one side at a time)',
+      video: 'single arm cable curl proper form',
+      setup: [
+        'Stand facing the low pulley with the handle in one hand, palm up, elbow at the side.',
+      ],
+      execution: [
+        'Curl the handle to the shoulder, squeeze hard, and lower slowly to a straight arm.',
+        'Do all reps, then swap arms.',
+      ],
+      tips: [
+        'One arm at a time lets you find and fix the weaker side.',
+      ],
+      mistakes: [
+        'Moving the elbow forward to finish the rep.',
+        'Dropping the weight on the way down.',
+      ],
+    },
+    {
+      id: 'ar-db-preacher', name: 'One-Arm Dumbbell Preacher Curl',
+      gear: 'One dumbbell + preacher bench', icon: 'preacher', equip: 'free',
+      tags: ['biceps'], muscles: 'Biceps (lower, peak)',
+      video: 'one arm dumbbell preacher curl how to',
+      setup: [
+        'Rest the back of one upper arm on the preacher pad, dumbbell in that hand, palm up, the other hand steadying the elbow.',
+      ],
+      execution: [
+        'Curl to the shoulder, squeeze, then lower slowly until the arm is nearly straight.',
+        'Do all reps, then swap arms.',
+      ],
+      tips: [
+        'Stop just short of locking out at the bottom to keep the tension on the biceps and off the tendon.',
+      ],
+      mistakes: [
+        'Lifting the upper arm off the pad.',
+        'Dropping into a locked elbow at the bottom.',
+      ],
+    },
+    {
+      id: 'ar-bar-pushdown', name: 'Straight-Bar Triceps Pushdown',
+      gear: 'Cable tower, straight bar on the high pulley', icon: 'pushdown', equip: 'machine',
+      tags: ['triceps'], muscles: 'Triceps (lateral head)',
+      video: 'straight bar cable triceps pushdown proper form',
+      setup: [
+        'Grip the bar overhand, hands shoulder-width, elbows pinned to the sides, forearms just above parallel.',
+      ],
+      execution: [
+        'Push the bar down until the arms are straight, squeeze, and let it return slowly.',
+      ],
+      tips: [
+        'The bar lets you go heavier than the rope — keep the elbows still and the wrists straight.',
+      ],
+      mistakes: [
+        'Elbows flaring out as the weight goes up.',
+        'Leaning over the bar to press with the body.',
+      ],
+    },
+    {
+      id: 'ar-seated-overhead', name: 'Seated Two-Arm Overhead Dumbbell Extension',
+      gear: 'Dumbbells + bench with back support', icon: 'dumbbell', equip: 'free',
+      tags: ['triceps'], muscles: 'Triceps (long head)',
+      video: 'seated two arm overhead dumbbell triceps extension how to',
+      setup: [
+        'Sit tall with a dumbbell in each hand pressed overhead, palms facing, elbows close to the head.',
+      ],
+      execution: [
+        'Bend the elbows to lower the dumbbells behind the head until the forearms touch the biceps.',
+        'Extend back to straight arms without moving the upper arms.',
+      ],
+      tips: [
+        'Overhead work stretches the long head — the part of the triceps that adds the most size.',
+      ],
+      mistakes: [
+        'Elbows flaring out wide.',
+        'Arching the lower back.',
+      ],
+    },
+    {
+      id: 'ar-cable-kickback', name: 'Cable Triceps Kickback',
+      gear: 'Cable tower, single handle on the low pulley', icon: 'cable', equip: 'machine',
+      tags: ['triceps'], muscles: 'Triceps',
+      video: 'cable triceps kickback how to',
+      setup: [
+        'Face the low pulley, hinge forward with a flat back, handle in one hand, upper arm pinned beside the ribs and parallel to the floor.',
+      ],
+      execution: [
+        'Extend the arm straight back until it locks, pause, and return slowly.',
+        'Do all reps, then swap arms.',
+      ],
+      tips: [
+        'The cable keeps tension at the top where dumbbell kickbacks go slack — squeeze hard at lockout.',
+      ],
+      mistakes: [
+        'Letting the upper arm drop as you extend.',
+        'Swinging the weight with the torso.',
+      ],
+    },
+    {
+      id: 'ar-decline-skull', name: 'Decline Skull Crusher',
+      gear: 'EZ bar + decline bench', icon: 'bench', equip: 'free',
+      tags: ['triceps'], muscles: 'Triceps',
+      video: 'decline skull crusher EZ bar how to',
+      setup: [
+        'Lie on a decline bench, feet hooked, EZ bar held over the forehead with arms straight, hands just inside shoulder-width.',
+      ],
+      execution: [
+        'Bend only the elbows to lower the bar toward the top of the head, then extend back to straight.',
+      ],
+      tips: [
+        'The decline keeps the triceps under tension through the whole range — slightly more than flat.',
+      ],
+      mistakes: [
+        'Letting the elbows flare.',
+        'Moving the upper arms toward the hips to turn it into a press.',
       ],
     },
   ],
