@@ -38,6 +38,13 @@
   --accent-dim: rgba(217, 169, 47, 0.14);
   --accent-glow: rgba(217, 169, 47, 0.35);
   --on-accent: #171207;
+  /* motion: enters ease out and land softly, exits are quick, releases spring back */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);
+  --dur-fast: 110ms;
+  --dur: 220ms;
+  --dur-slow: 320ms;
   --amber: #c0842a;
   --blue: #e8cf7f;        /* champagne: links, chips (name kept from the earlier palette) */
   --rose: #e0756a;
@@ -117,6 +124,9 @@ button:focus:not(:focus-visible) { outline: none; }
 /* ------------------------------ app shell ------------------------------ */
 .main { padding-bottom: calc(78px + env(safe-area-inset-bottom)); }
 .content { padding: 10px 16px 28px; max-width: 640px; margin: 0 auto; }
+#view-workout { position: relative; }
+/* A snapshot of the outgoing day, faded out over the incoming one (see crossFade in app.js). */
+.content-ghost { position: absolute; left: 0; right: 0; z-index: 1; overflow: hidden; pointer-events: none; }
 body:not(.view-workout) .week-nav { display: none; }
 body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 .view[hidden] { display: none !important; }
@@ -219,9 +229,9 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 .ring { position: relative; width: 78px; height: 78px; flex: 0 0 auto; filter: drop-shadow(0 0 10px rgba(217, 169, 47, 0.25)); }
 .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
 .ring-bg { fill: none; stroke: rgba(255, 255, 255, 0.07); stroke-width: 7; }
-.ring-fg { fill: none; stroke: var(--accent); stroke-width: 7; stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; }
+.ring-fg { fill: none; stroke: var(--accent); stroke-width: 7; stroke-linecap: round; }   /* arc is driven by animateRing() */
 .hero.complete .ring-fg { stroke: var(--accent-2); }
-.ring-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 1.2rem; letter-spacing: 0.02em; }
+.ring-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 1.2rem; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
 
 .burst { position: absolute; inset: 0; pointer-events: none; }
 .burst span {
@@ -331,9 +341,7 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
   border: 1px solid var(--border-strong);
   font-size: 1rem; font-weight: 800; cursor: pointer;
   font-variant-numeric: tabular-nums;
-  transition: transform 0.08s ease, background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
-.set-bubble:active { transform: scale(0.9); }
 .set-bubble.done {
   background: var(--gold-grad); border-color: transparent; color: var(--on-accent);
   box-shadow: 0 4px 14px var(--accent-glow);
@@ -355,7 +363,7 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
   padding: 7px 12px; cursor: pointer; min-height: 36px;
 }
 .alt-btn .ico { width: 14px; height: 14px; color: var(--accent); }
-.alt-btn:active { transform: scale(0.97); border-color: var(--accent); background: var(--accent-dim); }
+.alt-btn:active { border-color: var(--accent); background: var(--accent-dim); }
 .swap-note {
   display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
   margin: -4px 0 12px; padding: 8px 12px; border-radius: var(--radius-sm);
@@ -382,9 +390,9 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 .howto summary::after {
   content: ''; margin-left: auto; width: 8px; height: 8px;
   border-right: 2px solid var(--text-dim); border-bottom: 2px solid var(--text-dim);
-  transform: rotate(45deg); transition: transform 0.2s ease;
+  transform: rotate(45deg); transition: transform var(--dur) var(--ease-out);
 }
-.howto[open] summary::after { transform: rotate(-135deg); }
+.howto[open]:not(.closing) summary::after { transform: rotate(-135deg); }
 .howto-body { margin-top: 10px; font-size: 0.88rem; }
 .howto-body h4 {
   color: var(--text-dim); text-transform: uppercase; font-size: 0.82rem; font-weight: 500;
@@ -485,9 +493,9 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
   padding: 10px 14px 12px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 24px var(--accent-glow);
   z-index: 40;
-  animation: timer-in 0.25s ease-out;
+  animation: timer-in var(--dur-slow) var(--ease-out);
 }
-@keyframes timer-in { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes timer-in { from { transform: translateY(18px) scale(0.97); opacity: 0; } to { transform: none; opacity: 1; } }
 body.timer-on .main { padding-bottom: calc(184px + env(safe-area-inset-bottom)); }
 
 .rest-progress { height: 6px; border-radius: 999px; overflow: hidden; background: rgba(255, 255, 255, 0.08); margin-bottom: 8px; }
@@ -510,6 +518,10 @@ body.timer-on .main { padding-bottom: calc(184px + env(safe-area-inset-bottom));
 .rest-timer.done .rest-fill { background: var(--accent-2); }
 .rest-timer.done .rest-time, .rest-timer.done .rest-emoji { color: var(--accent-2); }
 @keyframes timer-go { from { box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 16px var(--accent-glow); } to { box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 36px var(--accent-glow); } }
+.rest-timer.bump { animation: timer-bump var(--dur-slow) var(--ease-spring); }      /* a new rest on a visible timer */
+.rest-timer.leaving { animation: timer-out 180ms var(--ease-in) forwards; }         /* skip / auto-hide */
+@keyframes timer-bump { from { transform: scale(0.96); } to { transform: none; } }
+@keyframes timer-out { to { transform: translateY(14px) scale(0.98); opacity: 0; } }
 
 /* ------------------------------ bottom nav ------------------------------ */
 .bottom-nav {
@@ -529,12 +541,13 @@ body.timer-on .main { padding-bottom: calc(184px + env(safe-area-inset-bottom));
   width: 24px; height: 24px; fill: none; stroke: currentColor;
   stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round;
   padding: 0; box-sizing: content-box; border-radius: 999px;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: transform var(--dur-slow) var(--ease-spring), background 0.15s ease, color 0.15s ease;
 }
 .nav-btn .nav-icon circle { fill: currentColor; stroke: none; }
 .nav-btn[data-view="settings"] .nav-icon circle { fill: none; stroke: currentColor; }
 .nav-btn.active { color: var(--accent-2); }
-.nav-btn.active .nav-icon { background: var(--accent-dim); padding: 4px 14px; margin: -4px 0; }
+.nav-btn.active .nav-icon { background: var(--accent-dim); padding: 4px 14px; margin: -4px 0; animation: nav-pop var(--dur-slow) var(--ease-spring); }
+@keyframes nav-pop { from { transform: scale(0.8); } to { transform: none; } }
 
 .toast {
   position: fixed; left: 16px; right: 16px; bottom: calc(84px + env(safe-area-inset-bottom));
@@ -543,10 +556,12 @@ body.timer-on .main { padding-bottom: calc(184px + env(safe-area-inset-bottom));
   border: 1px solid var(--border-strong); border-left: 3px solid var(--accent); border-radius: 12px;
   padding: 11px 14px; font-weight: 700; font-size: 0.9rem;
   box-shadow: var(--shadow);
-  animation: toast-in 0.25s ease;
+  animation: toast-in var(--dur-slow) var(--ease-out);
 }
 .toast .ico { color: var(--accent); vertical-align: -0.2em; }
-@keyframes toast-in { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+.toast.leaving { animation: toast-out 160ms var(--ease-in) forwards; }
+@keyframes toast-in { from { transform: translateY(14px) scale(0.97); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes toast-out { to { transform: translateY(10px); opacity: 0; } }
 
 /* ------------------------------ onboarding ------------------------------ */
 .ob { max-width: 520px; margin: 0 auto; padding: 28px 18px 40px; }
@@ -595,7 +610,6 @@ body.timer-on .main { padding-bottom: calc(184px + env(safe-area-inset-bottom));
   font-size: 1.05rem; font-weight: 800; letter-spacing: 0.02em; cursor: pointer;
   box-shadow: 0 10px 28px var(--accent-glow);
 }
-.primary-btn:active { transform: scale(0.98); }
 
 /* ------------------------------ history ------------------------------ */
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
@@ -687,6 +701,25 @@ body.timer-on .main { padding-bottom: calc(184px + env(safe-area-inset-bottom));
 /* ------------------------------ icon system ------------------------------ */
 .ico { width: 1.05em; height: 1.05em; display: inline-block; vertical-align: -0.18em; flex: 0 0 auto; }
 .primary-btn .ico { vertical-align: -0.2em; }
+
+/* ------------------------------ press feedback ------------------------------ */
+/* Everything tappable sinks under the finger and springs back on release.
+ * Transform only, so nothing reflows; the press-in is quicker than the release.
+ * Kept last so it wins over the per-component rules above. */
+.set-bubble, .alt-btn, .unswap-btn, .chip-video, .video-link, .primary-btn, .rest-btn, .choice,
+.unit-toggle, .week-arrow, .day-tab, .nav-btn, .goal-pill, .update-btn, .weight-unit {
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  transition: transform var(--dur-slow) var(--ease-spring), background-color 0.15s ease, color 0.15s ease,
+    border-color 0.15s ease, box-shadow 0.2s ease;
+}
+.set-bubble:active, .alt-btn:active, .unswap-btn:active, .chip-video:active, .video-link:active, .rest-btn:active,
+.unit-toggle:active, .week-arrow:active, .goal-pill:active, .update-btn:active {
+  transform: scale(0.92); transition-duration: var(--dur-fast); transition-timing-function: ease-out;
+}
+.primary-btn:active, .choice:active, .day-tab:active {   /* wide targets: a smaller dip reads better */
+  transform: scale(0.975); transition-duration: var(--dur-fast); transition-timing-function: ease-out;
+}
+.nav-btn:active .nav-icon { transform: scale(0.86); transition-duration: var(--dur-fast); transition-timing-function: ease-out; }
 
 /* ------------------------------ motion preferences ------------------------------ */
 @media (prefers-reduced-motion: reduce) {

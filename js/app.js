@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 31;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 32;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -613,6 +613,108 @@ const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+/* ------------------------------ motion ------------------------------ */
+/* Transform and opacity only; enters ease out, exits are quick; and all of it
+ * is skipped for people who asked their phone for reduced motion. */
+const EASE_OUT = 'cubic-bezier(0.22, 1, 0.36, 1)';
+const EASE_IN = 'cubic-bezier(0.4, 0, 1, 1)';
+const reducedMotion = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const canAnimate = () => !reducedMotion() && typeof Element.prototype.animate === 'function';
+// iOS only applies :active to touches once something on the page listens for touchstart.
+document.addEventListener('touchstart', () => {}, { passive: true });
+
+/* Play an element's exit animation (a CSS class) and then run `done`.
+ * Showing the element again before that cancels the pending hide. */
+function dismiss(el, cls, done) {
+  if (el.hidden) return;
+  const token = (el._dismiss = {});
+  const finish = () => { if (el._dismiss !== token) return; el._dismiss = null; el.classList.remove(cls); done(); };
+  if (!canAnimate()) { finish(); return; }
+  el.classList.add(cls);
+  el.addEventListener('animationend', (e) => { if (e.target === el) finish(); }, { once: true });
+  setTimeout(finish, 320);   // safety net if the animation never reports back
+}
+function cancelDismiss(el, cls) { el._dismiss = null; el.classList.remove(cls); }
+
+/* The form guide opens like a sheet: height and opacity ease out; the close is
+ * quicker. The <details> open flag flips at the start of an open and the end of
+ * a close, so the clip play/pause toggle listener keeps working unchanged. */
+function toggleGuide(guide) {
+  const body = guide.querySelector('.howto-body');
+  if (!body || !canAnimate()) { guide.open = !guide.open; return; }
+  const closing = guide.classList.contains('closing');
+  const cur = body.getBoundingClientRect().height;   // read before cancelling: mid-animation height if there is one
+  if (guide._anim) guide._anim.cancel();
+  guide.classList.remove('closing');
+  body.style.overflow = 'hidden';
+  const finish = () => { body.style.overflow = ''; guide._anim = null; };
+  if (!guide.open || closing) {
+    guide.open = true;
+    const full = body.offsetHeight;
+    guide._anim = body.animate(
+      [{ height: `${closing ? cur : 0}px`, opacity: closing ? 1 : 0, transform: closing ? 'none' : 'translateY(-6px)' },
+       { height: `${full}px`, opacity: 1, transform: 'none' }],
+      { duration: 300, easing: EASE_OUT });
+    guide._anim.onfinish = finish;
+  } else {
+    guide.classList.add('closing');
+    guide._anim = body.animate(
+      [{ height: `${cur}px`, opacity: 1 }, { height: '0px', opacity: 0 }],
+      { duration: 180, easing: EASE_IN });
+    guide._anim.onfinish = () => { guide.classList.remove('closing'); guide.open = false; finish(); };
+  }
+}
+
+/* Swap a container's content with a cross-fade: a ghost of the old content fades
+ * out over the new, which slides in from the side the user is heading to. */
+function crossFade(el, rerender, dir) {
+  if (!canAnimate()) { rerender(); return; }
+  const ghost = el.cloneNode(true);
+  ghost.removeAttribute('id');
+  ghost.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'));
+  ghost.querySelectorAll('video source').forEach((s) => s.remove());   // the ghost must not start loading clips
+  ghost.className = 'content content-ghost';
+  ghost.style.top = `${el.offsetTop}px`;
+  ghost.style.height = `${el.offsetHeight}px`;
+  ghost.setAttribute('aria-hidden', 'true');
+  el.parentElement.appendChild(ghost);
+  rerender();
+  const out = ghost.animate(
+    [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${-12 * dir}px)` }],
+    { duration: 160, easing: EASE_IN, fill: 'forwards' });
+  out.onfinish = () => ghost.remove();
+  setTimeout(() => ghost.remove(), 500);
+  el.animate(
+    [{ opacity: 0, transform: `translateX(${16 * dir}px)` }, { opacity: 1, transform: 'none' }],
+    { duration: 260, easing: EASE_OUT });
+}
+
+/* The progress ring counts up (or down) from what it last showed, so a ticked
+ * set is seen to move the number rather than the number just changing. */
+let ringShown = 0, ringRun = 0;
+function animateRing(from) {
+  const hero = $('.hero');
+  if (!hero) return;
+  const to = Number(hero.dataset.pct) || 0;
+  const fg = hero.querySelector('.ring-fg'), label = hero.querySelector('.ring-label');
+  const c = Number(fg.getAttribute('stroke-dasharray'));
+  const complete = hero.classList.contains('complete');
+  const run = ++ringRun;
+  ringShown = to;
+  if (!canAnimate() || from === to) return;
+  const start = performance.now(), dur = 600;
+  const step = (now) => {
+    if (run !== ringRun) return;   // a newer render took over
+    const t = Math.min(1, (now - start) / dur);
+    const v = from + (to - from) * (1 - Math.pow(1 - t, 3));   // ease-out cubic
+    fg.setAttribute('stroke-dashoffset', c * (1 - v / 100));
+    if (!complete) label.textContent = `${Math.round(v)}%`;
+    if (t < 1) requestAnimationFrame(step);
+  };
+  fg.setAttribute('stroke-dashoffset', c * (1 - from / 100));
+  requestAnimationFrame(step);
+}
+
 function render() {
   const onboarded = state.profile && state.profile.onboarded;
   document.body.classList.toggle('onboarding', !onboarded);
@@ -758,6 +860,7 @@ function renderDay() {
     ${hiitNote}
     ${cards}
     ${finisherCard(weekIdx, dayIdx, phase)}`;
+  animateRing(ringShown);
 }
 
 /* After a set is ticked: update bubbles, card state, hero and tabs in place —
@@ -773,7 +876,7 @@ function refreshProgress() {
     card.querySelectorAll('.set-bubble').forEach((b, i) => b.classList.toggle('done', i < done));
   });
   const hero = $('.hero');
-  if (hero) hero.outerHTML = heroCard(DAYS[dayIdx], exercises, schemes, dateISO, isToday);
+  if (hero) { hero.outerHTML = heroCard(DAYS[dayIdx], exercises, schemes, dateISO, isToday); animateRing(ringShown); }
   renderTabs();
 }
 
@@ -793,7 +896,7 @@ function heroCard(day, exercises, schemes, dateISO, isToday) {
   const r = 26, c = 2 * Math.PI * r;
   const burst = complete ? `<div class="burst" aria-hidden="true">${Array.from({ length: 8 }, (_, i) => `<span style="--i:${i}">${ico(i % 2 ? 'star' : 'dot')}</span>`).join('')}</div>` : '';
   return `
-  <section class="hero ${complete ? 'complete' : ''}">
+  <section class="hero ${complete ? 'complete' : ''}" data-pct="${pct}">
     ${burst}
     <div class="hero-main">
       <div class="hero-text">
@@ -1063,9 +1166,10 @@ let toastTimer = null;
 function showToast(msg, icon) {
   const el = $('#toast');
   el.innerHTML = (icon ? ico(icon) + ' ' : '') + esc(msg);
+  cancelDismiss(el, 'leaving');
   el.hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.hidden = true; }, 3500);
+  toastTimer = setTimeout(() => dismiss(el, 'leaving', () => { el.hidden = true; }), 3500);
 }
 
 /* ------------------------------ rest timer ------------------------------ */
@@ -1123,6 +1227,8 @@ function startRestTimer(seconds, label) {
   rest.totalMs = seconds * 1000;
   rest.running = true;
   const el = $('#restTimer');
+  cancelDismiss(el, 'leaving');
+  if (!el.hidden) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }   // restart = a small pop
   el.hidden = false;
   el.classList.remove('done');
   document.body.classList.add('timer-on');
@@ -1161,9 +1267,11 @@ function stopRestTimer() {
   clearInterval(rest.tick);
   clearTimeout(rest.hideTimer);
   releaseWakeLock();
-  $('#restTimer').hidden = true;
-  document.body.classList.remove('timer-on');
+  const el = $('#restTimer');
+  el.classList.remove('bump');
+  dismiss(el, 'leaving', () => { el.hidden = true; el.classList.remove('done'); document.body.classList.remove('timer-on'); });
 }
+$('#restTimer').addEventListener('animationend', (e) => { if (e.animationName === 'timer-bump') e.target.classList.remove('bump'); });
 
 // If the phone was locked or the browser tabbed away past the end time,
 // fire the finish state (and chime) the moment the app is visible again.
@@ -1181,6 +1289,9 @@ $('#restPlus').addEventListener('click', () => {
 
 /* ------------------------------ events ------------------------------ */
 document.addEventListener('click', (e) => {
+  const summary = e.target.closest('.howto summary');
+  if (summary) { e.preventDefault(); toggleGuide(summary.parentElement); return; }
+
   const nav = e.target.closest('.nav-btn');
   if (nav) { state.view = nav.dataset.view; render(); window.scrollTo(0, 0); return; }
 
@@ -1246,8 +1357,12 @@ document.addEventListener('click', (e) => {
   }
   const tab = e.target.closest('.day-tab');
   if (tab) {
-    state.selectedDay = Number(tab.dataset.day);
-    renderTabs(); renderDay();
+    const next = Number(tab.dataset.day);
+    if (next === state.selectedDay) return;
+    const dir = next > state.selectedDay ? 1 : -1;   // slide in from the side we're heading to
+    state.selectedDay = next;
+    renderTabs();
+    crossFade($('#content'), renderDay, dir);
     return;
   }
   const vid = e.target.closest('video.anim-video');
