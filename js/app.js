@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 29;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 30;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -130,20 +130,32 @@ function allowed(ex) {
   const eq = currentEquip();
   const kind = equipOf(ex);
   if (!eq.allow.includes(kind)) return false;
-  if (kind === 'body' && eq.key !== 'body') return !!ex.staple || ex.tags.includes('core');
+  if (kind === 'body' && eq.key !== 'body') {
+    // Core work is allowed everywhere (the HIIT goal needs it). Otherwise a
+    // full gym never schedules bodyweight; free weights may use a staple.
+    if (ex.tags.includes('core')) return true;
+    return eq.key === 'free' && !!ex.staple;
+  }
   return true;
 }
 /* And even staples are capped: at most one bodyweight exercise (core aside)
  * per day when weights are available, so a Build muscle day stays loaded.
  * The cap lifts only when a day cannot otherwise be filled (e.g. the HIIT
  * goal's push day, which avoids nearly every loaded chest lift). */
-const BODY_CAP = 1;
+const BODY_CAP = { gym: 0, free: 1 };   // per equipment mode; calisthenics is uncapped
 const isBodyPick = (ex) => equipOf(ex) === 'body' && !ex.tags.includes('core');
 function bodyCapped(list) {
-  return currentEquip().key !== 'body' && list.filter(isBodyPick).length >= BODY_CAP;
+  const cap = BODY_CAP[currentEquip().key];
+  return cap !== undefined && list.filter(isBodyPick).length >= cap;
 }
-/* Equipment physically available, ignoring the staple rule — the fallback pool. */
-function baseAllowed(ex) { return currentEquip().allow.includes(equipOf(ex)); }
+/* Equipment physically available, ignoring the staple rule — the fallback pool.
+ * A full gym still never falls back to bodyweight for Build muscle; the HIIT
+ * goal may (its push day avoids nearly every loaded chest lift on purpose). */
+function baseAllowed(ex) {
+  const eq = currentEquip();
+  if (!eq.allow.includes(equipOf(ex))) return false;
+  return !(eq.key === 'gym' && isBodyPick(ex) && currentGoal().key !== 'fatloss');
+}
 
 const KG_PER_LB = 0.45359237;
 const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
@@ -963,7 +975,7 @@ function altChips(ex, day, chosenIds, weekIdx, dateISO, swappedFrom) {
   };
   add(swapSuggestion(ex, day.key, taken, weekIdx), 'swap', 'same kit');
   if (mine === 'machine') add(altForEquip(ex, day.key, 'free', weekIdx, taken), 'dumbbell', 'free weights');
-  if (mine !== 'body') add(altForEquip(ex, day.key, 'body', weekIdx, taken), 'pullupBar', 'bodyweight');
+  if (mine !== 'body' && currentEquip().key !== 'gym') add(altForEquip(ex, day.key, 'body', weekIdx, taken), 'pullupBar', 'bodyweight');
   if (!opts.length) return '';
   const plannedId = swappedFrom ? swappedFrom.id : ex.id;
   return `
