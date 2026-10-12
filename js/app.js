@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 30;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 31;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -682,6 +682,7 @@ function finishOnboarding() {
   store.write('equip', state.equip);
   state.view = 'workout';
   render();
+  window.scrollTo(0, 0);   // the Start button sits at the bottom of the form; land on the hero, not mid-plan
   showToast(name ? `Welcome, ${name} — let's build.` : 'Welcome — let’s build.', 'dumbbell');
 }
 
@@ -887,7 +888,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
     <div class="exercise-top">
       <div class="exercise-icon">${ICONS[ex.icon] || ICONS.dumbbell}</div>
       <div class="exercise-info">
-        <h3 class="exercise-name">${i + 1}. ${ex.name}</h3>
+        <h3 class="exercise-name"><span class="ex-num">${i + 1}</span>${ex.name}</h3>
         <div class="exercise-meta">
           <span class="chip chip-gear">${ex.gear}</span>
           <span class="chip chip-muscle">${ex.muscles}</span>
