@@ -832,7 +832,7 @@ const EXERCISE_DB = {
     },
     {
       id: 'bk-pullup', name: 'Pull-Up',
-      gear: 'Pull-up bar', icon: 'pullup', equip: 'body',
+      gear: 'Pull-up bar', icon: 'pullup', equip: 'body', staple: true,
       tags: ['compound', 'vertical'], muscles: 'Lats, biceps, grip',
       video: 'pull up proper form',
       setup: [
@@ -852,7 +852,7 @@ const EXERCISE_DB = {
     },
     {
       id: 'bk-chinup', name: 'Chin-Up',
-      gear: 'Pull-up bar', icon: 'pullup', equip: 'body', also: ['arms'],
+      gear: 'Pull-up bar', icon: 'pullup', equip: 'body', also: ['arms'], staple: true,
       tags: ['compound', 'vertical', 'biceps'], muscles: 'Lats, biceps',
       video: 'chin up proper form',
       setup: [
@@ -1561,7 +1561,7 @@ const EXERCISE_DB = {
     },
     {
       id: 'lg-nordic', name: 'Nordic Hamstring Curl',
-      gear: 'Bodyweight + something to anchor the heels', icon: 'pushup', equip: 'body',
+      gear: 'Bodyweight + something to anchor the heels', icon: 'pushup', equip: 'body', staple: true,
       tags: ['isolation', 'ham'], muscles: 'Hamstrings',
       video: 'nordic hamstring curl proper form beginner',
       setup: [
@@ -1639,7 +1639,7 @@ const EXERCISE_DB = {
     },
     {
       id: 'lg-sl-calf', name: 'Single-Leg Calf Raise',
-      gear: 'Bodyweight + step (hold a wall for balance)', icon: 'calf', equip: 'body',
+      gear: 'Bodyweight + step (hold a wall for balance)', icon: 'calf', equip: 'body', staple: true,
       tags: ['isolation', 'calf'], muscles: 'Calves',
       video: 'single leg calf raise bodyweight',
       setup: [
@@ -1946,7 +1946,7 @@ const EXERCISE_DB = {
     },
     {
       id: 'ch-pushup', name: 'Push-Up Finisher',
-      gear: 'Bodyweight (floor)', icon: 'pushup',
+      gear: 'Bodyweight (floor)', icon: 'pushup', staple: true,
       tags: ['compound', 'press', 'finisher'], muscles: 'Chest, triceps, core',
       video: 'perfect push up form',
       setup: [
@@ -2106,7 +2106,7 @@ const EXERCISE_DB = {
     },
     {
       id: 'ch-bar-dips', name: 'Parallel Bar Dips',
-      gear: 'Dip bars (or two sturdy chairs)', icon: 'dip', equip: 'body', also: ['arms'],
+      gear: 'Dip bars (or two sturdy chairs)', icon: 'dip', equip: 'body', also: ['arms'], staple: true,
       tags: ['compound', 'press', 'lower', 'triceps'], muscles: 'Lower chest, triceps',
       video: 'parallel bar dips proper form calisthenics',
       setup: [
@@ -2422,7 +2422,7 @@ const EXERCISE_DB = {
     },
     {
       id: 'ar-bench-dip', name: 'Bench Dips',
-      gear: 'Flat bench (bodyweight)', icon: 'dip',
+      gear: 'Flat bench (bodyweight)', icon: 'dip', staple: true,
       tags: ['triceps', 'finisher'], muscles: 'Triceps',
       video: 'bench dips proper form',
       setup: [

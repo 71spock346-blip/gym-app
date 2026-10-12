@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 27;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 28;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -121,7 +121,28 @@ const HIIT_FINISHERS = [
 
 function currentGoal() { return GOALS[state.goal] || GOALS.build; }
 function currentEquip() { return EQUIPMENT[state.equip] || EQUIPMENT.gym; }
-function allowed(ex) { return currentEquip().allow.includes(equipOf(ex)); }
+/* What the current equipment profile may schedule. With weights available,
+ * bodyweight moves are limited to the gym staples (pull-ups, chin-ups, dips,
+ * Nordic curls, push-up and bench-dip finishers…) plus core work; the
+ * calisthenics fillers only appear in Calisthenics mode. */
+function allowed(ex) {
+  const eq = currentEquip();
+  const kind = equipOf(ex);
+  if (!eq.allow.includes(kind)) return false;
+  if (kind === 'body' && eq.key !== 'body') return !!ex.staple || ex.tags.includes('core');
+  return true;
+}
+/* And even staples are capped: at most one bodyweight exercise (core aside)
+ * per day when weights are available, so a Build muscle day stays loaded.
+ * The cap lifts only when a day cannot otherwise be filled (e.g. the HIIT
+ * goal's push day, which avoids nearly every loaded chest lift). */
+const BODY_CAP = 1;
+const isBodyPick = (ex) => equipOf(ex) === 'body' && !ex.tags.includes('core');
+function bodyCapped(list) {
+  return currentEquip().key !== 'body' && list.filter(isBodyPick).length >= BODY_CAP;
+}
+/* Equipment physically available, ignoring the staple rule — the fallback pool. */
+function baseAllowed(ex) { return currentEquip().allow.includes(equipOf(ex)); }
 
 const KG_PER_LB = 0.45359237;
 const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
@@ -294,12 +315,20 @@ function applyGoal(picks, day, weekIdx, dayIdx, prevMine) {
   const add = (pred, n) => {
     for (const ex of pool) {
       if (n <= 0) break;
-      if (!taken.has(ex.id) && pred(ex)) { out.push(ex); taken.add(ex.id); n--; }
+      if (!taken.has(ex.id) && pred(ex) && !(isBodyPick(ex) && bodyCapped(out))) { out.push(ex); taken.add(ex.id); n--; }
     }
   };
   const extras = goal.extraSlots[day.key] || [];
   for (const slot of extras) add((ex) => has(ex, slot.tag), slot.count - count(slot.tag));
   add((ex) => !has(ex, 'core'), day.picks - out.length);
+  if (out.length < day.picks) {   // thin pool for this goal + equipment: fill from anything the kit allows, cap lifted
+    const relaxed = seededShuffle(dayPool(day.key), mulberry32(weekIdx * 4241 + dayIdx * 613 + 11))
+      .filter((ex) => !avoid.has(ex.id) && baseAllowed(ex) && !has(ex, 'core'));
+    for (const ex of relaxed) {
+      if (out.length >= day.picks) break;
+      if (!taken.has(ex.id)) { out.push(ex); taken.add(ex.id); }
+    }
+  }
 
   // Trim back to the day's size without breaking any slot rule (shared or
   // extra): drop isolation work first, compounds second, never core.
@@ -321,35 +350,43 @@ function applyGoal(picks, day, weekIdx, dayIdx, prevMine) {
 function pickWeek(day, weekIdx, dayIdx, prevIds) {
   const rng = mulberry32(weekIdx * 7919 + dayIdx * 104729 + 17);
   const phase = phaseForWeek(weekIdx);
+  // With weights available, loaded exercises come before bodyweight ones.
+  const loadedLast = (ex) => (currentEquip().key !== 'body' && equipOf(ex) === 'body') ? 1 : 0;
   const flavour = (ex) => {
     if (phase.key === 'strength') return ex.tags.includes('compound') ? 0 : 1;
     if (phase.key === 'volume') return ex.tags.includes('compound') ? 1 : 0;
     return 0;
   };
-  const pool = seededShuffle(dayPool(day.key), rng)
+  const sorted = seededShuffle(dayPool(day.key), rng)
     .map((ex, i) => ({ ex, i }))
     .sort((a, b) =>
       (prevIds.has(a.ex.id) - prevIds.has(b.ex.id)) ||
       (isBorrowed(a.ex, day.key) - isBorrowed(b.ex, day.key)) ||
+      (loadedLast(a.ex) - loadedLast(b.ex)) ||
       (flavour(a.ex) - flavour(b.ex)) ||
       (a.i - b.i))
-    .map((o) => o.ex)
-    .filter(allowed);
+    .map((o) => o.ex);
+  const pool = sorted.filter(allowed);
 
   const chosen = [];
   const taken = new Set();
-  for (const slot of day.slots) {
-    let need = slot.count;
-    for (const ex of pool) {
-      if (need === 0) break;
-      if (!taken.has(ex.id) && ex.tags.includes(slot.tag)) {
-        chosen.push(ex); taken.add(ex.id); need--;
+  const need = Object.fromEntries(day.slots.map((s) => [s.tag, s.count]));
+  const fill = (from, ok) => {
+    for (const slot of day.slots) {
+      for (const ex of from) {
+        if (need[slot.tag] <= 0) break;
+        if (ok(ex) && ex.tags.includes(slot.tag)) { chosen.push(ex); taken.add(ex.id); need[slot.tag]--; }
       }
     }
-  }
-  for (const ex of pool) {
-    if (chosen.length >= day.picks) break;
-    if (!taken.has(ex.id)) { chosen.push(ex); taken.add(ex.id); }
+    for (const ex of from) {
+      if (chosen.length >= day.picks) break;
+      if (ok(ex)) { chosen.push(ex); taken.add(ex.id); }
+    }
+  };
+  fill(pool, (ex) => !taken.has(ex.id) && !(isBodyPick(ex) && bodyCapped(chosen)));
+  // Thin pool for this mode? Fill the rest from anything the equipment allows, cap lifted.
+  if (chosen.length < day.picks || Object.values(need).some((n) => n > 0)) {
+    fill(sorted.filter(baseAllowed), (ex) => !taken.has(ex.id));
   }
 
   const isCompound = (ex) => ex.tags.includes('compound');

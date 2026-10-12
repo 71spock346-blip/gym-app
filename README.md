@@ -45,7 +45,11 @@ shared machine for machine. Switch any time via the goal pill in the banner.
 
 Every day's plan is rebuilt from exercises that fit the mode, with the same slot
 rules (leg day still gets quads + hamstrings + calves, arm day still gets 3 biceps
-+ 3 triceps moves).
++ 3 triceps moves). When weights are available, loaded exercises always come
+first: bodyweight moves are limited to the gym staples (pull-ups, chin-ups, dips,
+Nordic curls, push-up and bench-dip finishers) and capped at one per day, and
+only fill a slot nothing loaded can. The calisthenics-only fillers never appear
+outside Calisthenics mode.
 
 ### Machine busy? Tap to swap
 
