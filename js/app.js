@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 33;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 34;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -1281,6 +1281,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
       ${scheme.capped ? `<span class="scheme-cap" title="A set trimmed so this muscle stays near 12 hard sets this session">· volume cap</span>` : ''}
     </div>
     <div class="tempo-line">⏱ ${phase.tempo}</div>
+    ${focusBlock(ex)}
     ${weightBlock}
     <div class="sets-block">${setsBlock(ex, scheme, dateISO, phase, isAnchor)}</div>
     ${altChips(ex, day, chosenIds, weekIdx, dateISO, swappedFrom)}
@@ -1288,6 +1289,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
       <summary>${ico('book')} How to do it</summary>
       <div class="howto-body">
         ${photoDemo(ex)}
+        ${focusBlock(ex, true)}
         <h4>Set-up</h4>
         <ol>${ex.setup.map((s) => `<li>${s}</li>`).join('')}</ol>
         <h4>Doing the exercise</h4>

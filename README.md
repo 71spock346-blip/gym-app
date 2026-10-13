@@ -123,6 +123,12 @@ remembered if you close the app mid-session.
 - **Plate-stack machines.** Tap the unit next to any weight box to switch that
   exercise to *plates* — for stacks with unmarked plates you enter the plate count
   and get suggestions back as plate counts.
+- **Muscle focus map.** Every card shows a small front/back figure with the
+  target muscle lit in gold and the helpers in a dimmer gold, plus a one-line
+  mind–muscle cue ("Pull with your elbows, not your hands…"). The guide has a
+  larger "Where to feel it" version with a legend. The regions are read from each
+  exercise's muscle description (`js/muscles.js`), so new exercises get a map
+  automatically.
 - **How-to guides.** Every exercise card has a "How to do it" section with real
   start/finish photographs of the movement (cross-fading; tap to see them side by
   side), set-up steps, execution steps, form tips, and common mistakes. The photos
