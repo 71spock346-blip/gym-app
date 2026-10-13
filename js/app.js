@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 32;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 33;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -72,6 +72,12 @@ const GOALS = {
       legs: [{ tag: 'glute', count: 2 }],
       chest: [{ tag: 'core', count: 2 }],
       arms: [{ tag: 'core', count: 1 }],
+      // the twice-a-week split
+      upper: [{ tag: 'core', count: 1 }],
+      lower: [{ tag: 'glute', count: 2 }],
+      push: [{ tag: 'core', count: 2 }],
+      pull: [{ tag: 'core', count: 1 }],
+      legs2: [{ tag: 'glute', count: 2 }],
     },
   },
 };
@@ -122,6 +128,28 @@ const HIIT_FINISHERS = [
 
 function currentGoal() { return GOALS[state.goal] || GOALS.build; }
 function currentEquip() { return EQUIPMENT[state.equip] || EQUIPMENT.gym; }
+
+/* ------------------------------ training splits ------------------------------ */
+/* Which five days make up the week. The twice-a-week layout is the default
+ * for new users: the research on training frequency favours hitting each
+ * muscle twice a week over once. The body-part split stays for those who
+ * prefer it (or whose partner is on it). */
+const SPLITS = {
+  twice: {
+    key: 'twice', name: 'Upper · Lower · Push · Pull · Legs', badge: '2×', days: DAYS_TWICE,
+    short: 'Every muscle twice a week — recommended',
+    desc: 'Mon upper body, Tue lower, Wed push, Thu pull, Fri legs. Each muscle is trained twice a week, which the research on training frequency favours for growth.',
+  },
+  bodypart: {
+    key: 'bodypart', name: 'One muscle group a day', badge: '1×', days: DAYS,
+    short: 'Shoulders · Back · Legs · Chest · Arms',
+    desc: 'The classic body-part split: one muscle group per day, once a week. Simple, and the easiest to share with a partner.',
+  },
+};
+function currentSplit() { return SPLITS[state.split] || SPLITS.bodypart; }
+function currentDays() { return currentSplit().days; }
+/* The five-day list a day object belongs to (either split can be planned). */
+function daysOf(day) { return Object.values(SPLITS).map((s) => s.days).find((d) => d.includes(day)) || currentDays(); }
 /* What the current equipment profile may schedule. With weights available,
  * bodyweight moves are limited to the gym staples (pull-ups, chin-ups, dips,
  * Nordic curls, push-up and bench-dip finishers…) plus core work; the
@@ -191,7 +219,11 @@ const state = {
   swaps: store.read('swaps', {}),                  // { 'YYYY-MM-DD': { plannedExId: swappedInExId } } — "machine busy" swaps
   sessions: store.read('sessions', {}),            // { 'YYYY-MM-DD': { day, name, sets, total, completed, ex } }
   prs: store.read('prs', []),                      // [{ id, name, w, plates, date }]
-  ob: { goal: 'build', equip: 'gym' },             // onboarding choices in progress
+  split: store.read('split', 'bodypart'),          // 'twice' | 'bodypart' — which five-day layout
+  reps: store.read('reps', {}),                    // { 'YYYY-MM-DD': { exId: [reps per set] } }
+  anchors: store.read('anchors', {}),              // { exId: { zones: { hypertrophy|strength|volume: { w } }, applied: { date: { zone, outcome, step, at } } } }
+  editSet: null,                                   // { date, ex, set } — the done set whose reps are being adjusted
+  ob: { goal: 'build', equip: 'gym', split: 'twice' },   // onboarding choices in progress
 };
 // Phones that picked a goal before onboarding existed skip straight in.
 if (!state.profile && state.goal) { state.profile = { name: '', onboarded: true }; store.write('profile', state.profile); }
@@ -277,14 +309,98 @@ function cycleForWeek(weekIdx) { return Math.floor(weekIdx / 4); }
  * together (with the same equipment) still see the same exercises. */
 const ANTI_REPEAT_ANCHOR = Math.floor((Date.UTC(2026, 0, 5) - WEEK_EPOCH) / MS_PER_WEEK);
 
+/* Slots can pin a tag to one pool (`from`), e.g. a chest press on upper day. */
+const matchesSlot = (ex, slot) => ex.tags.includes(slot.tag) && (!slot.from || ex.group === slot.from);
+const slotKey = (slot) => slot.tag + (slot.from ? '@' + slot.from : '');
+
+/* ANCHOR LIFTS: each day's main movement(s) are fixed for a whole 4-week cycle
+ * so they can be practised and progressed (double progression, see the reps
+ * section), then rotated to a fresh candidate next cycle. Chosen with a
+ * cycle-level replay so every phone agrees, with last cycle's anchors sent to
+ * the back of the queue and no exercise anchoring two days of one split.
+ * Outside calisthenics mode an anchor is always a loaded lift. */
+const ANCHOR_CYCLE_START = Math.floor(ANTI_REPEAT_ANCHOR / 4);
+const anchorCache = new Map();
+function anchorCandidates(day, spec) {
+  const loadedOnly = currentEquip().key !== 'body';
+  return dayPool(day).filter((ex) => allowed(ex) && matchesSlot(ex, spec) &&
+    !ex.tags.includes('core') && !ex.tags.includes('finisher') &&
+    (spec.iso || ex.tags.includes('compound')) && !(loadedOnly && isBodyPick(ex)));
+}
+function cycleAnchors(days, cycleIdx) {
+  const key = `${state.equip}|${days[0].key}|${cycleIdx}`;
+  if (anchorCache.has(key)) return anchorCache.get(key);
+  const last = {};   // exercise id -> last cycle it anchored
+  const stale = (id, c) => Math.min(2, c - (id in last ? last[id] : -99));
+  let result = new Map();
+  for (let c = Math.min(cycleIdx, ANCHOR_CYCLE_START); c <= cycleIdx; c++) {
+    result = new Map();
+    const taken = new Set();
+    days.forEach((day, dayIdx) => {
+      const rng = mulberry32(c * 2797 + dayIdx * 431 + 3);
+      const picks = [];
+      for (const spec of day.anchors || []) {
+        const cands = seededShuffle(anchorCandidates(day, spec), rng)
+          .map((ex, i) => ({ ex, i }))
+          .sort((a, b) => (stale(b.ex.id, c) - stale(a.ex.id, c)) || (a.i - b.i))
+          .map((o) => o.ex);
+        let n = spec.count;
+        for (const ex of cands) {
+          if (n <= 0) break;
+          if (!taken.has(ex.id)) { picks.push(ex); taken.add(ex.id); n--; }
+        }
+      }
+      picks.forEach((ex) => { last[ex.id] = c; });
+      result.set(day.key, picks);
+    });
+  }
+  anchorCache.set(key, result);
+  return result;
+}
+function anchorsFor(day, weekIdx) {
+  return cycleAnchors(daysOf(day), cycleForWeek(weekIdx)).get(day.key) || [];
+}
+
+/* VOLUME CAP: around 12 hard sets per muscle per session is where the research
+ * shows returns flattening, so once the week's schemes are drawn, sets are
+ * trimmed from the last accessories (never below 2, never from an anchor)
+ * until each of the day's muscle groups is under its cap. */
+const matchesCap = (ex, cap) => (cap.group && ex.group === cap.group) || (cap.tag && ex.tags.includes(cap.tag));
+function applyVolumeCaps(exercises, schemes, day, anchorIds) {
+  for (const cap of day.caps || []) {
+    const idx = exercises.map((ex, i) => i).filter((i) => matchesCap(exercises[i], cap));
+    const total = () => idx.reduce((n, i) => n + schemes[i].sets, 0);
+    for (let guard = 0; guard < 40 && total() > cap.cap; guard++) {
+      const i = idx.slice().reverse().find((j) => !anchorIds.has(exercises[j].id) && schemes[j].sets > 2);
+      if (i === undefined) break;
+      schemes[i] = { ...schemes[i], sets: schemes[i].sets - 1, capped: true };
+    }
+  }
+  return schemes;
+}
+
 function pickExercises(day, weekIdx, dayIdx) {
+  const days = daysOf(day);
+  // Some days avoid repeating an earlier day's picks in the same week (push and
+  // pull after upper, the second leg day after the first).
+  const base = day.exclude ? days.find((d) => d.key === day.exclude) : null;
+  const baseIdx = base ? days.indexOf(base) : -1;
   const lastUsed = {};   // exercise id -> last week it was in the shared plan
   const lastMine = {};   // same for the goal-adjusted plan
+  const baseUsed = {}, baseMine = {};
   let mine = null;
   for (let w = Math.min(weekIdx, ANTI_REPEAT_ANCHOR); w <= weekIdx; w++) {
-    const picks = pickWeek(day, w, dayIdx, lastUsed);
+    let exclude = null;
+    if (base) {   // the paired day's plan this week, shared and goal-adjusted alike
+      const bp = pickWeek(base, w, baseIdx, baseUsed);
+      bp.forEach((ex) => { baseUsed[ex.id] = w; });
+      const bm = applyGoal(bp, base, w, baseIdx, baseMine);
+      bm.forEach((ex) => { baseMine[ex.id] = w; });
+      exclude = new Set(bp.concat(bm).map((ex) => ex.id));
+    }
+    const picks = pickWeek(day, w, dayIdx, lastUsed, exclude);
     picks.forEach((ex) => { lastUsed[ex.id] = w; });
-    mine = applyGoal(picks, day, w, dayIdx, lastMine);
+    mine = applyGoal(picks, day, w, dayIdx, lastMine, exclude);
     mine.forEach((ex) => { lastMine[ex.id] = w; });
   }
   return mine;
@@ -306,25 +422,32 @@ function staleness(lastWeek, weekIdx, id) {
  * other pools that list it under `also` (e.g. chin-ups and dips double as arm
  * work). Borrowed moves come after the day's own, so they only get picked when
  * the native pool runs short — which is exactly the calisthenics case. */
-function dayPool(dayKey) {
-  const own = EXERCISE_DB[dayKey] || [];
-  const borrowed = Object.entries(EXERCISE_DB)
-    .filter(([k]) => k !== dayKey)
-    .flatMap(([, list]) => list.filter((ex) => ex.also && ex.also.includes(dayKey)));
+function poolsOf(dayOrKey) { return typeof dayOrKey === 'string' ? [dayOrKey] : (dayOrKey.pools || [dayOrKey.key]); }
+function dayPool(dayOrKey) {
+  const pools = poolsOf(dayOrKey);
+  const own = pools.flatMap((k) => EXERCISE_DB[k] || []);
+  const seen = new Set(own.map((ex) => ex.id));
+  const borrowed = Object.values(EXERCISE_DB).flat()
+    .filter((ex) => !seen.has(ex.id) && ex.also && ex.also.some((k) => pools.includes(k)));
   return own.concat(borrowed);
 }
-function isBorrowed(ex, dayKey) { return !!(ex.also && ex.also.includes(dayKey)); }
+function isBorrowed(ex, dayOrKey) { return !poolsOf(dayOrKey).includes(ex.group); }
 
-function applyGoal(picks, day, weekIdx, dayIdx, lastMine) {
+function applyGoal(picks, day, weekIdx, dayIdx, lastMine, exclude) {
   const goal = currentGoal();
   if (!goal.avoid) return picks;
   const avoid = new Set(goal.avoid);
   const rng = mulberry32(weekIdx * 4241 + dayIdx * 613 + 7);
-  const pool = seededShuffle(dayPool(day.key).concat(EXERCISE_DB.core), rng)
+  // Another day's anchors and a paired day's picks go to the back of the refill queue.
+  const others = new Set();
+  for (const [k, list] of cycleAnchors(daysOf(day), cycleForWeek(weekIdx))) if (k !== day.key) list.forEach((ex) => others.add(ex.id));
+  const excluded = (ex) => ((exclude && exclude.has(ex.id)) || others.has(ex.id) ? 1 : 0);
+  const pool = seededShuffle(dayPool(day).concat(EXERCISE_DB.core), rng)
     .map((ex, i) => ({ ex, i }))
     .sort((a, b) =>
+      (excluded(a.ex) - excluded(b.ex)) ||
       (staleness(lastMine, weekIdx, b.ex.id) - staleness(lastMine, weekIdx, a.ex.id)) ||
-      (isBorrowed(a.ex, day.key) - isBorrowed(b.ex, day.key)) ||
+      (isBorrowed(a.ex, day) - isBorrowed(b.ex, day)) ||
       (a.i - b.i))
     .map((o) => o.ex)
     .filter((ex) => !avoid.has(ex.id) && allowed(ex));
@@ -342,7 +465,7 @@ function applyGoal(picks, day, weekIdx, dayIdx, lastMine) {
   for (const slot of extras) add((ex) => has(ex, slot.tag), slot.count - count(slot.tag));
   add((ex) => !has(ex, 'core'), day.picks - out.length);
   if (out.length < day.picks) {   // thin pool for this goal + equipment: fill from anything the kit allows, cap lifted
-    const relaxed = seededShuffle(dayPool(day.key), mulberry32(weekIdx * 4241 + dayIdx * 613 + 11))
+    const relaxed = seededShuffle(dayPool(day), mulberry32(weekIdx * 4241 + dayIdx * 613 + 11))
       .filter((ex) => !avoid.has(ex.id) && baseAllowed(ex) && !has(ex, 'core'));
     for (const ex of relaxed) {
       if (out.length >= day.picks) break;
@@ -353,21 +476,23 @@ function applyGoal(picks, day, weekIdx, dayIdx, lastMine) {
   // Trim back to the day's size without breaking any slot rule (shared or
   // extra): drop isolation work first, compounds second, never core.
   const slots = day.slots.concat(extras);
-  const removable = (i) => !has(out[i], 'core') &&
-    slots.every((s) => !has(out[i], s.tag) || count(s.tag) - 1 >= s.count);
+  const anchorIds = new Set(anchorsFor(day, weekIdx).map((ex) => ex.id));
+  const countSlot = (s) => out.filter((ex) => matchesSlot(ex, s)).length;
+  const removable = (i) => !has(out[i], 'core') && !anchorIds.has(out[i].id) &&
+    slots.every((s) => !matchesSlot(out[i], s) || countSlot(s) - 1 >= s.count);
   while (out.length > day.picks) {
     let idx = -1;
     for (let i = out.length - 1; i >= 0 && idx < 0; i--) if (removable(i) && !has(out[i], 'compound')) idx = i;
     for (let i = out.length - 1; i >= 0 && idx < 0; i--) if (removable(i)) idx = i;
     out.splice(idx < 0 ? out.length - 1 : idx, 1);
   }
-  // Same ordering as the shared plan: compounds first, finishers late, core last.
-  out.sort((a, b) => (has(a, 'core') - has(b, 'core')) || (has(a, 'finisher') - has(b, 'finisher')) ||
-    (has(b, 'compound') - has(a, 'compound')));
+  // Same ordering as the shared plan: anchors, then compounds, finishers late, core last.
+  out.sort((a, b) => (anchorIds.has(b.id) - anchorIds.has(a.id)) || (has(a, 'core') - has(b, 'core')) ||
+    (has(a, 'finisher') - has(b, 'finisher')) || (has(b, 'compound') - has(a, 'compound')));
   return out;
 }
 
-function pickWeek(day, weekIdx, dayIdx, lastUsed) {
+function pickWeek(day, weekIdx, dayIdx, lastUsed, exclude) {
   const rng = mulberry32(weekIdx * 7919 + dayIdx * 104729 + 17);
   const phase = phaseForWeek(weekIdx);
   // With weights available, loaded exercises come before bodyweight ones.
@@ -377,25 +502,38 @@ function pickWeek(day, weekIdx, dayIdx, lastUsed) {
     if (phase.key === 'volume') return ex.tags.includes('compound') ? 1 : 0;
     return 0;
   };
-  const sorted = seededShuffle(dayPool(day.key), rng)
+  // Anchors first: they hold their slots for the whole cycle. Another day's
+  // anchors, and anything already used this week on a paired day, go to the
+  // back of the accessory queue.
+  const anchors = anchorsFor(day, weekIdx);
+  const others = new Set();
+  for (const [k, list] of cycleAnchors(daysOf(day), cycleForWeek(weekIdx))) if (k !== day.key) list.forEach((ex) => others.add(ex.id));
+  const excluded = (ex) => ((exclude && exclude.has(ex.id)) || others.has(ex.id) ? 1 : 0);
+  const sorted = seededShuffle(dayPool(day), rng)
     .map((ex, i) => ({ ex, i }))
     .sort((a, b) =>
+      (excluded(a.ex) - excluded(b.ex)) ||
       (staleness(lastUsed, weekIdx, b.ex.id) - staleness(lastUsed, weekIdx, a.ex.id)) ||
-      (isBorrowed(a.ex, day.key) - isBorrowed(b.ex, day.key)) ||
+      (isBorrowed(a.ex, day) - isBorrowed(b.ex, day)) ||
       (loadedLast(a.ex) - loadedLast(b.ex)) ||
       (flavour(a.ex) - flavour(b.ex)) ||
       (a.i - b.i))
     .map((o) => o.ex);
   const pool = sorted.filter(allowed);
 
-  const chosen = [];
-  const taken = new Set();
-  const need = Object.fromEntries(day.slots.map((s) => [s.tag, s.count]));
+  const chosen = anchors.slice();
+  const taken = new Set(anchors.map((ex) => ex.id));
+  const need = {};
+  for (const slot of day.slots) need[slotKey(slot)] = slot.count;
+  for (const ex of anchors) {
+    const slot = day.slots.find((s) => need[slotKey(s)] > 0 && matchesSlot(ex, s));
+    if (slot) need[slotKey(slot)]--;
+  }
   const fill = (from, ok) => {
     for (const slot of day.slots) {
       for (const ex of from) {
-        if (need[slot.tag] <= 0) break;
-        if (ok(ex) && ex.tags.includes(slot.tag)) { chosen.push(ex); taken.add(ex.id); need[slot.tag]--; }
+        if (need[slotKey(slot)] <= 0) break;
+        if (ok(ex) && matchesSlot(ex, slot)) { chosen.push(ex); taken.add(ex.id); need[slotKey(slot)]--; }
       }
     }
     for (const ex of from) {
@@ -409,25 +547,28 @@ function pickWeek(day, weekIdx, dayIdx, lastUsed) {
     fill(sorted.filter(baseAllowed), (ex) => !taken.has(ex.id));
   }
 
+  const isAnchor = (ex) => anchors.includes(ex);
   const isCompound = (ex) => ex.tags.includes('compound');
   const isFinisher = (ex) => ex.tags.includes('finisher');
   chosen.sort((a, b) =>
-    (isFinisher(a) - isFinisher(b)) || (isCompound(b) - isCompound(a)));
+    (isAnchor(b) - isAnchor(a)) || (isFinisher(a) - isFinisher(b)) || (isCompound(b) - isCompound(a)));
   return chosen.slice(0, day.picks);
 }
 
 /* Per-exercise scheme for the week: sets/reps drawn from the phase's options
  * with a seeded per-exercise variation, so schemes differ between exercises
  * and between weeks. */
-function schemeFor(ex, phase, weekIdx, exOrdinal) {
+function schemeFor(ex, phase, weekIdx, exOrdinal, isAnchor) {
   const rng = mulberry32(weekIdx * 31337 + exOrdinal * 977 + hashId(ex.id));
   const iso = !ex.tags.includes('compound');
   const goal = currentGoal();
   const repsOptions = iso ? phase.isoReps : phase.reps;
-  let [lo, hi] = repsOptions[Math.floor(rng() * repsOptions.length)];
+  // Anchors keep one fixed range and the fuller set count per phase, so double
+  // progression compares like with like from cycle to cycle.
+  let [lo, hi] = isAnchor ? repsOptions[0] : repsOptions[Math.floor(rng() * repsOptions.length)];
   lo = Math.min(lo + goal.repsDelta, 18);
   hi = Math.min(hi + goal.repsDelta, 22);
-  const sets = phase.sets[Math.floor(rng() * phase.sets.length)];
+  const sets = isAnchor ? phase.sets[phase.sets.length - 1] : phase.sets[Math.floor(rng() * phase.sets.length)];
   const restSec = Math.max(goal.restMin || 40, Math.round((phase.restSec * goal.restMult) / 5) * 5);
   return {
     sets, repsLo: lo, repsHi: hi,
@@ -454,9 +595,9 @@ function specificTags(ex) { return ex.tags.filter((t) => !GENERIC_TAGS.has(t)); 
 
 /* "Machine busy?" — another exercise for the same muscles, from the equipment
  * you have, that isn't already in today's plan. Stable for the week. */
-function swapSuggestion(ex, dayKey, chosenIds, weekIdx) {
+function swapSuggestion(ex, day, chosenIds, weekIdx) {
   const avoid = new Set(currentGoal().avoid || []);
-  const pool = (ex.tags.includes('core') ? EXERCISE_DB.core : dayPool(dayKey)).filter(allowed);
+  const pool = (ex.tags.includes('core') ? EXERCISE_DB.core : dayPool(day)).filter(allowed);
   const specific = specificTags(ex);
   const c = pool.filter((e) => e.id !== ex.id && !chosenIds.has(e.id) && !avoid.has(e.id) &&
     e.tags.some((t) => specific.includes(t)));
@@ -466,8 +607,8 @@ function swapSuggestion(ex, dayKey, chosenIds, weekIdx) {
 }
 
 /* The same movement for another equipment profile ("no machine? do this"). */
-function altForEquip(ex, dayKey, equipKey, weekIdx, chosenIds) {
-  const pool = ex.tags.includes('core') ? EXERCISE_DB.core : dayPool(dayKey);
+function altForEquip(ex, day, equipKey, weekIdx, chosenIds) {
+  const pool = ex.tags.includes('core') ? EXERCISE_DB.core : dayPool(day);
   const specific = specificTags(ex);
   const avoid = new Set(currentGoal().avoid || []);
   const c = pool.filter((e) => e.id !== ex.id && equipOf(e) === equipKey && !avoid.has(e.id) &&
@@ -559,10 +700,122 @@ function pruneDone() {
   while (keys.length > 60) delete state.done[keys.shift()];
 }
 
+/* ------------------------------ reps & double progression ------------------------------ */
+/* Every ticked set logs its reps (the top of the range until you adjust it). */
+function repsFor(dateISO, exId) { return (state.reps[dateISO] && state.reps[dateISO][exId]) || []; }
+function setReps(dateISO, exId, setIdx, value) {
+  if (!state.reps[dateISO]) state.reps[dateISO] = {};
+  const arr = (state.reps[dateISO][exId] || []).slice();
+  arr[setIdx] = value;
+  state.reps[dateISO][exId] = arr;
+  const keys = Object.keys(state.reps).sort();
+  while (keys.length > 60) delete state.reps[keys.shift()];
+  store.write('reps', state.reps);
+}
+
+/* Which working zone a week belongs to; the deload has none (60% of hypertrophy). */
+const zoneOf = (phase) => (phase.key === 'deload' ? null : phase.key);
+const anchorRec = (exId) => state.anchors[exId] || (state.anchors[exId] = { zones: {}, applied: {} });
+function derivedZoneWeight(ex, zone) {
+  const base = state.baselines[ex.id];
+  if (!base || !base.w) return null;
+  const phase = PHASES.find((p) => p.key === zone);
+  return base.w * (ex.tags.includes('compound') ? phase.pct : phase.isoPct) * currentGoal().pctMult;
+}
+/* The weight an anchor is worked at: the zone's stored weight (typed in, or
+ * raised by double progression), else derived from the saved ~10-rep load.
+ * On a date already evaluated, the weight it was actually done at. */
+function anchorWorkingWeight(ex, phase, dateISO) {
+  const rec = state.anchors[ex.id];
+  const ap = rec && rec.applied && dateISO && rec.applied[dateISO];
+  if (ap && ap.at) return ap.at;
+  const zone = zoneOf(phase) || 'hypertrophy';
+  const z = rec && rec.zones && rec.zones[zone];
+  const w = (z && z.w) || derivedZoneWeight(ex, zone);
+  if (!w) return null;
+  return zoneOf(phase) ? w : w * 0.6;
+}
+const anchorStep = (ex, plates) => (plates ? 1 : ['quad', 'ham', 'glute'].some((t) => ex.tags.includes(t)) ? 5 : 2.5);
+const anchorEvents = [];   // outcomes that just changed, for a toast
+
+/* DOUBLE PROGRESSION on anchor lifts: hit the top of the rep range on every
+ * set and that zone's weight goes up for next cycle; otherwise hold the weight
+ * and chase the reps. Idempotent: re-ticking, editing reps or undoing a set on
+ * the same date re-evaluates and corrects the zone weight. */
+function evaluateAnchor(dateISO, ex, scheme, phase) {
+  const zone = zoneOf(phase);
+  if (!zone || equipOf(ex) === 'body') return null;
+  const done = doneCount(dateISO, ex.id);
+  const reps = repsFor(dateISO, ex.id);
+  const complete = done >= scheme.sets;
+  const allTop = complete && Array.from({ length: scheme.sets }, (_, i) => reps[i] ?? scheme.repsHi).every((r) => r >= scheme.repsHi);
+  const outcome = !complete ? 'pending' : allTop ? 'up' : 'hold';
+  const prev = state.anchors[ex.id] && state.anchors[ex.id].applied && state.anchors[ex.id].applied[dateISO];
+  if ((prev ? prev.outcome : 'pending') === outcome && (!prev || prev.zone === zone)) return outcome;
+  const rec = anchorRec(ex.id);
+  const plates = !!(state.baselines[ex.id] && state.baselines[ex.id].plates);
+  const step = anchorStep(ex, plates);
+  if (!rec.zones[zone] || !rec.zones[zone].w) { const d = derivedZoneWeight(ex, zone); if (d) rec.zones[zone] = { w: d }; }
+  if (prev && prev.outcome === 'up' && rec.zones[prev.zone]) rec.zones[prev.zone].w -= prev.step;   // take back an earlier bump
+  const at = rec.zones[zone] ? rec.zones[zone].w : null;
+  if (outcome === 'up' && rec.zones[zone]) rec.zones[zone].w += step;
+  if (outcome === 'pending') delete rec.applied[dateISO];
+  else rec.applied[dateISO] = { zone, outcome, step, at };
+  const keys = Object.keys(rec.applied).sort();
+  while (keys.length > 12) delete rec.applied[keys.shift()];
+  store.write('anchors', state.anchors);
+  if (outcome !== 'pending') anchorEvents.push({ ex, outcome, at, step, plates, zone, hi: scheme.repsHi });
+  return outcome;
+}
+
+/* The double-progression line under an anchor's set bubbles. */
+function progressNote(ex, scheme, phase, dateISO) {
+  const zone = zoneOf(phase);
+  if (equipOf(ex) === 'body') return `<p class="prog-note">${ico('target')} Anchor lift — progress by reps: hit ${scheme.repsHi} on every set, then make the move harder.</p>`;
+  if (!zone) return `<p class="prog-note">${ico('moon')} Anchor lift — deload: 60% of your hypertrophy weight, perfect form.</p>`;
+  const rec = state.anchors[ex.id];
+  const ap = rec && rec.applied && rec.applied[dateISO];
+  const plates = !!(state.baselines[ex.id] && state.baselines[ex.id].plates);
+  const fmt = (w) => (plates ? formatPlates(w) : formatWeight(w));
+  const step = anchorStep(ex, plates);
+  const week = `${phase.name.toLowerCase()} week`;
+  if (ap && ap.outcome === 'up') {
+    return ap.at
+      ? `<p class="prog-note up">${ico('check')} ${scheme.repsHi} reps on every set at ${fmt(ap.at)} — next ${week}: <strong>${fmt(ap.at + step)}</strong></p>`
+      : `<p class="prog-note up">${ico('check')} ${scheme.repsHi} reps on every set — enter your weight and it goes up next ${week}.</p>`;
+  }
+  if (ap && ap.outcome === 'hold') {
+    return `<p class="prog-note hold">${ico('target')} ${ap.at ? `Hold ${fmt(ap.at)} next ${week}` : `Same weight next ${week}`} — chase ${scheme.repsHi} reps on all ${scheme.sets} sets, then it goes up.</p>`;
+  }
+  const w = anchorWorkingWeight(ex, phase, dateISO);
+  return `<p class="prog-note">${ico('target')} Anchor lift — double progression: ${scheme.repsHi} reps on all ${scheme.sets} sets${w ? ` at ${fmt(w)}` : ''} → +${plates ? '1 plate' : formatWeight(step)} next ${week}.</p>`;
+}
+
+/* Set bubbles, plus the reps stepper for the done set being adjusted and, on
+ * an anchor lift, the double-progression note. Re-rendered in place on every tick. */
+function setsBlock(ex, scheme, dateISO, phase, isAnchor) {
+  const completed = doneCount(dateISO, ex.id);
+  const reps = repsFor(dateISO, ex.id);
+  const edit = state.editSet && state.editSet.date === dateISO && state.editSet.ex === ex.id ? state.editSet.set : 0;
+  const bubbles = Array.from({ length: scheme.sets }, (_, s) => `
+    <button class="set-bubble ${s < completed ? 'done' : ''} ${edit === s + 1 ? 'editing' : ''}" type="button"
+      data-ex="${ex.id}" data-set="${s + 1}" data-date="${dateISO}" data-rest="${scheme.restSec}"
+      aria-label="${s < completed ? `Set ${s + 1}: ${reps[s] ?? scheme.repsHi} reps — tap to adjust` : `Mark set ${s + 1} done`}"><span class="sb-num">${s + 1}</span>${s < completed ? `<span class="sb-reps">${reps[s] ?? scheme.repsHi}</span>` : ''}</button>`).join('');
+  const stepper = edit && edit <= completed ? `
+    <div class="reps-row">
+      <span class="reps-label">Set ${edit}</span>
+      <button class="reps-btn" type="button" data-reps="-1" data-ex="${ex.id}" data-set="${edit}" data-date="${dateISO}" aria-label="One rep fewer">−</button>
+      <span class="reps-val">${reps[edit - 1] ?? scheme.repsHi}<small>reps</small></span>
+      <button class="reps-btn" type="button" data-reps="1" data-ex="${ex.id}" data-set="${edit}" data-date="${dateISO}" aria-label="One rep more">+</button>
+      <button class="reps-undo" type="button" data-ex="${ex.id}" data-set="${edit}" data-date="${dateISO}">${ico('undo')} Undo set</button>
+    </div>` : '';
+  return `<div class="sets-row">${bubbles}</div>${stepper}${isAnchor ? progressNote(ex, scheme, phase, dateISO) : ''}`;
+}
+
 /* Keep a compact record of every session touched, for History. */
 function logSession(dateISO) {
   if (!currentPlan || currentPlan.dateISO !== dateISO) return;
-  const day = DAYS[currentPlan.dayIdx];
+  const day = currentDays()[currentPlan.dayIdx];
   const total = Object.values(currentPlan.sets).reduce((a, b) => a + b, 0);
   const sets = currentPlan.exercises.reduce((n, ex) => n + Math.min(doneCount(dateISO, ex.id), currentPlan.sets[ex.id]), 0);
   if (sets === 0) { delete state.sessions[dateISO]; }
@@ -768,9 +1021,11 @@ function renderOnboarding() {
       <div class="choice-grid">${choiceCards('ob-goal', Object.values(GOALS), state.ob.goal, 'goal')}</div>
       <h3 class="ob-h">Your equipment</h3>
       <div class="choice-grid">${choiceCards('ob-equip', Object.values(EQUIPMENT), state.ob.equip, 'equip')}</div>
+      <h3 class="ob-h">Your week</h3>
+      <div class="choice-grid">${choiceCards('ob-split', Object.values(SPLITS), state.ob.split, 'split')}</div>
       <button id="obStart" class="primary-btn" type="button">Let's go ${ico('arrowRight')}</button>
-      <p class="ob-note">Training with a partner? Each phone keeps its own goal and equipment — you'll still get the same
-      muscle group on the same day.</p>
+      <p class="ob-note">Training with a partner? Pick the same week layout and each phone keeps its own goal and
+      equipment — you'll still get the same muscles on the same day.</p>
     </div>`;
 }
 
@@ -779,9 +1034,11 @@ function finishOnboarding() {
   state.profile = { name, onboarded: true };
   state.goal = state.ob.goal;
   state.equip = state.ob.equip;
+  state.split = state.ob.split || 'twice';
   store.write('profile', state.profile);
   store.write('goal', state.goal);
   store.write('equip', state.equip);
+  store.write('split', state.split);
   state.view = 'workout';
   render();
   window.scrollTo(0, 0);   // the Start button sits at the bottom of the form; land on the hero, not mid-plan
@@ -790,7 +1047,8 @@ function finishOnboarding() {
 
 /* ------------------------------ workout view ------------------------------ */
 function renderPhaseBanner() {
-  const phase = phaseForWeek(displayedWeekIndex());
+  const weekIdx = displayedWeekIndex();
+  const phase = phaseForWeek(weekIdx);
   const goal = currentGoal();
   $('#phaseBanner').innerHTML = `
     <div class="phase-head">
@@ -799,11 +1057,12 @@ function renderPhaseBanner() {
       <button id="goalPill" class="goal-pill" type="button"
         title="Tap to switch goal">${ico(goal.icon)} ${goal.name} ${ico('swap')}</button>
     </div>
-    <p class="phase-desc">${phase.desc}</p>`;
+    <p class="phase-desc">${phase.desc} <span class="phase-week">Week ${(((weekIdx % 4) + 4) % 4) + 1} of 4 —
+      anchor lifts stay fixed all cycle.</span></p>`;
 }
 
 function renderTabs() {
-  const tabs = DAYS.map((day, i) => {
+  const tabs = currentDays().map((day, i) => {
     const iso = dayDateISO(i);
     const s = state.sessions[iso];
     const mark = s ? (s.completed ? '✓' : '·') : '';
@@ -820,7 +1079,7 @@ function renderDay() {
   const weekIdx = displayedWeekIndex();
   const phase = phaseForWeek(weekIdx);
   const dayIdx = state.selectedDay;
-  const day = DAYS[dayIdx];
+  const day = currentDays()[dayIdx];
   const dateISO = dayDateISO(dayIdx);
   // Today's "machine busy" swaps replace the planned move in place.
   const planned = pickExercises(day, weekIdx, dayIdx);
@@ -839,11 +1098,15 @@ function renderDay() {
     <div class="note-card hiit-note">${ico('link')} <strong>Supersets:</strong> exercises marked A, B, C are pairs —
       do both back to back with no rest, then rest once. Keeps the heart rate up and the session short.</div>` : '';
 
-  const schemes = exercises.map((ex, i) => schemeFor(ex, phase, weekIdx, i));
-  currentPlan = { dateISO, dayIdx, exercises, schemes, isToday, sets: Object.fromEntries(exercises.map((ex, i) => [ex.id, schemes[i].sets])) };
+  // An anchor keeps its status only while it is the planned lift (a swapped-in stand-in is an accessory).
+  const anchorIds = new Set(anchorsFor(day, weekIdx).filter((ex) => exercises.includes(ex)).map((ex) => ex.id));
+  const schemes = applyVolumeCaps(exercises, exercises.map((ex, i) => schemeFor(ex, phase, weekIdx, i, anchorIds.has(ex.id))), day, anchorIds);
+  currentPlan = { dateISO, dayIdx, exercises, schemes, phase, anchorIds, isToday, sets: Object.fromEntries(exercises.map((ex, i) => [ex.id, schemes[i].sets])) };
+  exercises.forEach((ex, i) => { if (anchorIds.has(ex.id)) evaluateAnchor(dateISO, ex, schemes[i], phase); });
+  anchorEvents.length = 0;   // a render is not a tap: nothing to announce
 
   const chosenIds = new Set(exercises.map((ex) => ex.id));
-  const cards = exercises.map((ex, i) => exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLabel(i), schemes[i], swappedFrom[i])).join('');
+  const cards = exercises.map((ex, i) => exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLabel(i), schemes[i], swappedFrom[i], anchorIds.has(ex.id))).join('');
 
   const equipNote = currentEquip().key !== 'gym' ? `
     <div class="note-card equip-note">${ico(currentEquip().icon)} <strong>${currentEquip().name} mode</strong> —
@@ -870,13 +1133,18 @@ function refreshProgress() {
   const { dateISO, dayIdx, exercises, schemes, isToday } = currentPlan;
   $$('.exercise-card[data-ex]').forEach((card) => {
     const id = card.dataset.ex;
+    const i = exercises.findIndex((ex) => ex.id === id);
+    if (i < 0) return;
     const sets = currentPlan.sets[id] || 0;
     const done = doneCount(dateISO, id);
     card.classList.toggle('card-done', sets > 0 && done >= sets);
-    card.querySelectorAll('.set-bubble').forEach((b, i) => b.classList.toggle('done', i < done));
+    const isAnchor = currentPlan.anchorIds.has(id);
+    if (isAnchor) evaluateAnchor(dateISO, exercises[i], schemes[i], currentPlan.phase);
+    const block = card.querySelector('.sets-block');
+    if (block) block.innerHTML = setsBlock(exercises[i], schemes[i], dateISO, currentPlan.phase, isAnchor);
   });
   const hero = $('.hero');
-  if (hero) { hero.outerHTML = heroCard(DAYS[dayIdx], exercises, schemes, dateISO, isToday); animateRing(ringShown); }
+  if (hero) { hero.outerHTML = heroCard(currentDays()[dayIdx], exercises, schemes, dateISO, isToday); animateRing(ringShown); }
   renderTabs();
 }
 
@@ -948,38 +1216,43 @@ function finisherCard(weekIdx, dayIdx, phase) {
   </article>`;
 }
 
-function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLabel, scheme, swappedFrom) {
-  const suggested = suggestedWeightKg(ex, scheme, weekIdx);
+/* The weight line: a suggestion plus the box you type into. For accessories the
+ * box holds your ~10-rep load and the suggestion scales it by phase; for anchor
+ * lifts the box IS this zone's working weight (double progression moves it). */
+function weightLine(ex, scheme, phase, dateISO, isAnchor, weekIdx) {
+  if (equipOf(ex) === 'body') return `<div class="weight-line"><span class="weight-suggest">Bodyweight — go to near-failure</span></div>`;
   const base = state.baselines[ex.id];
-  // Plate mode: for stacks with unmarked plates, the number IS the plate count.
-  const plates = !!(base && base.plates);
+  const plates = !!(base && base.plates);   // plate mode: for stacks with unmarked plates, the number IS the plate count
+  const zone = isAnchor ? zoneOf(phase) : null;
+  const suggested = isAnchor ? anchorWorkingWeight(ex, phase, dateISO) : suggestedWeightKg(ex, scheme, weekIdx);
   const weightText = plates ? formatPlates(suggested) : formatWeight(suggested);
-  const baseText = base && base.w
-    ? (plates ? base.w : state.unit === 'lb' ? Math.round(base.w / KG_PER_LB) : Math.round(base.w * 10) / 10)
+  const typed = isAnchor ? (zone ? suggested : null) : (base && base.w ? base.w : null);
+  const typedText = typed
+    ? (plates ? Math.round(typed * 10) / 10 : state.unit === 'lb' ? Math.round(typed / KG_PER_LB) : Math.round(typed * 10) / 10)
     : '';
-  const completed = doneCount(dateISO, ex.id);
-  const isBodyweight = equipOf(ex) === 'body';
-  const equipTag = { machine: `${ico('machine')} machine`, free: `${ico('dumbbell')} free weights`, body: `${ico('pullupBar')} bodyweight` }[equipOf(ex)];
-
-  const bubbles = Array.from({ length: scheme.sets }, (_, s) => `
-    <button class="set-bubble ${s < completed ? 'done' : ''}" type="button"
-      data-ex="${ex.id}" data-set="${s + 1}" data-date="${dateISO}" data-rest="${scheme.restSec}"
-      aria-label="Mark set ${s + 1}">${s + 1}</button>`).join('');
-
-  const weightBlock = isBodyweight
-    ? `<div class="weight-line"><span class="weight-suggest">Bodyweight — go to near-failure</span></div>`
-    : `<div class="weight-line">
-        <span class="weight-suggest">${weightText
-          ? `${ico('target')} Suggested: <strong>${weightText}</strong>`
-          : plates ? `Enter how many plates you use →` : `Set your weight to get weekly suggestions →`}</span>
+  const label = isAnchor
+    ? (weightText
+      ? `${ico('target')} ${zone ? 'Work at' : 'Deload at'}: <strong>${weightText}</strong>`
+      : `Enter your ${zone ? phase.name.toLowerCase() + ' ' : ''}working weight →`)
+    : (weightText
+      ? `${ico('target')} Suggested: <strong>${weightText}</strong>`
+      : plates ? `Enter how many plates you use →` : `Set your weight to get weekly suggestions →`);
+  return `<div class="weight-line">
+        <span class="weight-suggest">${label}</span>
         <span class="weight-input-wrap">
           <input class="weight-input" type="number" inputmode="decimal" min="1" step="0.5"
-            placeholder="${plates ? 'no.' : 'wt'}" value="${baseText}" data-ex="${ex.id}"
+            placeholder="${plates ? 'no.' : 'wt'}" value="${typedText}" data-ex="${ex.id}" data-date="${dateISO}"${zone ? ` data-zone="${zone}"` : ''}
             aria-label="${plates ? 'Number of plates' : 'Your working weight'}" />
           <button class="weight-unit weight-mode" type="button" data-ex="${ex.id}"
             title="Tap to switch between weight and plate count">${plates ? 'plates' : state.unit}</button>
         </span>
       </div>`;
+}
+
+function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLabel, scheme, swappedFrom, isAnchor) {
+  const completed = doneCount(dateISO, ex.id);
+  const equipTag = { machine: `${ico('machine')} machine`, free: `${ico('dumbbell')} free weights`, body: `${ico('pullupBar')} bodyweight` }[equipOf(ex)];
+  const weightBlock = weightLine(ex, scheme, phase, dateISO, isAnchor, weekIdx);
 
   const swapNote = swappedFrom ? `
     <div class="swap-note"><span>${ico('swap')} Swapped in for <strong>${swappedFrom.name}</strong></span>
@@ -997,6 +1270,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
           <span class="chip chip-muscle">${ex.muscles}</span>
           <span class="chip chip-equip">${equipTag}</span>
           <a class="chip chip-video" href="${videoUrl(ex)}" target="_blank" rel="noopener">${ico('play')} Video</a>
+          ${isAnchor ? `<span class="chip chip-anchor" title="Fixed for this 4-week cycle and progressed by double progression">${ico('target')} Anchor lift</span>` : ''}
           ${supersetLabel ? `<span class="chip chip-superset">${ico('link')} Superset ${supersetLabel}</span>` : ''}
         </div>
       </div>
@@ -1004,10 +1278,11 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
     <div class="scheme-row">
       <span class="scheme-pill">${scheme.sets} × ${scheme.repsLo}–${scheme.repsHi} reps</span>
       <span class="scheme-rest">rest ${scheme.rest}</span>
+      ${scheme.capped ? `<span class="scheme-cap" title="A set trimmed so this muscle stays near 12 hard sets this session">· volume cap</span>` : ''}
     </div>
     <div class="tempo-line">⏱ ${phase.tempo}</div>
     ${weightBlock}
-    <div class="sets-row">${bubbles}</div>
+    <div class="sets-block">${setsBlock(ex, scheme, dateISO, phase, isAnchor)}</div>
     ${altChips(ex, day, chosenIds, weekIdx, dateISO, swappedFrom)}
     <details class="howto">
       <summary>${ico('book')} How to do it</summary>
@@ -1077,9 +1352,9 @@ function altChips(ex, day, chosenIds, weekIdx, dateISO, swappedFrom) {
   const add = (alt, icon, why) => {
     if (alt && !opts.some((o) => o.alt.id === alt.id)) opts.push({ alt, icon, why });
   };
-  add(swapSuggestion(ex, day.key, taken, weekIdx), 'swap', 'same kit');
-  if (mine === 'machine') add(altForEquip(ex, day.key, 'free', weekIdx, taken), 'dumbbell', 'free weights');
-  if (mine !== 'body' && currentEquip().key !== 'gym') add(altForEquip(ex, day.key, 'body', weekIdx, taken), 'pullupBar', 'bodyweight');
+  add(swapSuggestion(ex, day, taken, weekIdx), 'swap', 'same kit');
+  if (mine === 'machine') add(altForEquip(ex, day, 'free', weekIdx, taken), 'dumbbell', 'free weights');
+  if (mine !== 'body' && currentEquip().key !== 'gym') add(altForEquip(ex, day, 'body', weekIdx, taken), 'pullupBar', 'bodyweight');
   if (!opts.length) return '';
   const plannedId = swappedFrom ? swappedFrom.id : ex.id;
   return `
@@ -1120,6 +1395,22 @@ function renderHistory() {
       <div class="hist-sets">${s.completed ? '✓' : ''} ${s.sets}/${s.total}</div>
     </div>`).join('');
 
+  // Anchor lifts: the working weight per zone, and how the last session went.
+  const anchorRows = Object.entries(state.anchors).map(([id, rec]) => {
+    const ex = findExercise(id);
+    const zones = ['hypertrophy', 'strength', 'volume'].filter((z) => rec.zones && rec.zones[z] && rec.zones[z].w);
+    if (!ex || !zones.length) return '';
+    const plates = !!(state.baselines[id] && state.baselines[id].plates);
+    const fmt = (w) => (plates ? formatPlates(w) : formatWeight(w));
+    const lastDate = Object.keys(rec.applied || {}).sort().pop();
+    const last = lastDate && rec.applied[lastDate];
+    const when = lastDate ? new Date(lastDate + 'T00:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) : '';
+    return `
+    <div class="pr-row anchor-row"><span>${ico('target')} ${ex.name}</span>
+      <strong>${zones.map((z) => `<em>${z[0].toUpperCase()}</em>${fmt(rec.zones[z].w)}`).join(' · ')}</strong>
+      <small>${last ? `${last.outcome === 'up' ? '↑ went up' : 'held'} · ${when}` : 'no session yet'}</small></div>`;
+  }).join('');
+
   const prs = state.prs.slice(0, 12).map((p) => `
     <div class="pr-row"><span>${ico('trophy')} ${p.name}</span><strong>${p.plates ? formatPlates(p.w) : formatWeight(p.w)}</strong>
       <small>${new Date(p.date + 'T00:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</small></div>`).join('');
@@ -1134,6 +1425,8 @@ function renderHistory() {
     <h2 class="section-title">Last 4 weeks</h2>
     <div class="cal">${calHead}${cells.join('')}</div>
     <p class="cal-key"><span class="key full"></span> completed <span class="key part"></span> partial</p>
+    <h2 class="section-title">Anchor lifts</h2>
+    ${anchorRows || '<p class="empty">Your main lifts and their working weight per zone (H hypertrophy · S strength · V volume) land here once you log a session.</p>'}
     <h2 class="section-title">Personal bests</h2>
     ${prs || '<p class="empty">Raise a saved weight on any exercise and it lands here.</p>'}
     <h2 class="section-title">Sessions</h2>
@@ -1154,6 +1447,9 @@ function renderSettings() {
     <h2 class="section-title">Equipment</h2>
     <div class="choice-grid">${choiceCards('set-equip', Object.values(EQUIPMENT), currentEquip().key, 'equip')}</div>
     <p class="hint">${currentEquip().desc} Every day's plan is rebuilt from exercises that fit.</p>
+    <h2 class="section-title">Training split</h2>
+    <div class="choice-grid">${choiceCards('set-split', Object.values(SPLITS), currentSplit().key, 'split')}</div>
+    <p class="hint">${currentSplit().desc} Training with a partner? Pick the same split and you share the same days.</p>
     <h2 class="section-title">Units</h2>
     <div class="choice-grid two">
       <button class="choice set-unit ${state.unit === 'kg' ? 'active' : ''}" type="button" data-unit="kg"><span class="choice-emoji"><span class="choice-badge">kg</span></span><span class="choice-text"><strong>Kilograms</strong><small>kg, 2.5 kg steps</small></span></button>
@@ -1300,6 +1596,8 @@ document.addEventListener('click', (e) => {
   if (obGoal) { state.ob.goal = obGoal.dataset.goal; state.ob.name = $('#obName').value; renderOnboarding(); return; }
   const obEquip = e.target.closest('.ob-equip');
   if (obEquip) { state.ob.equip = obEquip.dataset.equip; state.ob.name = $('#obName').value; renderOnboarding(); return; }
+  const obSplit = e.target.closest('.ob-split');
+  if (obSplit) { state.ob.split = obSplit.dataset.split; state.ob.name = $('#obName').value; renderOnboarding(); return; }
   if (e.target.closest('#obStart')) { finishOnboarding(); return; }
 
   // settings
@@ -1307,6 +1605,8 @@ document.addEventListener('click', (e) => {
   if (setGoal) { state.goal = setGoal.dataset.goal; store.write('goal', state.goal); render(); return; }
   const setEquip = e.target.closest('.set-equip');
   if (setEquip) { state.equip = setEquip.dataset.equip; store.write('equip', state.equip); render(); return; }
+  const setSplit = e.target.closest('.set-split');
+  if (setSplit) { state.split = setSplit.dataset.split; store.write('split', state.split); render(); return; }
   const setUnit = e.target.closest('.set-unit');
   if (setUnit) { state.unit = setUnit.dataset.unit; store.write('unit', state.unit); render(); return; }
 
@@ -1326,6 +1626,7 @@ document.addEventListener('click', (e) => {
     state.baselines[exId] = { w: null, plates: !wasPlates };
     if (!state.baselines[exId].plates) delete state.baselines[exId];
     store.write('baselines', state.baselines);
+    if (state.anchors[exId]) { state.anchors[exId].zones = {}; store.write('anchors', state.anchors); }   // kg and plate counts don't mix
     renderDay();
     return;
   }
@@ -1370,23 +1671,62 @@ document.addEventListener('click', (e) => {
     if (vid.paused) { const p = vid.play(); if (p && p.catch) p.catch(() => {}); } else vid.pause();
     return;
   }
+  const repsBtn = e.target.closest('.reps-btn');
+  if (repsBtn) {
+    const { ex, set, date } = repsBtn.dataset;
+    const i = Number(set) - 1;
+    const cur = repsFor(date, ex)[i] ?? planScheme(ex).repsHi;
+    setReps(date, ex, i, Math.max(1, Math.min(50, cur + Number(repsBtn.dataset.reps))));
+    refreshProgress(); announceAnchor();
+    return;
+  }
+  const undoSet = e.target.closest('.reps-undo');
+  if (undoSet) {
+    const { ex, set, date } = undoSet.dataset;
+    setDoneCount(date, ex, Number(set) - 1);
+    state.editSet = null;
+    refreshProgress(); announceAnchor();
+    return;
+  }
   const bubble = e.target.closest('.set-bubble');
   if (bubble) {
     const { ex, set, date } = bubble.dataset;
     const setNum = Number(set);
     const current = doneCount(date, ex);
-    const completing = current !== setNum;
-    // Tapping the last completed bubble un-completes it; otherwise complete up to here.
-    setDoneCount(date, ex, completing ? setNum : setNum - 1);
-    if (completing) {
-      ensureAudio();   // user tap = the moment we're allowed to unlock sound
-      const restSec = Number(bubble.dataset.rest) || 60;
-      const exercise = findExercise(ex);
-      startRestTimer(restSec, `Rest — ${exercise ? exercise.name : 'set'} · set ${setNum} done`);
+    if (setNum <= current) {
+      // Already done: open (or close) its reps stepper.
+      const open = state.editSet && state.editSet.date === date && state.editSet.ex === ex && state.editSet.set === setNum;
+      state.editSet = open ? null : { date, ex, set: setNum };
+      refreshProgress();
+      return;
     }
-    refreshProgress();
+    // Complete up to here; each newly done set is logged at the top of its range until adjusted.
+    for (let s = current; s < setNum; s++) setReps(date, ex, s, planScheme(ex).repsHi);
+    setDoneCount(date, ex, setNum);
+    state.editSet = null;
+    ensureAudio();   // user tap = the moment we're allowed to unlock sound
+    const restSec = Number(bubble.dataset.rest) || 60;
+    const exercise = findExercise(ex);
+    startRestTimer(restSec, `Rest — ${exercise ? exercise.name : 'set'} · set ${setNum} done`);
+    refreshProgress(); announceAnchor();
   }
 });
+
+/* This exercise's scheme in the plan on screen (a sane default if it isn't there). */
+function planScheme(exId) {
+  const i = currentPlan ? currentPlan.exercises.findIndex((x) => x.id === exId) : -1;
+  return i >= 0 ? currentPlan.schemes[i] : { repsHi: 10, sets: 3 };
+}
+/* After a tap changed an anchor's outcome, say so. */
+function announceAnchor() {
+  const ev = anchorEvents.pop();
+  anchorEvents.length = 0;
+  if (!ev) return;
+  const fmt = (w) => (ev.plates ? formatPlates(w) : formatWeight(w));
+  const week = `${ev.zone} week`;
+  if (ev.outcome === 'up') showToast(ev.at ? `${ev.ex.name}: ${ev.hi} reps on every set — ${fmt(ev.at + ev.step)} next ${week}` : `${ev.ex.name}: ${ev.hi} reps on every set — it goes up next ${week}`, 'trophy');
+  else showToast(ev.at ? `${ev.ex.name}: hold ${fmt(ev.at)} next ${week} and chase the reps` : `${ev.ex.name}: same weight next ${week} — chase the reps`, 'target');
+}
 
 /* Animated demos play only while their guide is open (battery), and a tap pauses/resumes. */
 document.addEventListener('toggle', (e) => {
@@ -1413,6 +1753,26 @@ document.addEventListener('change', (e) => {
   const plates = !!(prev && prev.plates);
   const raw = parseFloat(String(input.value).replace(',', '.'));
   const value = plates ? (isFinite(raw) && raw > 0 ? raw : null) : parseWeightInput(input.value);
+  const zone = input.dataset.zone;
+  if (zone) {   // anchor lift: this is the zone's working weight; the ~10-rep baseline follows from it
+    const ex = findExercise(exId);
+    const rec = anchorRec(exId);
+    const before = rec.zones[zone] && rec.zones[zone].w;
+    if (value) {
+      rec.zones[zone] = { w: value };
+      if (ex && (!prev || !prev.w)) {
+        const ph = PHASES.find((p) => p.key === zone);
+        const pct = (ex.tags.includes('compound') ? ph.pct : ph.isoPct) * currentGoal().pctMult;
+        state.baselines[exId] = { w: value / pct, c: cycleForWeek(currentWeekIndex()), plates };
+      }
+      if (ex && before && value > before) recordPR(ex, value, plates);
+    } else delete rec.zones[zone];
+    delete rec.applied[input.dataset.date];   // re-evaluate this date against the new weight
+    store.write('anchors', state.anchors);
+    store.write('baselines', state.baselines);
+    renderDay();
+    return;
+  }
   if (value) {
     state.baselines[exId] = { w: value, c: cycleForWeek(currentWeekIndex()), plates };
     // Beating a previously saved weight is a personal best.

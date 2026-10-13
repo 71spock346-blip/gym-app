@@ -307,6 +307,8 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
   font-variant-numeric: tabular-nums;
 }
 .scheme-rest { color: var(--text-dim); font-size: 0.8rem; font-weight: 600; }
+.scheme-cap { color: var(--text-faint); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.chip-anchor { background: var(--accent-dim); color: var(--accent-2); border-color: rgba(217, 169, 47, 0.6); }
 .tempo-line { color: var(--text-faint); font-size: 0.76rem; margin-top: 6px; }
 
 .weight-line {
@@ -348,6 +350,40 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
   animation: bubble-pop 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.3);
 }
 @keyframes bubble-pop { 0% { transform: scale(0.85); } 60% { transform: scale(1.08); } 100% { transform: scale(1); } }
+/* A done bubble shows its set number small and the reps it logged large. */
+.set-bubble { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; padding: 0; line-height: 1; }
+.set-bubble.done .sb-num { font-size: 0.58rem; font-weight: 800; opacity: 0.75; letter-spacing: 0.04em; }
+.sb-reps { font-size: 1rem; font-weight: 800; }
+.set-bubble.editing { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-2), 0 4px 14px var(--accent-glow); }
+
+/* Reps stepper for the set being adjusted */
+.reps-row {
+  display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 8px 10px;
+  background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 12px;
+  animation: view-in var(--dur) var(--ease-out);
+}
+.reps-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); }
+.reps-btn {
+  width: 36px; height: 36px; border-radius: 50%; flex: 0 0 auto;
+  background: var(--surface-3); color: var(--text); border: 1px solid var(--border-strong);
+  font-size: 1.25rem; font-weight: 800; line-height: 1; cursor: pointer;
+}
+.reps-val { font-family: var(--font-display); font-size: 1.4rem; font-weight: 600; min-width: 2.4em; text-align: center; color: var(--accent-2); font-variant-numeric: tabular-nums; }
+.reps-val small { font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; color: var(--text-dim); margin-left: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+.reps-undo {
+  margin-left: auto; font: inherit; font-size: 0.72rem; font-weight: 800; color: var(--rose);
+  background: transparent; border: 1px solid rgba(224, 117, 106, 0.5); border-radius: 999px; padding: 6px 10px; cursor: pointer;
+}
+.reps-undo .ico { width: 12px; height: 12px; }
+
+/* Double-progression note under an anchor lift */
+.prog-note { margin-top: 10px; font-size: 0.8rem; color: var(--text-dim); line-height: 1.45; }
+.prog-note .ico { color: var(--accent); }
+.prog-note.up { color: var(--accent-2); }
+.prog-note strong { color: var(--text); }
+.phase-week { color: var(--text-faint); }
+.anchor-row strong { font-variant-numeric: tabular-nums; }
+.anchor-row em { font-style: normal; color: var(--text-faint); font-size: 0.68rem; margin-right: 2px; }
 
 /* "Machine busy?" — tappable alternatives on every card */
 .alts-row {
@@ -707,13 +743,13 @@ body.timer-on .main { padding-bottom: calc(184px + env(safe-area-inset-bottom));
  * Transform only, so nothing reflows; the press-in is quicker than the release.
  * Kept last so it wins over the per-component rules above. */
 .set-bubble, .alt-btn, .unswap-btn, .chip-video, .video-link, .primary-btn, .rest-btn, .choice,
-.unit-toggle, .week-arrow, .day-tab, .nav-btn, .goal-pill, .update-btn, .weight-unit {
+.unit-toggle, .week-arrow, .day-tab, .nav-btn, .goal-pill, .update-btn, .weight-unit, .reps-btn, .reps-undo {
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
   transition: transform var(--dur-slow) var(--ease-spring), background-color 0.15s ease, color 0.15s ease,
     border-color 0.15s ease, box-shadow 0.2s ease;
 }
 .set-bubble:active, .alt-btn:active, .unswap-btn:active, .chip-video:active, .video-link:active, .rest-btn:active,
-.unit-toggle:active, .week-arrow:active, .goal-pill:active, .update-btn:active {
+.unit-toggle:active, .week-arrow:active, .goal-pill:active, .update-btn:active, .reps-btn:active, .reps-undo:active {
   transform: scale(0.92); transition-duration: var(--dur-fast); transition-timing-function: ease-out;
 }
 .primary-btn:active, .choice:active, .day-tab:active {   /* wide targets: a smaller dip reads better */

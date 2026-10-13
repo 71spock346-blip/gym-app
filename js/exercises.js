@@ -11,6 +11,8 @@ const DAYS = [
   { key: 'shoulders', label: 'Mon', name: 'Shoulders', hiitName: 'Shoulders & Core', emoji: '🪨',
     picks: 5,
     slots: [ { tag: 'press', count: 1 }, { tag: 'side', count: 2 }, { tag: 'rear', count: 1 } ],
+    anchors: [ { tag: 'press', count: 1 } ],
+    caps: [ { tag: 'press', cap: 6 }, { tag: 'side', cap: 8 }, { tag: 'rear', cap: 6 }, { tag: 'front', cap: 4 } ],
     warmup: [
       '5 min easy cardio (bike or rower) to raise your temperature.',
       '15 slow arm circles each way, then 15 band pull-aparts (or wall slides).',
@@ -19,6 +21,8 @@ const DAYS = [
   { key: 'back', label: 'Tue', name: 'Back', hiitName: 'Back', emoji: '🦅',
     picks: 5,
     slots: [ { tag: 'vertical', count: 1 }, { tag: 'horizontal', count: 2 } ],
+    anchors: [ { tag: 'vertical', count: 1 }, { tag: 'horizontal', count: 1 } ],
+    caps: [ { tag: 'vertical', cap: 8 }, { tag: 'horizontal', cap: 8 }, { tag: 'lower', cap: 4 }, { tag: 'traps', cap: 4 } ],
     warmup: [
       '5 min easy cardio — rower is perfect for back day.',
       '20–30 s dead hang from the pull-up bar, then 10 slow cat-cows.',
@@ -27,6 +31,8 @@ const DAYS = [
   { key: 'legs', label: 'Wed', name: 'Legs', hiitName: 'Legs & Glutes', emoji: '🦵',
     picks: 6,
     slots: [ { tag: 'quad', count: 2 }, { tag: 'ham', count: 1 }, { tag: 'calf', count: 1 } ],
+    anchors: [ { tag: 'quad', count: 1 }, { tag: 'ham', count: 1 } ],
+    caps: [ { tag: 'quad', cap: 10 }, { tag: 'ham', cap: 8 }, { tag: 'glute', cap: 8 }, { tag: 'calf', cap: 6 } ],
     warmup: [
       '5 min incline walk or bike to warm up hips and knees.',
       '15 bodyweight squats and 10 leg swings per leg (front-to-back and side-to-side).',
@@ -35,6 +41,8 @@ const DAYS = [
   { key: 'chest', label: 'Thu', name: 'Chest', hiitName: 'Push & Core', emoji: '🛡️',
     picks: 5,
     slots: [ { tag: 'press', count: 2 }, { tag: 'fly', count: 1 } ],
+    anchors: [ { tag: 'press', count: 1 } ],
+    caps: [ { tag: 'press', cap: 8 }, { tag: 'fly', cap: 6 } ],
     warmup: [
       '5 min easy cardio to get the blood moving.',
       '10 slow push-ups and a 30 s doorway pec stretch per side.',
@@ -43,10 +51,75 @@ const DAYS = [
   { key: 'arms', label: 'Fri', name: 'Arms', hiitName: 'Arms & Core', emoji: '💪',
     picks: 6,
     slots: [ { tag: 'biceps', count: 3 }, { tag: 'triceps', count: 3 } ],
+    anchors: [ { tag: 'biceps', count: 1, iso: true }, { tag: 'triceps', count: 1, iso: true } ],
+    caps: [ { tag: 'biceps', cap: 10 }, { tag: 'triceps', cap: 10 } ],
     warmup: [
       '3–5 min easy cardio — arms need less, but never train cold.',
       '15 wrist circles each way, 15 elbow circles.',
       '1 very light set of curls and 1 of pushdowns before the counted sets.',
+    ] },
+];
+
+/* The twice-a-week split: Upper / Lower / Push / Pull / Legs. Every muscle gets
+ * two sessions a week, which the research on training frequency favours for
+ * growth. Days draw from several pools; `from` pins a slot to one of them,
+ * `anchors` are the lifts held fixed for a 4-week cycle, `caps` bound the hard
+ * sets per muscle per session, and `exclude` names the earlier day whose picks
+ * this day avoids repeating in the same week. */
+const DAYS_TWICE = [
+  { key: 'upper', label: 'Mon', name: 'Upper', hiitName: 'Upper & Core', emoji: '🏋️',
+    picks: 6, pools: ['chest', 'back', 'shoulders', 'arms'],
+    slots: [ { tag: 'press', from: 'chest', count: 1 }, { tag: 'horizontal', from: 'back', count: 1 },
+             { tag: 'vertical', from: 'back', count: 1 }, { tag: 'press', from: 'shoulders', count: 1 },
+             { tag: 'biceps', from: 'arms', count: 1 }, { tag: 'triceps', from: 'arms', count: 1 } ],
+    anchors: [ { tag: 'press', from: 'chest', count: 1 }, { tag: 'horizontal', from: 'back', count: 1 } ],
+    caps: [ { group: 'chest', cap: 8 }, { group: 'back', cap: 8 }, { group: 'shoulders', cap: 6 }, { tag: 'biceps', cap: 4 }, { tag: 'triceps', cap: 4 } ],
+    warmup: [
+      '5 min easy cardio (bike or rower) to raise your temperature.',
+      '15 band pull-aparts, 10 slow push-ups and 10 arm circles each way.',
+      '2 light sets of your first press — about half your working weight.',
+    ] },
+  { key: 'lower', label: 'Tue', name: 'Lower', hiitName: 'Lower & Glutes', emoji: '🦵',
+    picks: 5, pools: ['legs'],
+    slots: [ { tag: 'quad', count: 2 }, { tag: 'ham', count: 1 }, { tag: 'calf', count: 1 } ],
+    anchors: [ { tag: 'quad', count: 1 }, { tag: 'ham', count: 1 } ],
+    caps: [ { tag: 'quad', cap: 8 }, { tag: 'ham', cap: 6 }, { tag: 'glute', cap: 6 }, { tag: 'calf', cap: 4 } ],
+    warmup: [
+      '5 min incline walk or bike to warm up hips and knees.',
+      '15 bodyweight squats and 10 leg swings per leg (front-to-back and side-to-side).',
+      '2 light sets of your first exercise — about half your working weight.',
+    ] },
+  { key: 'push', label: 'Wed', name: 'Push', hiitName: 'Push & Core', emoji: '🛡️',
+    picks: 5, pools: ['chest', 'shoulders', 'arms'], exclude: 'upper',
+    slots: [ { tag: 'press', from: 'chest', count: 1 }, { tag: 'press', from: 'shoulders', count: 1 },
+             { tag: 'side', count: 1 }, { tag: 'fly', count: 1 }, { tag: 'triceps', from: 'arms', count: 1 } ],
+    anchors: [ { tag: 'press', from: 'shoulders', count: 1 } ],
+    caps: [ { group: 'chest', cap: 8 }, { group: 'shoulders', cap: 8 }, { tag: 'triceps', cap: 6 } ],
+    warmup: [
+      '5 min easy cardio to get the blood moving.',
+      '10 slow push-ups, 15 band pull-aparts and a 30 s doorway pec stretch per side.',
+      '2 light sets of your first press — about half your working weight.',
+    ] },
+  { key: 'pull', label: 'Thu', name: 'Pull', hiitName: 'Pull & Core', emoji: '🦅',
+    picks: 5, pools: ['back', 'shoulders', 'arms'], exclude: 'upper',
+    slots: [ { tag: 'vertical', from: 'back', count: 1 }, { tag: 'horizontal', from: 'back', count: 2 },
+             { tag: 'rear', count: 1 }, { tag: 'biceps', from: 'arms', count: 1 } ],
+    anchors: [ { tag: 'vertical', from: 'back', count: 1 } ],
+    caps: [ { group: 'back', cap: 10 }, { tag: 'rear', cap: 4 }, { tag: 'biceps', cap: 6 } ],
+    warmup: [
+      '5 min easy cardio — rower is perfect for a pull day.',
+      '20–30 s dead hang from the pull-up bar, then 10 slow cat-cows.',
+      '2 light sets of your first pull — about half your working weight.',
+    ] },
+  { key: 'legs2', label: 'Fri', name: 'Legs', hiitName: 'Legs & Glutes', emoji: '🦵',
+    picks: 5, pools: ['legs'], exclude: 'lower',
+    slots: [ { tag: 'quad', count: 1 }, { tag: 'ham', count: 2 }, { tag: 'glute', count: 1 }, { tag: 'calf', count: 1 } ],
+    anchors: [ { tag: 'quad', count: 1 }, { tag: 'glute', count: 1 } ],
+    caps: [ { tag: 'quad', cap: 6 }, { tag: 'ham', cap: 8 }, { tag: 'glute', cap: 8 }, { tag: 'calf', cap: 4 } ],
+    warmup: [
+      '5 min incline walk or bike to warm up hips and knees.',
+      '10 glute bridges, 10 leg swings per leg and 10 slow bodyweight squats.',
+      '2 light sets of your first exercise — about half your working weight.',
     ] },
 ];
 
@@ -3482,6 +3555,10 @@ const EXERCISE_DB = {
     },
   ],
 };
+
+/* Every exercise knows which pool it lives in (shoulders, back, legs, chest,
+ * arms, core): the split days use it to pin slots to a muscle group. */
+Object.entries(EXERCISE_DB).forEach(([group, list]) => list.forEach((ex) => { ex.group = group; }));
 
 /* Which of the three equipment profiles an exercise needs. Explicit `equip`
  * on the exercise wins; otherwise it is inferred from the gear description. */

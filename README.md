@@ -1,23 +1,49 @@
 # 🏋️ Stay Strong — Gym Planner
 
-A phone-friendly workout planner for a 5-day split that **changes every week** — no
-accounts, no ads, works offline in the gym. Pick your goal and your equipment once,
-and every day's plan is built to fit.
+A phone-friendly workout planner for a 5-day week that **changes every week** — no
+accounts, no ads, works offline in the gym. Pick your goal, your equipment and your
+week layout once, and every day's plan is built to fit.
 
-| Day | Muscle group |
-|-----|--------------|
-| Monday | Shoulders |
-| Tuesday | Back |
-| Wednesday | Legs |
-| Thursday | Chest |
-| Friday | Arms |
+| Day | Twice-a-week split (recommended) | One muscle a day |
+|-----|----------------------------------|------------------|
+| Monday | Upper | Shoulders |
+| Tuesday | Lower | Back |
+| Wednesday | Push | Legs |
+| Thursday | Pull | Chest |
+| Friday | Legs | Arms |
+
+## Programming — what the evidence says, and what the app does about it
+
+- **Train each muscle twice a week.** The default *Upper / Lower / Push / Pull /
+  Legs* layout gives every muscle two sessions a week, which the training-frequency
+  research favours over once-a-week body-part splits. The classic one-muscle-a-day
+  split is still there for anyone who prefers it (partners should pick the same
+  layout so they share days).
+- **Anchor lifts.** Each day's main movement(s) — a press, a row, a squat pattern, a
+  hinge — are **fixed for a whole 4-week cycle** so you can practise and progress
+  them, then rotated to a fresh candidate next cycle. Only the accessories rotate
+  weekly. Anchors always go first in the session and carry an *Anchor lift* chip.
+- **Double progression on anchors.** Every ticked set logs its reps (the top of the
+  range until you adjust it — tap a done bubble to change). Hit the top of the rep
+  range on every set and that zone's weight goes up next cycle (+2.5 kg upper body,
+  +5 kg legs, +1 plate on plate stacks); miss it and the app tells you to hold the
+  weight and chase the reps. Each anchor keeps its own weight per zone (hypertrophy
+  / strength / volume); deload weeks use 60% of the hypertrophy weight. History lists
+  every anchor's zone weights and how the last session went.
+- **Volume cap.** Around 10–12 hard sets per muscle per session is where returns
+  flatten, so sets are trimmed from the last accessories (never below 2, never from
+  an anchor) until each muscle on the day is under its cap; a trimmed card says
+  *volume cap*. The twice-a-week split uses lower per-session caps because each
+  muscle gets two sessions.
+- **Compounds first, isolation later; a press, a pull, a squat, a hinge, calves and
+  rear delts every week** — the slot rules behind every day.
 
 ## First open
 
 A branded splash screen (icon, wordmark, tagline) shows for about a second on
-every launch and fades into the app. A short welcome then asks three things — your first name, your **goal** and your
-**equipment** — then drops you straight into today's session. All three can be
-changed later in **Settings**.
+every launch and fades into the app. A short welcome then asks four things — your
+first name, your **goal**, your **equipment** and your **week layout** — then drops
+you straight into today's session. All of them can be changed later in **Settings**.
 
 ### Two goals, one plan — train together
 
@@ -65,10 +91,13 @@ remembered if you close the app mid-session.
 - **A different plan every week.** Each calendar week gets its own combination of
   exercises, drawn from a pool of **160+ movements** (machine, free-weight and
   bodyweight). Selection rules keep every session balanced.
-- **Anti-repeat rotation.** The planner remembers when each exercise was last
-  scheduled and prefers anything unused for three weeks or more, so a move never
-  comes back within two weeks and each day cycles through most of its pool. Strength weeks also lean into big compound lifts while volume weeks
-  favour cable/isolation pump work, so each type of week feels different.
+- **Anti-repeat rotation (accessories).** The planner remembers when each exercise
+  was last scheduled and prefers anything unused for three weeks or more, so an
+  accessory never comes back within two weeks and each day cycles through most of
+  its pool; on the twice-a-week split the second session of a muscle also avoids
+  what the first used that week. Strength weeks lean into big compound lifts while
+  volume weeks favour cable/isolation pump work, so each type of week feels different.
+  Anchor lifts are the exception: they stay put for the cycle on purpose.
 - **Reps and sets rotate through a 4-week training cycle:**
   1. **Hypertrophy** — 3–4 sets × 8–12 reps, moderate weight
   2. **Strength** — 4–5 sets × 4–6 reps, heavy
@@ -84,9 +113,13 @@ remembered if you close the app mid-session.
   (+30 s / Skip), with a chime and vibration at zero and a wake lock so the phone
   stays awake.
 - **Weight suggestions.** Type in your comfortable ~10-rep working weight once per
-  exercise; the app scales it for each phase (e.g. +15% on strength week, −40% on
-  deload) and adds +2.5% per completed cycle for steady progressive overload.
-  Toggle between kg and lb in the header or Settings.
+  accessory exercise; the app scales it for each phase (e.g. +15% on strength week,
+  −40% on deload) and adds +2.5% per completed cycle for steady progressive overload.
+  On an anchor lift the box is that zone's working weight, and double progression
+  moves it for you. Toggle between kg and lb in the header or Settings.
+- **Reps per set.** Ticking a set logs it at the top of the rep range; tap a done
+  bubble to open a stepper and correct the reps (or undo the set). Done bubbles show
+  the reps they logged.
 - **Plate-stack machines.** Tap the unit next to any weight box to switch that
   exercise to *plates* — for stacks with unmarked plates you enter the plate count
   and get suggestions back as plate counts.
