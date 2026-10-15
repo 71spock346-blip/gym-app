@@ -147,6 +147,14 @@ remembered if you close the app mid-session.
   *Form video library* opens each training day as a YouTube playlist: save it,
   download it with Premium, and the buttons then play from your downloads with
   no signal.
+- **Three design rules.** Gold is the one *signal* colour and only ever means
+  "tap this" — buttons, chips, the active tab, set bubbles; everything else is
+  ink on paper. Type is either huge (the day name, the week, a stat, the rest
+  clock) or tiny (labels, chips, cues), nothing in between. Every screen is
+  built in three planes: huge ghost type at the back (the day name behind the
+  hero, the exercise number behind each card), the subject in the middle, and
+  the buttons on top (day tabs riding over the hero, the set bubbles, the
+  sticky Let's go button).
 - **One icon language.** A single monoline icon set (`js/icons.js`) and clean
   equipment pictograms on every exercise card, instead of platform emoji and
   stick figures, so the app looks the same on every phone.

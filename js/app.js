@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 34;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 35;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -1054,11 +1054,11 @@ function renderPhaseBanner() {
     <div class="phase-head">
       <span class="phase-badge">${ico(phase.icon)}</span>
       <span class="phase-name phase-${phase.key}">${phase.name} week</span>
-      <button id="goalPill" class="goal-pill" type="button"
-        title="Tap to switch goal">${ico(goal.icon)} ${goal.name} ${ico('swap')}</button>
     </div>
     <p class="phase-desc">${phase.desc} <span class="phase-week">Week ${(((weekIdx % 4) + 4) % 4) + 1} of 4 —
-      anchor lifts stay fixed all cycle.</span></p>`;
+      anchor lifts stay fixed all cycle.</span></p>
+    <button id="goalPill" class="goal-pill" type="button"
+      title="Tap to switch goal">${ico(goal.icon)} ${goal.name} ${ico('swap')}</button>`;
 }
 
 function renderTabs() {
@@ -1165,6 +1165,7 @@ function heroCard(day, exercises, schemes, dateISO, isToday) {
   const burst = complete ? `<div class="burst" aria-hidden="true">${Array.from({ length: 8 }, (_, i) => `<span style="--i:${i}">${ico(i % 2 ? 'star' : 'dot')}</span>`).join('')}</div>` : '';
   return `
   <section class="hero ${complete ? 'complete' : ''}" data-pct="${pct}">
+    <div class="hero-ghost" aria-hidden="true">${dayName(day)}</div>
     ${burst}
     <div class="hero-main">
       <div class="hero-text">
@@ -1260,11 +1261,12 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
 
   return `
   <article class="exercise-card ${completed >= scheme.sets ? 'card-done' : ''} ${swappedFrom ? 'swapped' : ''}" data-ex="${ex.id}">
+    <div class="card-ghost" aria-hidden="true">${i + 1}</div>
     ${swapNote}
     <div class="exercise-top">
       <div class="exercise-icon">${ICONS[ex.icon] || ICONS.dumbbell}</div>
       <div class="exercise-info">
-        <h3 class="exercise-name"><span class="ex-num">${i + 1}</span>${ex.name}</h3>
+        <h3 class="exercise-name"><span class="ex-num">${String(i + 1).padStart(2, '0')}</span>${ex.name}</h3>
         <div class="exercise-meta">
           <span class="chip chip-gear">${ex.gear}</span>
           <span class="chip chip-muscle">${ex.muscles}</span>
