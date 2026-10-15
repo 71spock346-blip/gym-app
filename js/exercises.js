@@ -2497,29 +2497,6 @@ const EXERCISE_DB = {
       ],
     },
     {
-      id: 'ch-dips', name: 'Chest Dips (Assisted)',
-      gear: 'Dip station or assisted dip machine', icon: 'dip',
-      tags: ['compound', 'press', 'lower'], muscles: 'Lower chest, triceps',
-      video: 'chest dips proper form',
-      setup: [
-        'On the assisted machine, set an assist weight you can control (start ~half bodyweight).',
-        'Grip the bars, lean your torso forward ~30°, knees on the pad or feet crossed behind.',
-      ],
-      execution: [
-        'Lower until your upper arms are parallel to the floor.',
-        'Press back up without locking your elbows harshly.',
-      ],
-      tips: [
-        'Forward lean = chest; upright torso = triceps. For chest day, lean in.',
-        'Reduce the assist a little each week.',
-      ],
-      mistakes: [
-        'Dropping below parallel with cold shoulders — build depth gradually.',
-        'Shrugging the shoulders up at the top; keep them down and back.',
-        'Staying bolt upright when you want to hit chest (that targets triceps).',
-      ],
-    },
-    {
       id: 'ch-pushup', name: 'Push-Up Finisher',
       gear: 'Bodyweight (floor)', icon: 'pushup', staple: true,
       tags: ['compound', 'press', 'finisher'], muscles: 'Chest, triceps, core',

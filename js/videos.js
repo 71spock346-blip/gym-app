@@ -59,7 +59,6 @@ const FORM_VIDEOS = {
   'ch-smith-incline':    { id: 'b8DqTO6ak0k', title: 'How To: Smith Machine Incline Bench Press' },
   'ch-pec-deck':         { id: 'hZ0CGRaKwbQ', title: 'Pec Deck / Chest Fly — how to' },
   'ch-cable-cross':      { id: 'XY6JrX1wyxk', title: 'Cable Crossover (NASM)' },
-  'ch-dips':             { id: 'kbmVlw-i0Vs', title: 'Assisted Dips — exercise tutorial' },
   'ch-pushup':           { id: 'WDIpL0pjun0', title: 'Push-Up (NASM)' },
   'ch-flat-db-press':    { id: 'Y_7aHqXeCfQ', title: 'How To: Dumbbell Bench Press — 3 golden rules' },
   'ch-smith-flat':       { id: 'z_r6hDOYtO0', title: 'How To: Smith Machine Bench Press' },

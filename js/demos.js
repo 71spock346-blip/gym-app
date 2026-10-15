@@ -52,7 +52,6 @@ const DEMO_PHOTOS = {
   "ch-smith-incline": "Smith Machine Incline Bench Press",
   "ch-pec-deck": "Butterfly",
   "ch-cable-cross": "Cable Crossover",
-  "ch-dips": "Dips - Chest Version",
   "ch-pushup": "Pushups",
   "ch-flat-db-press": "Dumbbell Bench Press",
   "ch-smith-flat": "Smith Machine Bench Press",

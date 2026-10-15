@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 35;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 36;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -61,7 +61,7 @@ const GOALS = {
     // Never scheduled in this mode (chest growth / heavy arm isolation / traps).
     avoid: [
       'ch-bench-press', 'ch-smith-flat', 'ch-smith-incline', 'ch-pec-deck', 'ch-cable-cross',
-      'ch-flat-fly', 'ch-low-cable-fly', 'ch-flat-db-press', 'ch-dips', 'ch-floor-press',
+      'ch-flat-fly', 'ch-low-cable-fly', 'ch-flat-db-press', 'ch-floor-press',
       'ar-concentration', 'ar-skull', 'ar-spider-curl', 'ar-cgbp', 'ar-preacher', 'ar-db-skull',
       'bk-shrug',
       'ch-incline-bb', 'ch-decline-db', 'ch-incline-fly', 'ch-incline-machine', 'ch-cable-press', 'ch-squeeze-press', 'ar-decline-skull', 'ar-db-preacher',
