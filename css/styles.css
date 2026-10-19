@@ -271,9 +271,18 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 }
 
 /* ------------------------------ exercise cards ------------------------------ */
-.exercise-card { padding: 16px; margin-bottom: 14px; scroll-margin-top: 112px; transition: border-color 0.2s ease; position: relative; overflow: hidden; }
-.card-ghost { right: 4px; top: -26px; font-size: 8.5rem; }   /* back plane: the exercise number */
-.exercise-card.card-done { border-color: rgba(243, 239, 228, 0.4); }
+/* Each exercise is its own raised slab: a lighter surface than the page, a
+ * visible edge, a shadow and a clear gap, so one exercise ends where the next
+ * begins even on a dim OLED screen. */
+.exercise-card {
+  padding: 16px; margin-bottom: 24px; scroll-margin-top: 112px; transition: border-color 0.2s ease;
+  position: relative; overflow: hidden;
+  background: linear-gradient(180deg, #211e16 0%, #1b1913 100%);
+  border: 1px solid rgba(255, 228, 160, 0.22);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 16px 36px rgba(0, 0, 0, 0.55);
+}
+.card-ghost { right: 4px; top: -26px; font-size: 8.5rem; color: rgba(243, 239, 228, 0.075); }   /* back plane: the exercise number */
+.exercise-card.card-done { border-color: rgba(243, 239, 228, 0.45); }
 .exercise-card.swapped { border-color: var(--border-strong); }
 
 .exercise-top { display: flex; gap: 12px; align-items: flex-start; }

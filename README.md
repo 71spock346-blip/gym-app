@@ -138,8 +138,10 @@ remembered if you close the app mid-session.
   working muscle highlighted in gold. Clips play while the guide is open, pause on
   tap, are saved for offline use with the photos, and the service worker answers
   the byte-range requests video players make, so they play offline on iPhone too.
-  `tools/mannequin_curl.py` renders the mannequin-style clips headless in Blender;
-  `tools/encode_anim.sh` encodes any source clip to the right formats.
+  `tools/mannequin_curl.py` and `tools/mannequin_lat_raise.py` render the
+  mannequin-style clips headless in Blender (the lateral raise shows the elbow
+  leading to shoulder height with a neutral grip); `tools/encode_anim.sh`
+  encodes any source clip to the right formats.
 - **Form videos for learning at home (YouTube Premium for offline).** Every
   exercise's Video button deep-links to one curated form video (many from
   NASM's technique series). They're meant for learning the move before a
