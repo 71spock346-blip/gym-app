@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 38;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 39;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -1106,7 +1106,8 @@ function renderDay() {
   anchorEvents.length = 0;   // a render is not a tap: nothing to announce
 
   const chosenIds = new Set(exercises.map((ex) => ex.id));
-  const cards = exercises.map((ex, i) => exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLabel(i), schemes[i], swappedFrom[i], anchorIds.has(ex.id))).join('');
+  const cards = exercises.map((ex, i) => exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLabel(i), schemes[i], swappedFrom[i], anchorIds.has(ex.id)))
+    .join('<div class="card-sep" aria-hidden="true"></div>');
 
   const equipNote = currentEquip().key !== 'gym' ? `
     <div class="note-card equip-note">${ico(currentEquip().icon)} <strong>${currentEquip().name} mode</strong> —

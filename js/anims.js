@@ -9,6 +9,7 @@
 
 const DEMO_ANIMS = {
   'ar-db-curl': { muscle: 'Biceps', source: 'mannequin', rev: 3 },
+  'sh-db-lat-raise': { muscle: 'Side delts', source: 'mannequin', rev: 1 },
 };
 
 function animUrl(id, ext) {

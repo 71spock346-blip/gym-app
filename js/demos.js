@@ -8,7 +8,6 @@ const DEMO_PHOTOS = {
   "sh-db-press": "Dumbbell Shoulder Press",
   "sh-smith-press": "Smith Machine Overhead Shoulder Press",
   "sh-lat-raise-machine": "Side Lateral Raise",
-  "sh-db-lat-raise": "One-Arm Side Laterals",
   "sh-cable-lat-raise": "Cable Seated Lateral Raise",
   "sh-reverse-pec-deck": "Reverse Machine Flyes",
   "sh-face-pull": "Face Pull",
@@ -158,5 +157,5 @@ const DEMO_PHOTOS = {
 /* Revision tags for photos replaced after shipping. The offline cache keeps
  * files by URL, so a new tag is what makes phones fetch the corrected photo. */
 const DEMO_REV = {
-  "sh-db-lat-raise": 2,   // corrected technique: neutral wrist, stop at shoulder height
+  // (none at the moment — the lateral raise moved to a mannequin clip)
 };
