@@ -48,7 +48,7 @@ const FOCUS_CUES = {
   adductors: 'Press the knees inward against the resistance and control the return.',
   chest: 'Think of squeezing your elbows together — the chest moves the weight, not the arms.',
   'front-delts': 'Lead with the elbows and keep your traps relaxed.',
-  'side-delts': 'Raise with the elbows, pinkies slightly up; don’t shrug.',
+  'side-delts': 'Lead with the elbows to shoulder height, thumbs level — never tipped down — and don’t shrug.',
   'rear-delts': 'Pull the elbows out and back; feel the back of the shoulders, not the arms.',
   traps: 'Shrug straight up toward your ears; pause, then lower slowly.',
   lats: 'Pull with your elbows, not your hands — drive them down toward your back pockets.',

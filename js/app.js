@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 36;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 37;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -1321,6 +1321,9 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
  * photographs (public domain, bundled so they work with no signal). The two
  * photo frames cross-fade to show the movement; tap to hold them side by side.
  * Clips don't autoplay: the guide's toggle handler starts them when opened. */
+/* A replaced photo gets a revision tag so cached copies on phones refresh. */
+const photoUrl = (id, idx) => `img/demo/${id}-${idx}.jpg${(typeof DEMO_REV !== 'undefined' && DEMO_REV[id]) ? `?r=${DEMO_REV[id]}` : ''}`;
+
 function photoDemo(ex) {
   const anim = (typeof DEMO_ANIMS !== 'undefined') && DEMO_ANIMS[ex.id];
   if (anim) return `
@@ -1336,8 +1339,8 @@ function photoDemo(ex) {
   if (!DEMO_PHOTOS[ex.id]) return '';
   return `
     <div class="photo-demo" data-ex="${ex.id}">
-      <img class="photo-frame photo-start" src="img/demo/${ex.id}-0.jpg" alt="${ex.name} — start position" loading="lazy" />
-      <img class="photo-frame photo-end" src="img/demo/${ex.id}-1.jpg" alt="${ex.name} — finish position" loading="lazy" />
+      <img class="photo-frame photo-start" src="${photoUrl(ex.id, 0)}" alt="${ex.name} — start position" loading="lazy" />
+      <img class="photo-frame photo-end" src="${photoUrl(ex.id, 1)}" alt="${ex.name} — finish position" loading="lazy" />
       <span class="photo-tag photo-tag-start">Start</span>
       <span class="photo-tag photo-tag-end">Finish</span>
       <span class="photo-hint">${ico('camera')} Works offline · tap to compare</span>
@@ -1848,14 +1851,14 @@ async function prefetchPhotos() {
   if (!('caches' in window) || !navigator.onLine) return;
   try {
     const cache = await caches.open(PHOTO_CACHE);
-    const wanted = Object.keys(DEMO_PHOTOS).flatMap((id) => [`img/demo/${id}-0.jpg`, `img/demo/${id}-1.jpg`])
+    const wanted = Object.keys(DEMO_PHOTOS).flatMap((id) => [photoUrl(id, 0), photoUrl(id, 1)])
       .concat(Object.keys(DEMO_ANIMS).flatMap((id) => ['jpg', 'webm', 'mp4'].map((ext) => animUrl(id, ext))));
     const base = new URL('.', location.href).pathname;
     const keys = await cache.keys();
     const have = new Set(keys.map((req) => req.url.slice(new URL(req.url).origin.length)));
     const wantedSet = new Set(wanted.map((p) => base + p));
-    // old revisions of re-rendered clips are no longer wanted: drop them
-    await Promise.all(keys.filter((req) => req.url.includes('/img/anim/') && !wantedSet.has(req.url.slice(new URL(req.url).origin.length))).map((req) => cache.delete(req)));
+    // superseded files (re-rendered clips, replaced photos, removed exercises) are no longer wanted: drop them
+    await Promise.all(keys.filter((req) => /\/img\/(anim|demo)\//.test(req.url) && !wantedSet.has(req.url.slice(new URL(req.url).origin.length))).map((req) => cache.delete(req)));
     const missing = wanted.filter((p) => !have.has(base + p));
     let done = wanted.length - missing.length;
     const total = wanted.length;

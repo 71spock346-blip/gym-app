@@ -8,7 +8,7 @@ const DEMO_PHOTOS = {
   "sh-db-press": "Dumbbell Shoulder Press",
   "sh-smith-press": "Smith Machine Overhead Shoulder Press",
   "sh-lat-raise-machine": "Side Lateral Raise",
-  "sh-db-lat-raise": "Side Lateral Raise",
+  "sh-db-lat-raise": "One-Arm Side Laterals",
   "sh-cable-lat-raise": "Cable Seated Lateral Raise",
   "sh-reverse-pec-deck": "Reverse Machine Flyes",
   "sh-face-pull": "Face Pull",
@@ -153,4 +153,10 @@ const DEMO_PHOTOS = {
   "ar-seated-overhead": "Seated Triceps Press",
   "ar-cable-kickback": "Standing Low-Pulley One-Arm Triceps Extension",
   "ar-decline-skull": "Decline EZ Bar Triceps Extension"
+};
+
+/* Revision tags for photos replaced after shipping. The offline cache keeps
+ * files by URL, so a new tag is what makes phones fetch the corrected photo. */
+const DEMO_REV = {
+  "sh-db-lat-raise": 2,   // corrected technique: neutral wrist, stop at shoulder height
 };
