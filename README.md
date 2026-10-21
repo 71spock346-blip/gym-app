@@ -36,7 +36,9 @@ week layout once, and every day's plan is built to fit.
   *volume cap*. The twice-a-week split uses lower per-session caps because each
   muscle gets two sessions.
 - **Compounds first, isolation later; a press, a pull, a squat, a hinge, calves and
-  rear delts every week** — the slot rules behind every day.
+  rear delts every week** — the slot rules behind every day. Slots set the floor
+  and caps set the ceiling: one calf-raise variant per session, and the free
+  picks go to a muscle the day has not covered yet before doubling up.
 
 ## First open
 

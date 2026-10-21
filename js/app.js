@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 40;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 41;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -313,6 +313,33 @@ const ANTI_REPEAT_ANCHOR = Math.floor((Date.UTC(2026, 0, 5) - WEEK_EPOCH) / MS_P
 const matchesSlot = (ex, slot) => ex.tags.includes(slot.tag) && (!slot.from || ex.group === slot.from);
 const slotKey = (slot) => slot.tag + (slot.from ? '@' + slot.from : '');
 
+/* How many exercises for one muscle a session may hold. Slots set the floor;
+ * this sets the ceiling — one calf-raise variant per day unless a day's slots
+ * ask for more (a second one is the same movement with a different machine). */
+const TAG_CAP = { calf: 1 };
+function tagCap(day, tag) {
+  const slotMax = Math.max(0, ...day.slots.filter((s) => s.tag === tag).map((s) => s.count));
+  const base = (day.maxTags && day.maxTags[tag]) ?? TAG_CAP[tag] ?? Infinity;
+  return Math.max(base, slotMax);
+}
+const specificOf = (ex) => ex.tags.filter((t) => t !== 'compound' && t !== 'isolation' && t !== 'finisher');
+const withinCaps = (day, list, ex) => specificOf(ex).every((t) => list.filter((e) => e.tags.includes(t)).length < tagCap(day, t));
+/* Does this exercise target a muscle region nothing already picked works? Judged with the same
+ * muscle map the cards show (a press already works the front delts, so a front raise adds nothing),
+ * memoised per exercise because the planner replays many weeks. */
+const coverageCache = new Map();
+function muscleCoverage(ex) {
+  if (!coverageCache.has(ex.id)) {
+    const f = typeof focusFor === 'function' ? focusFor(ex) : null;
+    coverageCache.set(ex.id, f ? { hits: f.primary, works: f.primary.concat(f.secondary) } : { hits: specificOf(ex), works: specificOf(ex) });
+  }
+  return coverageCache.get(ex.id);
+}
+const coversNew = (list, ex) => {
+  const have = new Set(list.flatMap((e) => muscleCoverage(e).works));
+  return muscleCoverage(ex).hits.some((r) => !have.has(r));
+};
+
 /* ANCHOR LIFTS: each day's main movement(s) are fixed for a whole 4-week cycle
  * so they can be practised and progressed (double progression, see the reps
  * section), then rotated to a fresh candidate next cycle. Chosen with a
@@ -458,18 +485,19 @@ function applyGoal(picks, day, weekIdx, dayIdx, lastMine, exclude) {
   const add = (pred, n) => {
     for (const ex of pool) {
       if (n <= 0) break;
-      if (!taken.has(ex.id) && pred(ex) && !(isBodyPick(ex) && bodyCapped(out))) { out.push(ex); taken.add(ex.id); n--; }
+      if (!taken.has(ex.id) && pred(ex) && !(isBodyPick(ex) && bodyCapped(out)) && withinCaps(day, out, ex)) { out.push(ex); taken.add(ex.id); n--; }
     }
   };
   const extras = goal.extraSlots[day.key] || [];
   for (const slot of extras) add((ex) => has(ex, slot.tag), slot.count - count(slot.tag));
+  add((ex) => !has(ex, 'core') && coversNew(out, ex) && staleness(lastMine, weekIdx, ex.id) >= 3, day.picks - out.length);   // a rested move for a muscle the day lacks first
   add((ex) => !has(ex, 'core'), day.picks - out.length);
   if (out.length < day.picks) {   // thin pool for this goal + equipment: fill from anything the kit allows, cap lifted
     const relaxed = seededShuffle(dayPool(day), mulberry32(weekIdx * 4241 + dayIdx * 613 + 11))
       .filter((ex) => !avoid.has(ex.id) && baseAllowed(ex) && !has(ex, 'core'));
     for (const ex of relaxed) {
       if (out.length >= day.picks) break;
-      if (!taken.has(ex.id)) { out.push(ex); taken.add(ex.id); }
+      if (!taken.has(ex.id) && withinCaps(day, out, ex)) { out.push(ex); taken.add(ex.id); }
     }
   }
 
@@ -533,12 +561,16 @@ function pickWeek(day, weekIdx, dayIdx, lastUsed, exclude) {
     for (const slot of day.slots) {
       for (const ex of from) {
         if (need[slotKey(slot)] <= 0) break;
-        if (ok(ex) && matchesSlot(ex, slot)) { chosen.push(ex); taken.add(ex.id); need[slotKey(slot)]--; }
+        if (ok(ex) && matchesSlot(ex, slot) && withinCaps(day, chosen, ex)) { chosen.push(ex); taken.add(ex.id); need[slotKey(slot)]--; }
       }
     }
-    for (const ex of from) {
-      if (chosen.length >= day.picks) break;
-      if (ok(ex)) { chosen.push(ex); taken.add(ex.id); }
+    // Free picks: first a fully rested move (unused for 3+ weeks) that works a muscle the day hasn't
+    // covered yet, then anything within the caps — so coverage never overrides the anti-repeat rotation.
+    for (const pass of [(ex) => coversNew(chosen, ex) && staleness(lastUsed, weekIdx, ex.id) >= 3, () => true]) {
+      for (const ex of from) {
+        if (chosen.length >= day.picks) break;
+        if (ok(ex) && withinCaps(day, chosen, ex) && pass(ex)) { chosen.push(ex); taken.add(ex.id); }
+      }
     }
   };
   fill(pool, (ex) => !taken.has(ex.id) && !(isBodyPick(ex) && bodyCapped(chosen)));
