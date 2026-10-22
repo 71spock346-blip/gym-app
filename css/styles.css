@@ -280,7 +280,7 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
   /* each workout sits on a solid warm-charcoal slab, one step up from the page,
    * in the same black / charcoal / gold family as the rest of the app */
   background: #262219;
-  border: 1px solid rgba(255, 228, 160, 0.3);
+  border: 2px solid rgba(255, 228, 160, 0.34);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 16px 36px rgba(0, 0, 0, 0.6);
   /* chips, bubbles and boxes inside the card sit one step lighter than the slab */
   --surface-2: #332e21; --surface-3: #3e382a;
