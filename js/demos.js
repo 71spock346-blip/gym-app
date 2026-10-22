@@ -165,6 +165,7 @@ const DEMO_REV = {
  * Bump `rev` when a file is replaced so phones refetch it. */
 const DEMO_ILLUS = {
   "ch-smith-incline": { rev: 1 },
+  "ch-bench-press": { rev: 1 },
 };
 function illusUrl(id) {
   const a = DEMO_ILLUS[id];
