@@ -277,13 +277,14 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 .exercise-card {
   padding: 16px; margin-bottom: 24px; scroll-margin-top: 112px; transition: border-color 0.2s ease;
   position: relative; overflow: hidden;
-  /* each workout sits on a deep blue slab, so it stands apart from the warm black page */
-  background: linear-gradient(180deg, #192234 0%, #121927 100%);
-  border: 1px solid rgba(150, 180, 230, 0.26);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 16px 36px rgba(0, 0, 0, 0.55);
-  /* blue-tinted surfaces for everything inside the card */
-  --surface-2: #1f2b3f; --surface-3: #283650;
-  --border: rgba(150, 180, 230, 0.14); --border-strong: rgba(150, 180, 230, 0.3);
+  /* each workout sits on a solid warm-charcoal slab, one step up from the page,
+   * in the same black / charcoal / gold family as the rest of the app */
+  background: #262219;
+  border: 1px solid rgba(255, 228, 160, 0.3);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 16px 36px rgba(0, 0, 0, 0.6);
+  /* chips, bubbles and boxes inside the card sit one step lighter than the slab */
+  --surface-2: #332e21; --surface-3: #3e382a;
+  --border: rgba(255, 228, 160, 0.14); --border-strong: rgba(255, 228, 160, 0.26);
 }
 .card-ghost { right: 4px; top: -26px; font-size: 8.5rem; color: rgba(243, 239, 228, 0.075); }   /* back plane: the exercise number */
 .exercise-card.card-done { border-color: rgba(243, 239, 228, 0.45); }
