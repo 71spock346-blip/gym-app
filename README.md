@@ -150,6 +150,15 @@ remembered if you close the app mid-session.
   wide) and list the id in `DEMO_FOCUS` (`js/demos.js`); the card's Focus row and
   the guide's "Where to feel it" block show it instead of the drawn body map.
   The Smith machine incline press uses one.
+- **Add your own pictures from the phone (admin).** Settings → *Your images ·
+  admin* is locked with a PIN you choose, so only you can change them. Unlocked,
+  pick any exercise and paste a picture (or choose one from Photos) into its
+  card-thumbnail, guide-illustration or muscle-figure slot; the app trims, crops
+  and shrinks it on the phone and shows it everywhere that exercise appears (an
+  own illustration drops the video link, like a bundled one). Pictures live on
+  that phone only (`js/media.js`, IndexedDB). *Export pack* hands the whole set
+  to another phone (AirDrop, Files, a chat) or produces a file to send so they
+  can be built into the app for everyone; *Import pack* loads one.
 - **Animated demos.** Exercises listed in `js/anims.js` show a looping clip
   (`img/anim/<id>.webm` + `.mp4`, poster `.jpg`) in place of the photos, with the
   working muscle highlighted in gold. Clips play while the guide is open, pause on
@@ -216,6 +225,7 @@ js/exercises.js       exercise database (160+ exercises with guides) + SVG picto
 js/videos.js          curated YouTube form video per exercise
 js/icons.js           monoline UI icon set
 js/demos.js           generated manifest of bundled demo photos
+js/media.js           your own images: phone-local store, crop/scale, pack export/import, PIN
 img/demo/             start/finish photos per exercise (public domain)
 img/illus/            your own guide illustrations (DEMO_ILLUS)
 img/thumb/            your own card thumbnails (DEMO_THUMBS)

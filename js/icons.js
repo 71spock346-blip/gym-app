@@ -30,6 +30,11 @@ const UI_ICONS = {
   film: '<path d="M4 5h16v14H4zM8 5v14M16 5v14M4 9h4M4 15h4M16 9h4M16 15h4"/>',
   arrowRight: '<path d="M5 12h14M13 6l6 6-6 6"/>',
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+  lock: '<path d="M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3"/>',
+  share: '<path d="M12 4v11M8 8l4-4 4 4M5 13v7h14v-7"/>',
+  download: '<path d="M12 4v11M8 11l4 4 4-4M5 16v4h14v-4"/>',
+  image: '<path d="M4 5h16v14H4zM4 15l5-5 4 4 3-3 4 4"/><circle cx="15.5" cy="9" r="1.5"/>',
+  clipboard: '<path d="M9 4h6v3H9zM7 6H5v15h14V6h-2M9 12h6M9 16h4"/>',
 };
 
 /* Inline SVG for an icon; sized by CSS (.ico) and coloured by currentColor. */

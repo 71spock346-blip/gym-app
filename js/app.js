@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 56;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 57;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -224,6 +224,8 @@ const state = {
   anchors: store.read('anchors', {}),              // { exId: { zones: { hypertrophy|strength|volume: { w } }, applied: { date: { zone, outcome, step, at } } } }
   editSet: null,                                   // { date, ex, set } — the done set whose reps are being adjusted
   ob: { goal: 'build', equip: 'gym', split: 'twice' },   // onboarding choices in progress
+  adminPin: store.read('adminPin', null),          // SHA-256 of the PIN that locks Settings → Your images (admin)
+  admin: { open: false, ex: null, trim: false, changing: false, pasteFor: null },   // admin area UI state (not saved)
 };
 // Phones that picked a goal before onboarding existed skip straight in.
 if (!state.profile && state.goal) { state.profile = { name: '', onboarded: true }; store.write('profile', state.profile); }
@@ -1297,7 +1299,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
     ${swapNote}
     <div class="exercise-top">
       <div class="exercise-icon ${hasThumb(ex) ? 'has-thumb' : ''}">${hasThumb(ex)
-        ? `<img class="exercise-thumb" src="${thumbUrl(ex.id)}" alt="" loading="lazy" />`
+        ? `<img class="exercise-thumb" src="${thumbSrc(ex.id)}" alt="" loading="lazy" />`
         : (ICONS[ex.icon] || ICONS.dumbbell)}</div>
       <div class="exercise-info">
         <h3 class="exercise-name"><span class="ex-num">${String(i + 1).padStart(2, '0')}</span>${ex.name}</h3>
@@ -1358,17 +1360,22 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
 /* A replaced photo gets a revision tag so cached copies on phones refresh. */
 const photoUrl = (id, idx) => `img/demo/${id}-${idx}.jpg${(typeof DEMO_REV !== 'undefined' && DEMO_REV[id]) ? `?r=${DEMO_REV[id]}` : ''}`;
 
+/* Your own images — added in Settings → Your images (admin) and kept on this
+ * phone (js/media.js) — win over the bundled files in img/<kind>/. */
+const ownUrl = (kind, id) => (typeof ownMediaUrl === 'function' ? ownMediaUrl(kind, id) : null);
 /* An exercise with your own illustration shows that instead of any video link. */
-const hasIllus = (ex) => !!((typeof DEMO_ILLUS !== 'undefined') && DEMO_ILLUS[ex.id]);
+const hasIllus = (ex) => !!(ownUrl('illus', ex.id) || ((typeof DEMO_ILLUS !== 'undefined') && DEMO_ILLUS[ex.id]));
 /* …and one with your own thumbnail shows it in place of the pictogram. */
-const hasThumb = (ex) => !!((typeof DEMO_THUMBS !== 'undefined') && DEMO_THUMBS[ex.id]);
+const hasThumb = (ex) => !!(ownUrl('thumb', ex.id) || ((typeof DEMO_THUMBS !== 'undefined') && DEMO_THUMBS[ex.id]));
+const illusSrc = (id) => ownUrl('illus', id) || illusUrl(id);
+const thumbSrc = (id) => ownUrl('thumb', id) || thumbUrl(id);
 
 function photoDemo(ex) {
   const anim = (typeof DEMO_ANIMS !== 'undefined') && DEMO_ANIMS[ex.id];
-  const illus = !anim && (typeof DEMO_ILLUS !== 'undefined') && DEMO_ILLUS[ex.id];
+  const illus = !anim && hasIllus(ex);
   if (illus) return `
     <div class="illus-demo" data-ex="${ex.id}">
-      <img src="${illusUrl(ex.id)}" alt="${ex.name} — illustrated technique" loading="lazy" />
+      <img src="${illusSrc(ex.id)}" alt="${ex.name} — illustrated technique" loading="lazy" />
       <span class="photo-hint">${ico('camera')} Works offline</span>
     </div>`;
   if (anim) return `
@@ -1506,7 +1513,138 @@ function renderSettings() {
     <div class="choice-grid two">
       <button class="choice set-unit ${state.unit === 'kg' ? 'active' : ''}" type="button" data-unit="kg"><span class="choice-emoji"><span class="choice-badge">kg</span></span><span class="choice-text"><strong>Kilograms</strong><small>kg, 2.5 kg steps</small></span></button>
       <button class="choice set-unit ${state.unit === 'lb' ? 'active' : ''}" type="button" data-unit="lb"><span class="choice-emoji"><span class="choice-badge">lb</span></span><span class="choice-text"><strong>Pounds</strong><small>lb, 5 lb steps</small></span></button>
+    </div>
+    <h2 class="section-title">Your images · admin</h2>
+    ${adminPanel()}`;
+}
+
+/* ------------------------------ your images (admin) ------------------------------ */
+/* A PIN-locked area at the bottom of Settings where you give any exercise your
+ * own picture — pasted, or picked from Photos — for its card thumbnail, guide
+ * illustration or lit muscle figure. Pictures are kept on this phone
+ * (js/media.js); export the pack to move them to another phone or to have
+ * them built into the app. */
+const groupLabel = (key) => (DAYS.find((d) => d.key === key) || {}).name || key.charAt(0).toUpperCase() + key.slice(1);
+
+function adminPanel() {
+  if (typeof OWN_KINDS === 'undefined') return '';
+  const count = ownMediaCount();
+  const plural = (n) => `${n} image${n === 1 ? '' : 's'} of yours`;
+  const pinRow = (id, placeholder, btnId, btnLabel) => `
+      <div class="admin-row">
+        <input id="${id}" class="pin-input" type="password" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="${placeholder}" aria-label="${placeholder}" />
+        <button id="${btnId}" class="admin-btn" type="button">${ico('check')} ${btnLabel}</button>
+      </div>`;
+  if (!state.adminPin) return `
+    <div class="admin-card">
+      <p class="admin-p">Give any exercise your own picture — a card thumbnail, a guide illustration or a lit muscle figure — straight from this phone. Lock the area with a PIN first, so only you can change them.</p>
+      ${pinRow('adminPinNew', 'PIN (4–8 digits)', 'adminSetPin', 'Set PIN')}
     </div>`;
+  if (!state.admin.open) return `
+    <div class="admin-card">
+      <p class="admin-p">${count ? `${plural(count)} on this phone.` : 'Add your own picture to any exercise.'} Unlock with your PIN.</p>
+      ${pinRow('adminPinIn', 'PIN', 'adminUnlock', 'Unlock')}
+    </div>`;
+  const ex = findExercise(state.admin.ex) || (currentPlan && currentPlan.exercises[0]) || Object.values(EXERCISE_DB)[0][0];
+  const options = Object.entries(EXERCISE_DB).map(([key, list]) =>
+    `<optgroup label="${esc(groupLabel(key))}">${list.map((e) => `<option value="${e.id}" ${e.id === ex.id ? 'selected' : ''}>${esc(e.name)}</option>`).join('')}</optgroup>`).join('');
+  const bundled = {
+    thumb: (id) => (typeof DEMO_THUMBS !== 'undefined' && DEMO_THUMBS[id]) ? thumbUrl(id) : null,
+    illus: (id) => (typeof DEMO_ILLUS !== 'undefined' && DEMO_ILLUS[id]) ? illusUrl(id) : null,
+    focus: (id) => (typeof DEMO_FOCUS !== 'undefined' && DEMO_FOCUS[id]) ? focusUrl(id) : null,
+  };
+  const slots = Object.entries(OWN_KINDS).map(([kind, spec]) => {
+    const own = ownUrl(kind, ex.id);
+    const src = own || bundled[kind](ex.id);
+    return `
+      <div class="media-slot" data-kind="${kind}" data-ex="${ex.id}">
+        <div class="media-preview ${kind}">${src ? `<img src="${src}" alt="" />` : '<span>none</span>'}</div>
+        <div class="media-text">
+          <div class="media-label">${spec.label} <small>${own ? '· yours' : src ? '· built in' : '· none yet'}</small></div>
+          <div class="media-hint">${spec.hint}</div>
+          <div class="media-actions">
+            <button class="admin-btn media-paste" type="button">${ico('clipboard')} Paste</button>
+            <label class="admin-btn media-pick">${ico('image')} Choose… <input class="media-file" type="file" accept="image/*" hidden /></label>
+            ${own ? `<button class="admin-btn media-remove" type="button">${ico('undo')} Remove</button>` : ''}
+          </div>
+          ${state.admin.pasteFor === kind ? `<div class="paste-target" contenteditable="true" tabindex="0" role="textbox" aria-label="Paste the picture here">${ico('clipboard')} Tap here, then long-press and choose Paste</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+  return `
+    <div class="admin-card unlocked">
+      <div class="admin-row">
+        <label class="admin-select">Exercise <select id="adminEx">${options}</select></label>
+        <button id="adminLock" class="admin-btn" type="button">${ico('lock')} Lock</button>
+      </div>
+      <label class="admin-check"><input id="adminTrim" type="checkbox" ${state.admin.trim ? 'checked' : ''} /> Trim a frame off the edges (7%) — for pictures that come with a coloured border</label>
+      ${slots}
+      <div class="admin-pack">
+        <div class="media-hint">${plural(count)} on this phone. They live here only: export the pack to copy them to another phone or to send them to be built into the app for everyone; import a pack to load them.</div>
+        <div class="media-actions">
+          <button id="mediaExport" class="admin-btn" type="button" ${count ? '' : 'disabled'}>${ico('share')} Export pack</button>
+          <label class="admin-btn">${ico('download')} Import pack <input id="mediaImport" type="file" accept="application/json,.json" hidden /></label>
+          <button id="adminChangePin" class="admin-btn" type="button">${ico('lock')} ${state.admin.changing ? 'Keep PIN' : 'Change PIN'}</button>
+        </div>
+        ${state.admin.changing ? pinRow('adminPinNew', 'New PIN (4–8 digits)', 'adminSetPin', 'Save PIN') : ''}
+      </div>
+    </div>`;
+}
+
+async function adminSetPin() {
+  const input = $('#adminPinNew');
+  const pin = ((input && input.value) || '').trim();
+  if (!/^\d{4,8}$/.test(pin)) { showToast('The PIN must be 4 to 8 digits', 'info'); if (input) input.focus(); return; }
+  state.adminPin = await pinHash(pin);
+  store.write('adminPin', state.adminPin);
+  state.admin.open = true; state.admin.changing = false;
+  render();
+  showToast('PIN saved — your images area is unlocked', 'check');
+}
+async function adminUnlock() {
+  const input = $('#adminPinIn');
+  const pin = ((input && input.value) || '').trim();
+  if (pin && await pinHash(pin) === state.adminPin) { state.admin.open = true; render(); return; }
+  showToast('Wrong PIN', 'info');
+  if (input) { input.value = ''; input.focus(); }
+}
+async function adminAdd(slot, blob) {
+  if (!slot) return;
+  const { kind, ex } = slot.dataset;
+  const exercise = findExercise(ex);
+  try {
+    await setOwnMedia(kind, ex, blob, { trim: state.admin.trim ? 0.07 : 0 });
+    state.admin.pasteFor = null;
+    render();
+    showToast(`${OWN_KINDS[kind].label} saved for ${exercise ? exercise.name : ex}`, 'check');
+  } catch (err) { showToast(err.message || 'Could not use that picture', 'info'); }
+}
+async function adminPaste(slot) {
+  const r = await clipboardImage();
+  if (r.blob) { adminAdd(slot, r.blob); return; }
+  if (r.error === 'noimage') { showToast('Copy a picture first, then tap Paste', 'info'); return; }
+  // no clipboard API, or the phone refused: open the long-press paste box in this slot
+  state.admin.pasteFor = slot.dataset.kind;
+  render();
+  const box = $('.paste-target');
+  if (box) { box.scrollIntoView({ block: 'center' }); box.focus(); }
+  showToast('Tap the box, long-press and choose Paste', 'info');
+}
+async function adminRemove(slot) {
+  const { kind, ex } = slot.dataset;
+  await removeOwnMedia(kind, ex);
+  render();
+  showToast(`${OWN_KINDS[kind].label} removed`, 'undo');
+}
+async function adminExport() {
+  try {
+    const r = await saveBlobToPhone(await exportOwnMedia(), `staystrong-images-${todayISO()}.json`);
+    if (r !== 'cancelled') showToast(r === 'shared' ? 'Pack shared' : 'Pack saved to your downloads', 'check');
+  } catch (err) { showToast('Could not export: ' + (err.message || err), 'info'); }
+}
+async function adminImport(file) {
+  try { const n = await importOwnMedia(file); render(); showToast(`${n} image${n === 1 ? '' : 's'} imported`, 'check'); }
+  catch (err) { showToast(err.message || 'That is not a Stay Strong image pack', 'info'); }
 }
 
 /* ------------------------------ toast ------------------------------ */
@@ -1662,6 +1800,17 @@ document.addEventListener('click', (e) => {
   const setUnit = e.target.closest('.set-unit');
   if (setUnit) { state.unit = setUnit.dataset.unit; store.write('unit', state.unit); render(); return; }
 
+  // your images (admin)
+  if (e.target.closest('#adminSetPin')) { adminSetPin(); return; }
+  if (e.target.closest('#adminUnlock')) { adminUnlock(); return; }
+  if (e.target.closest('#adminLock')) { Object.assign(state.admin, { open: false, changing: false, pasteFor: null }); render(); return; }
+  if (e.target.closest('#adminChangePin')) { state.admin.changing = !state.admin.changing; render(); return; }
+  const pasteBtn = e.target.closest('.media-paste');
+  if (pasteBtn) { adminPaste(pasteBtn.closest('.media-slot')); return; }
+  const removeBtn = e.target.closest('.media-remove');
+  if (removeBtn) { adminRemove(removeBtn.closest('.media-slot')); return; }
+  if (e.target.closest('#mediaExport')) { adminExport(); return; }
+
   if (e.target.closest('#goalPill')) {
     state.goal = currentGoal().key === 'build' ? 'fatloss' : 'build';
     store.write('goal', state.goal);
@@ -1762,6 +1911,32 @@ document.addEventListener('click', (e) => {
     startRestTimer(restSec, `Rest — ${exercise ? exercise.name : 'set'} · set ${setNum} done`);
     refreshProgress(); announceAnchor();
   }
+});
+
+/* Admin area inputs: the exercise picker, the trim box, the file pickers, the
+ * long-press paste box and Enter in a PIN field. */
+document.addEventListener('change', (e) => {
+  const el = e.target;
+  if (!el || !el.id && !el.classList) return;
+  if (el.id === 'adminEx') { state.admin.ex = el.value; state.admin.pasteFor = null; render(); return; }
+  if (el.id === 'adminTrim') { state.admin.trim = el.checked; return; }
+  if (el.classList && el.classList.contains('media-file')) { const f = el.files && el.files[0]; if (f) adminAdd(el.closest('.media-slot'), f); return; }
+  if (el.id === 'mediaImport') { const f = el.files && el.files[0]; if (f) adminImport(f); }
+});
+document.addEventListener('paste', (e) => {
+  const box = e.target && e.target.closest && e.target.closest('.paste-target');
+  if (!box) return;
+  e.preventDefault();
+  const cd = e.clipboardData;
+  let blob = cd && [...cd.files].find((f) => f.type.startsWith('image/'));
+  if (!blob && cd) { const it = [...cd.items].find((i) => i.type.startsWith('image/')); blob = it && it.getAsFile(); }
+  if (!blob) { showToast('Nothing on the clipboard is a picture', 'info'); return; }
+  adminAdd(box.closest('.media-slot'), blob);
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' || !e.target) return;
+  if (e.target.id === 'adminPinIn') { e.preventDefault(); adminUnlock(); }
+  else if (e.target.id === 'adminPinNew') { e.preventDefault(); adminSetPin(); }
 });
 
 /* This exercise's scheme in the plan on screen (a sane default if it isn't there). */
@@ -1953,6 +2128,8 @@ $('#checkUpdate').addEventListener('click', forceUpdate);
 window.addEventListener('online', prefetchPhotos);
 
 render();
+// your own images, once the phone's store answers (a moment, under the splash)
+if (typeof loadOwnMedia === 'function') loadOwnMedia().then((n) => { if (n) { render(); renderVideoLibrary(); } });
 renderVideoLibrary();
 prefetchPhotos();
 hideSplash();

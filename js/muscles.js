@@ -131,10 +131,12 @@ function focusBlock(ex, big) {
   const names = (list) => list.map((r) => MUSCLE_LABELS[r]).join(', ');
   const aria = `Target muscles: ${names(f.primary)}${f.secondary.length ? `; also ${names(f.secondary)}` : ''}`;
   const also = f.also.length ? `<span class="focus-also">· also ${f.also.join(', ')}</span>` : '';
-  // your own front/back figure (img/focus/<id>.webp) stands in for the drawn body map
-  const own = (typeof DEMO_FOCUS !== 'undefined') && DEMO_FOCUS[ex.id];
+  // your own front/back figure stands in for the drawn body map: one added on
+  // this phone (Settings → Your images) first, then a bundled img/focus/<id>.webp
+  const onPhone = (typeof ownMediaUrl === 'function') ? ownMediaUrl('focus', ex.id) : null;
+  const own = onPhone || (((typeof DEMO_FOCUS !== 'undefined') && DEMO_FOCUS[ex.id]) ? focusUrl(ex.id) : null);
   const map = (cls) => own
-    ? `<img class="body-map body-map-photo ${cls || ''}" src="${focusUrl(ex.id)}" alt="" loading="lazy" />`
+    ? `<img class="body-map body-map-photo ${cls || ''}" src="${own}" alt="" loading="lazy" />`
     : bodyMapSVG(f.primary, f.secondary, cls);
   if (big) return `
     <h4>Where to feel it</h4>
