@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 55;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 56;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -1899,13 +1899,14 @@ async function prefetchPhotos() {
     const wanted = Object.keys(DEMO_PHOTOS).flatMap((id) => [photoUrl(id, 0), photoUrl(id, 1)])
       .concat(Object.keys(DEMO_ANIMS).flatMap((id) => ['jpg', 'webm', 'mp4'].map((ext) => animUrl(id, ext))))
       .concat(Object.keys(typeof DEMO_ILLUS !== 'undefined' ? DEMO_ILLUS : {}).map((id) => illusUrl(id)))
-      .concat(Object.keys(typeof DEMO_THUMBS !== 'undefined' ? DEMO_THUMBS : {}).map((id) => thumbUrl(id)));
+      .concat(Object.keys(typeof DEMO_THUMBS !== 'undefined' ? DEMO_THUMBS : {}).map((id) => thumbUrl(id)))
+      .concat(Object.keys(typeof DEMO_FOCUS !== 'undefined' ? DEMO_FOCUS : {}).map((id) => focusUrl(id)));
     const base = new URL('.', location.href).pathname;
     const keys = await cache.keys();
     const have = new Set(keys.map((req) => req.url.slice(new URL(req.url).origin.length)));
     const wantedSet = new Set(wanted.map((p) => base + p));
     // superseded files (re-rendered clips, replaced photos, removed exercises) are no longer wanted: drop them
-    await Promise.all(keys.filter((req) => /\/img\/(anim|demo|illus|thumb)\//.test(req.url) && !wantedSet.has(req.url.slice(new URL(req.url).origin.length))).map((req) => cache.delete(req)));
+    await Promise.all(keys.filter((req) => /\/img\/(anim|demo|illus|thumb|focus)\//.test(req.url) && !wantedSet.has(req.url.slice(new URL(req.url).origin.length))).map((req) => cache.delete(req)));
     const missing = wanted.filter((p) => !have.has(base + p));
     let done = wanted.length - missing.length;
     const total = wanted.length;

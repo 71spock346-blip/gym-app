@@ -348,6 +348,9 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 .body-map .m-primary { fill: var(--ink-hi); filter: drop-shadow(0 0 3px var(--ink-glow)); }
 .body-map .m-secondary { fill: rgba(255, 248, 230, 0.4); }
 .body-map .m-lines { fill: none; stroke: rgba(12, 11, 9, 0.55); stroke-width: 0.8; }
+/* your own front/back figure in place of the drawn map: a little wider, since it shows two full bodies */
+.body-map-photo { object-fit: contain; object-position: center; width: 104px; height: 92px; }
+.focus-big .body-map-photo { width: 200px; height: 176px; }
 .focus-text { min-width: 0; flex: 1; }
 .focus-label { font-size: 0.8rem; font-weight: 800; color: var(--text); line-height: 1.3; }
 .focus-k {

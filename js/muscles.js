@@ -131,19 +131,24 @@ function focusBlock(ex, big) {
   const names = (list) => list.map((r) => MUSCLE_LABELS[r]).join(', ');
   const aria = `Target muscles: ${names(f.primary)}${f.secondary.length ? `; also ${names(f.secondary)}` : ''}`;
   const also = f.also.length ? `<span class="focus-also">· also ${f.also.join(', ')}</span>` : '';
+  // your own front/back figure (img/focus/<id>.webp) stands in for the drawn body map
+  const own = (typeof DEMO_FOCUS !== 'undefined') && DEMO_FOCUS[ex.id];
+  const map = (cls) => own
+    ? `<img class="body-map body-map-photo ${cls || ''}" src="${focusUrl(ex.id)}" alt="" loading="lazy" />`
+    : bodyMapSVG(f.primary, f.secondary, cls);
   if (big) return `
     <h4>Where to feel it</h4>
     <div class="focus-big" role="img" aria-label="${aria}">
-      ${bodyMapSVG(f.primary, f.secondary, 'body-map-big')}
+      ${map('body-map-big')}
       <div class="focus-text">
         <div class="focus-label">${f.label} ${also}</div>
         <div class="focus-cue">${f.cue}</div>
-        <div class="focus-legend"><span><i class="k-primary"></i>focus</span><span><i class="k-secondary"></i>also working</span></div>
+        ${own ? '' : '<div class="focus-legend"><span><i class="k-primary"></i>focus</span><span><i class="k-secondary"></i>also working</span></div>'}
       </div>
     </div>`;
   return `
     <div class="focus-row" role="img" aria-label="${aria}">
-      ${bodyMapSVG(f.primary, f.secondary)}
+      ${map()}
       <div class="focus-text">
         <div class="focus-label"><span class="focus-k">Focus</span>${f.label} ${also}</div>
         <div class="focus-cue">${f.cue}</div>

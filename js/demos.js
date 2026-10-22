@@ -168,7 +168,6 @@ const DEMO_ILLUS = {
   "ch-bench-press": { rev: 1 },
   "ch-low-cable-fly": { rev: 1 },
   "ch-incline-fly": { rev: 1 },
-  "ch-incline-fly": { rev: 1 },
   "ch-cable-cross": { rev: 1 },
 };
 function illusUrl(id) {
@@ -188,4 +187,16 @@ const DEMO_THUMBS = {
 function thumbUrl(id) {
   const a = DEMO_THUMBS[id];
   return `img/thumb/${id}.jpg${a && a.rev ? `?r=${a.rev}` : ''}`;
+}
+
+/* Your own front/back muscle figure for the Focus row and the guide's "Where to
+ * feel it" block, in img/focus/<id>.webp (transparent background, about 600 px
+ * wide, working muscles lit). Replaces the drawn body map for that exercise.
+ * Bump `rev` when a file is replaced. */
+const DEMO_FOCUS = {
+  "ch-smith-incline": { rev: 1 },
+};
+function focusUrl(id) {
+  const a = DEMO_FOCUS[id];
+  return `img/focus/${id}.${(a && a.ext) || 'webp'}${a && a.rev ? `?r=${a.rev}` : ''}`;
 }

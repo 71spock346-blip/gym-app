@@ -145,6 +145,11 @@ remembered if you close the app mid-session.
   (240 px is plenty) and list the id in `DEMO_THUMBS` (`js/demos.js`); the card's
   pictogram box shows the photo instead of the equipment icon, cached offline
   with the rest of the media.
+- **Your own muscle figures.** Drop a front/back figure with the working muscles
+  lit at `img/focus/<exercise-id>.webp` (transparent background, about 600 px
+  wide) and list the id in `DEMO_FOCUS` (`js/demos.js`); the card's Focus row and
+  the guide's "Where to feel it" block show it instead of the drawn body map.
+  The Smith machine incline press uses one.
 - **Animated demos.** Exercises listed in `js/anims.js` show a looping clip
   (`img/anim/<id>.webm` + `.mp4`, poster `.jpg`) in place of the photos, with the
   working muscle highlighted in gold. Clips play while the guide is open, pause on
@@ -214,6 +219,7 @@ js/demos.js           generated manifest of bundled demo photos
 img/demo/             start/finish photos per exercise (public domain)
 img/illus/            your own guide illustrations (DEMO_ILLUS)
 img/thumb/            your own card thumbnails (DEMO_THUMBS)
+img/focus/            your own lit muscle figures (DEMO_FOCUS)
 js/app.js             weekly plan generator, goals, equipment modes, history, UI
 sw.js                 service worker (offline support)
 manifest.webmanifest  PWA install metadata
