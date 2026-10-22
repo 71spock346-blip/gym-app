@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 43;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 44;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -1303,7 +1303,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
           <span class="chip chip-gear">${ex.gear}</span>
           <span class="chip chip-muscle">${ex.muscles}</span>
           <span class="chip chip-equip">${equipTag}</span>
-          <a class="chip chip-video" href="${videoUrl(ex)}" target="_blank" rel="noopener">${ico('play')} Video</a>
+          ${hasIllus(ex) ? '' : `<a class="chip chip-video" href="${videoUrl(ex)}" target="_blank" rel="noopener">${ico('play')} Video</a>`}
           ${isAnchor ? `<span class="chip chip-anchor" title="Fixed for this 4-week cycle and progressed by double progression">${ico('target')} Anchor lift</span>` : ''}
           ${supersetLabel ? `<span class="chip chip-superset">${ico('link')} Superset ${supersetLabel}</span>` : ''}
         </div>
@@ -1332,7 +1332,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
         <ul>${ex.tips.map((s) => `<li>${s}</li>`).join('')}</ul>
         ${ex.mistakes ? `<h4>Common mistakes</h4>
         <ul class="mistakes">${ex.mistakes.map((s) => `<li>${s}</li>`).join('')}</ul>` : ''}
-        <div class="video-box">
+        ${hasIllus(ex) ? '' : `<div class="video-box">
           <h4>Watch before your session</h4>
           <a class="video-link" href="${videoUrl(ex)}" target="_blank" rel="noopener">
             ${ico('play')} ${FORM_VIDEOS[ex.id] ? `Form video: ${FORM_VIDEOS[ex.id].title}` : 'Watch form videos on YouTube'}
@@ -1340,7 +1340,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
           <small class="video-sub">Between sets, the photos and cues above are your reference — the video is for learning
             the move at home. Plays offline if downloaded in YouTube (Premium) ·
             <a class="video-more" href="${videoSearchUrl(ex)}" target="_blank" rel="noopener">more videos</a></small>
-        </div>
+        </div>`}
       </div>
     </details>
   </article>`;
@@ -1355,6 +1355,9 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
  * Clips don't autoplay: the guide's toggle handler starts them when opened. */
 /* A replaced photo gets a revision tag so cached copies on phones refresh. */
 const photoUrl = (id, idx) => `img/demo/${id}-${idx}.jpg${(typeof DEMO_REV !== 'undefined' && DEMO_REV[id]) ? `?r=${DEMO_REV[id]}` : ''}`;
+
+/* An exercise with your own illustration shows that instead of any video link. */
+const hasIllus = (ex) => !!((typeof DEMO_ILLUS !== 'undefined') && DEMO_ILLUS[ex.id]);
 
 function photoDemo(ex) {
   const anim = (typeof DEMO_ANIMS !== 'undefined') && DEMO_ANIMS[ex.id];
@@ -1853,7 +1856,7 @@ function renderVideoLibrary() {
   if (!el) return;
   const groups = DAYS.concat([{ key: 'core', label: 'Core', name: 'Core moves (HIIT mode)' }]);
   const days = groups.map((day) => {
-    const items = (day.key === 'core' ? EXERCISE_DB.core : dayPool(day.key)).filter((ex) => FORM_VIDEOS[ex.id]);
+    const items = (day.key === 'core' ? EXERCISE_DB.core : dayPool(day.key)).filter((ex) => FORM_VIDEOS[ex.id] && !hasIllus(ex));
     const ids = items.map((ex) => FORM_VIDEOS[ex.id].id);
     return `
       <div class="vl-day">

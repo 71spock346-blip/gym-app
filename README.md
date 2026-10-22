@@ -137,7 +137,8 @@ remembered if you close the app mid-session.
   are bundled with the app, so they work with no signal — basement gyms included.
 - **Your own illustrations.** Drop an image at `img/illus/<exercise-id>.jpg` and
   list the id in `DEMO_ILLUS` (`js/demos.js`); the guide shows it full width in
-  place of the stock photos, saved for offline use like everything else. The
+  place of the stock photos, saved for offline use like everything else, and the
+  exercise then carries no video link at all (card, guide or video library). The
   Smith machine incline press uses one.
 - **Animated demos.** Exercises listed in `js/anims.js` show a looping clip
   (`img/anim/<id>.webm` + `.mp4`, poster `.jpg`) in place of the photos, with the
