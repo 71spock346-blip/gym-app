@@ -139,7 +139,12 @@ remembered if you close the app mid-session.
   list the id in `DEMO_ILLUS` (`js/demos.js`); the guide shows it full width in
   place of the stock photos, saved for offline use like everything else, and the
   exercise then carries no video link at all (card, guide or video library). The
-  Smith machine incline press uses one.
+  chest day uses them: Smith machine incline press, barbell bench press,
+  low-to-high cable fly, incline dumbbell fly and cable crossover.
+- **Your own card thumbnails.** Drop a square photo at `img/thumb/<exercise-id>.jpg`
+  (240 px is plenty) and list the id in `DEMO_THUMBS` (`js/demos.js`); the card's
+  pictogram box shows the photo instead of the equipment icon, cached offline
+  with the rest of the media.
 - **Animated demos.** Exercises listed in `js/anims.js` show a looping clip
   (`img/anim/<id>.webm` + `.mp4`, poster `.jpg`) in place of the photos, with the
   working muscle highlighted in gold. Clips play while the guide is open, pause on
@@ -207,6 +212,8 @@ js/videos.js          curated YouTube form video per exercise
 js/icons.js           monoline UI icon set
 js/demos.js           generated manifest of bundled demo photos
 img/demo/             start/finish photos per exercise (public domain)
+img/illus/            your own guide illustrations (DEMO_ILLUS)
+img/thumb/            your own card thumbnails (DEMO_THUMBS)
 js/app.js             weekly plan generator, goals, equipment modes, history, UI
 sw.js                 service worker (offline support)
 manifest.webmanifest  PWA install metadata
