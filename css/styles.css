@@ -43,6 +43,7 @@
    * huge or tiny, nothing in between. Screens are built in three planes: big
    * ghost type at the back, the subject in the middle, buttons on top. */
   --tap-border: rgba(217, 169, 47, 0.55);
+  --gold-edge: rgba(255, 255, 255, 0.88);   /* white rim on every golden chip, pill and bubble */
   --ink-hi: #fff8e6;
   --ink-glow: rgba(255, 248, 230, 0.28);
   --ghost: rgba(243, 239, 228, 0.06);
@@ -317,9 +318,8 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
   border: 1px solid var(--border);
 }
 .chip .ico { width: 11px; height: 11px; vertical-align: -1.5px; }
-.chip-gear { background: var(--surface-2); color: var(--text); }
+.chip-gear, .chip-equip { background: var(--accent-2); color: var(--on-accent); border-color: var(--gold-edge); }   /* equipment: golden */
 .chip-muscle { background: var(--surface-2); color: var(--text-dim); }
-.chip-equip { background: transparent; color: var(--text-dim); }
 .chip-video { background: var(--accent-dim); color: var(--accent-2); border-color: var(--tap-border); text-decoration: none; }   /* tappable: signal colour */
 .chip-video .ico { width: 10px; height: 10px; }
 .chip-superset { background: var(--surface-3); color: var(--text); border-color: var(--border-strong); }
@@ -327,7 +327,7 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 .scheme-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
 .scheme-pill {
   background: var(--accent-2); color: var(--on-accent);   /* golden yellow: the sets × reps for today */
-  border: 1px solid transparent;
+  border: 1.5px solid var(--gold-edge);
   border-radius: 999px; padding: 4px 12px;
   font-weight: 700; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;
   font-variant-numeric: tabular-nums;
@@ -397,14 +397,14 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 .set-bubble {
   width: 46px; height: 46px; border-radius: 50%;
   background: var(--accent-2); color: var(--on-accent);   /* golden yellow: a set waiting to be done */
-  border: 1px solid transparent;
+  border: 1.5px solid var(--gold-edge);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);   /* top plane: the buttons float */
   font-size: 1rem; font-weight: 800; cursor: pointer;
   font-variant-numeric: tabular-nums;
 }
 .set-bubble.done {
-  /* deep amber with a gold ring: a set that is done, next to the bright ones still to do */
-  background: linear-gradient(135deg, #a8731b 0%, #7e5410 100%); border-color: var(--accent-2); color: #fff3d6;
+  /* deep amber with the same white rim: a set that is done, next to the bright ones still to do */
+  background: linear-gradient(135deg, #a8731b 0%, #7e5410 100%); border-color: var(--gold-edge); color: #fff3d6;
   box-shadow: 0 4px 14px var(--accent-glow);
   animation: bubble-pop 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.3);
 }
@@ -424,7 +424,7 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 .reps-label { font-size: 0.64rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-dim); }
 .reps-btn {
   width: 36px; height: 36px; border-radius: 50%; flex: 0 0 auto;
-  background: var(--accent-2); color: var(--on-accent); border: 1px solid transparent;   /* golden, like the set bubbles */
+  background: var(--accent-2); color: var(--on-accent); border: 1.5px solid var(--gold-edge);   /* golden, like the set bubbles */
   font-size: 1.25rem; font-weight: 800; line-height: 1; cursor: pointer;
 }
 .reps-val { font-family: var(--font-display); font-size: 1.6rem; font-weight: 600; min-width: 2.4em; text-align: center; color: var(--text); font-variant-numeric: tabular-nums; }
