@@ -5,7 +5,7 @@
  * cache that the page fills in the background and that the fetch handler
  * tops up on demand. */
 
-const VERSION = 42;                 // keep in step with APP_VERSION in js/app.js
+const VERSION = 43;                 // keep in step with APP_VERSION in js/app.js
 const CACHE = `staystrong-v${VERSION}`;
 const PHOTO_CACHE = 'staystrong-photos';  // demo photos + animated clips; survives version bumps
 const ASSETS = [
@@ -64,7 +64,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  const isMedia = request.url.includes('/img/demo/') || request.url.includes('/img/anim/');
+  const isMedia = /\/img\/(demo|anim|illus)\//.test(request.url);
   if (isMedia) { event.respondWith(mediaResponse(request)); return; }
   event.respondWith(
     caches.match(request).then((hit) => hit || fetch(request).then((resp) => {

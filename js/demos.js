@@ -159,3 +159,14 @@ const DEMO_PHOTOS = {
 const DEMO_REV = {
   // (none at the moment — the lateral raise moved to a mannequin clip)
 };
+
+/* Your own illustrations, one per exercise id, in img/illus/<id>.jpg. Shown in
+ * the guide in place of the stock photos (a clip, if there is one, still wins).
+ * Bump `rev` when a file is replaced so phones refetch it. */
+const DEMO_ILLUS = {
+  "ch-smith-incline": { rev: 1 },
+};
+function illusUrl(id) {
+  const a = DEMO_ILLUS[id];
+  return `img/illus/${id}.jpg${a && a.rev ? `?r=${a.rev}` : ''}`;
+}

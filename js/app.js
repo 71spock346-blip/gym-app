@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 42;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 43;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -1358,6 +1358,12 @@ const photoUrl = (id, idx) => `img/demo/${id}-${idx}.jpg${(typeof DEMO_REV !== '
 
 function photoDemo(ex) {
   const anim = (typeof DEMO_ANIMS !== 'undefined') && DEMO_ANIMS[ex.id];
+  const illus = !anim && (typeof DEMO_ILLUS !== 'undefined') && DEMO_ILLUS[ex.id];
+  if (illus) return `
+    <div class="illus-demo" data-ex="${ex.id}">
+      <img src="${illusUrl(ex.id)}" alt="${ex.name} — illustrated technique" loading="lazy" />
+      <span class="photo-hint">${ico('camera')} Works offline</span>
+    </div>`;
   if (anim) return `
     <div class="anim-demo" data-ex="${ex.id}">
       <video class="anim-video" muted loop playsinline preload="metadata" poster="${animUrl(ex.id, 'jpg')}"
@@ -1884,13 +1890,14 @@ async function prefetchPhotos() {
   try {
     const cache = await caches.open(PHOTO_CACHE);
     const wanted = Object.keys(DEMO_PHOTOS).flatMap((id) => [photoUrl(id, 0), photoUrl(id, 1)])
-      .concat(Object.keys(DEMO_ANIMS).flatMap((id) => ['jpg', 'webm', 'mp4'].map((ext) => animUrl(id, ext))));
+      .concat(Object.keys(DEMO_ANIMS).flatMap((id) => ['jpg', 'webm', 'mp4'].map((ext) => animUrl(id, ext))))
+      .concat(Object.keys(typeof DEMO_ILLUS !== 'undefined' ? DEMO_ILLUS : {}).map((id) => illusUrl(id)));
     const base = new URL('.', location.href).pathname;
     const keys = await cache.keys();
     const have = new Set(keys.map((req) => req.url.slice(new URL(req.url).origin.length)));
     const wantedSet = new Set(wanted.map((p) => base + p));
     // superseded files (re-rendered clips, replaced photos, removed exercises) are no longer wanted: drop them
-    await Promise.all(keys.filter((req) => /\/img\/(anim|demo)\//.test(req.url) && !wantedSet.has(req.url.slice(new URL(req.url).origin.length))).map((req) => cache.delete(req)));
+    await Promise.all(keys.filter((req) => /\/img\/(anim|demo|illus)\//.test(req.url) && !wantedSet.has(req.url.slice(new URL(req.url).origin.length))).map((req) => cache.delete(req)));
     const missing = wanted.filter((p) => !have.has(base + p));
     let done = wanted.length - missing.length;
     const total = wanted.length;

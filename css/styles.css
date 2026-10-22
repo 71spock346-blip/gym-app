@@ -528,6 +528,10 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 }
 .anim-tag .ico { width: 11px; height: 11px; }
 
+/* your own illustration for an exercise, full width in the guide */
+.illus-demo { position: relative; border-radius: 12px; overflow: hidden; background: #000; border: 1px solid var(--border); margin-bottom: 10px; }
+.illus-demo img { display: block; width: 100%; height: auto; }
+
 .video-box { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--border); text-align: center; }
 .video-box h4 { text-align: left; }
 .video-link {

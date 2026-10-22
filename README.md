@@ -135,6 +135,10 @@ remembered if you close the app mid-session.
   start/finish photographs of the movement (cross-fading; tap to see them side by
   side), set-up steps, execution steps, form tips, and common mistakes. The photos
   are bundled with the app, so they work with no signal — basement gyms included.
+- **Your own illustrations.** Drop an image at `img/illus/<exercise-id>.jpg` and
+  list the id in `DEMO_ILLUS` (`js/demos.js`); the guide shows it full width in
+  place of the stock photos, saved for offline use like everything else. The
+  Smith machine incline press uses one.
 - **Animated demos.** Exercises listed in `js/anims.js` show a looping clip
   (`img/anim/<id>.webm` + `.mp4`, poster `.jpg`) in place of the photos, with the
   working muscle highlighted in gold. Clips play while the guide is open, pause on
