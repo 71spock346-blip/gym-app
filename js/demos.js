@@ -168,6 +168,7 @@ const DEMO_ILLUS = {
   "ch-bench-press": { rev: 1 },
   "ch-low-cable-fly": { rev: 1 },
   "ch-incline-fly": { rev: 1 },
+  "ch-incline-fly": { rev: 1 },
   "ch-cable-cross": { rev: 1 },
 };
 function illusUrl(id) {
@@ -179,6 +180,7 @@ function illusUrl(id) {
  * (square, about 240 px). Bump `rev` when a file is replaced. */
 const DEMO_THUMBS = {
   "ch-low-cable-fly": { rev: 1 },
+  "ch-incline-fly": { rev: 1 },
 };
 function thumbUrl(id) {
   const a = DEMO_THUMBS[id];
