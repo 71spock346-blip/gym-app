@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 48;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 49;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -1296,7 +1296,9 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
     <div class="card-ghost" aria-hidden="true">${i + 1}</div>
     ${swapNote}
     <div class="exercise-top">
-      <div class="exercise-icon">${ICONS[ex.icon] || ICONS.dumbbell}</div>
+      <div class="exercise-icon ${hasThumb(ex) ? 'has-thumb' : ''}">${hasThumb(ex)
+        ? `<img class="exercise-thumb" src="${thumbUrl(ex.id)}" alt="" loading="lazy" />`
+        : (ICONS[ex.icon] || ICONS.dumbbell)}</div>
       <div class="exercise-info">
         <h3 class="exercise-name"><span class="ex-num">${String(i + 1).padStart(2, '0')}</span>${ex.name}</h3>
         <div class="exercise-meta">
@@ -1358,6 +1360,8 @@ const photoUrl = (id, idx) => `img/demo/${id}-${idx}.jpg${(typeof DEMO_REV !== '
 
 /* An exercise with your own illustration shows that instead of any video link. */
 const hasIllus = (ex) => !!((typeof DEMO_ILLUS !== 'undefined') && DEMO_ILLUS[ex.id]);
+/* …and one with your own thumbnail shows it in place of the pictogram. */
+const hasThumb = (ex) => !!((typeof DEMO_THUMBS !== 'undefined') && DEMO_THUMBS[ex.id]);
 
 function photoDemo(ex) {
   const anim = (typeof DEMO_ANIMS !== 'undefined') && DEMO_ANIMS[ex.id];
@@ -1894,13 +1898,14 @@ async function prefetchPhotos() {
     const cache = await caches.open(PHOTO_CACHE);
     const wanted = Object.keys(DEMO_PHOTOS).flatMap((id) => [photoUrl(id, 0), photoUrl(id, 1)])
       .concat(Object.keys(DEMO_ANIMS).flatMap((id) => ['jpg', 'webm', 'mp4'].map((ext) => animUrl(id, ext))))
-      .concat(Object.keys(typeof DEMO_ILLUS !== 'undefined' ? DEMO_ILLUS : {}).map((id) => illusUrl(id)));
+      .concat(Object.keys(typeof DEMO_ILLUS !== 'undefined' ? DEMO_ILLUS : {}).map((id) => illusUrl(id)))
+      .concat(Object.keys(typeof DEMO_THUMBS !== 'undefined' ? DEMO_THUMBS : {}).map((id) => thumbUrl(id)));
     const base = new URL('.', location.href).pathname;
     const keys = await cache.keys();
     const have = new Set(keys.map((req) => req.url.slice(new URL(req.url).origin.length)));
     const wantedSet = new Set(wanted.map((p) => base + p));
     // superseded files (re-rendered clips, replaced photos, removed exercises) are no longer wanted: drop them
-    await Promise.all(keys.filter((req) => /\/img\/(anim|demo|illus)\//.test(req.url) && !wantedSet.has(req.url.slice(new URL(req.url).origin.length))).map((req) => cache.delete(req)));
+    await Promise.all(keys.filter((req) => /\/img\/(anim|demo|illus|thumb)\//.test(req.url) && !wantedSet.has(req.url.slice(new URL(req.url).origin.length))).map((req) => cache.delete(req)));
     const missing = wanted.filter((p) => !have.has(base + p));
     let done = wanted.length - missing.length;
     const total = wanted.length;

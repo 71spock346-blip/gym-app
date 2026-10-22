@@ -174,3 +174,13 @@ function illusUrl(id) {
   const a = DEMO_ILLUS[id];
   return `img/illus/${id}.jpg${a && a.rev ? `?r=${a.rev}` : ''}`;
 }
+
+/* Your own thumbnails for the pictogram box on a card, in img/thumb/<id>.jpg
+ * (square, about 240 px). Bump `rev` when a file is replaced. */
+const DEMO_THUMBS = {
+  "ch-low-cable-fly": { rev: 1 },
+};
+function thumbUrl(id) {
+  const a = DEMO_THUMBS[id];
+  return `img/thumb/${id}.jpg${a && a.rev ? `?r=${a.rev}` : ''}`;
+}
