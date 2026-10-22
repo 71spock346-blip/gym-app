@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 57;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 58;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -1546,8 +1546,11 @@ function adminPanel() {
       ${pinRow('adminPinIn', 'PIN', 'adminUnlock', 'Unlock')}
     </div>`;
   const ex = findExercise(state.admin.ex) || (currentPlan && currentPlan.exercises[0]) || Object.values(EXERCISE_DB)[0][0];
-  const options = Object.entries(EXERCISE_DB).map(([key, list]) =>
-    `<optgroup label="${esc(groupLabel(key))}">${list.map((e) => `<option value="${e.id}" ${e.id === ex.id ? 'selected' : ''}>${esc(e.name)}</option>`).join('')}</optgroup>`).join('');
+  // groups and the exercises inside them in alphabetical order, so anything is quick to find
+  const byName = (a, b) => a.name.localeCompare(b.name);
+  const groups = Object.entries(EXERCISE_DB).map(([key, list]) => ({ name: groupLabel(key), list: [...list].sort(byName) })).sort(byName);
+  const options = groups.map((g) =>
+    `<optgroup label="${esc(g.name)}">${g.list.map((e) => `<option value="${e.id}" ${e.id === ex.id ? 'selected' : ''}>${esc(e.name)}</option>`).join('')}</optgroup>`).join('');
   const bundled = {
     thumb: (id) => (typeof DEMO_THUMBS !== 'undefined' && DEMO_THUMBS[id]) ? thumbUrl(id) : null,
     illus: (id) => (typeof DEMO_ILLUS !== 'undefined' && DEMO_ILLUS[id]) ? illusUrl(id) : null,
