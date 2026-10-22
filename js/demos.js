@@ -166,6 +166,7 @@ const DEMO_REV = {
 const DEMO_ILLUS = {
   "ch-smith-incline": { rev: 1 },
   "ch-bench-press": { rev: 1 },
+  "ch-low-cable-fly": { rev: 1 },
 };
 function illusUrl(id) {
   const a = DEMO_ILLUS[id];
