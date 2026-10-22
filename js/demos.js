@@ -179,6 +179,7 @@ function illusUrl(id) {
 /* Your own thumbnails for the pictogram box on a card, in img/thumb/<id>.jpg
  * (square, about 240 px). Bump `rev` when a file is replaced. */
 const DEMO_THUMBS = {
+  "ch-bench-press": { rev: 1 },
   "ch-low-cable-fly": { rev: 1 },
   "ch-incline-fly": { rev: 1 },
 };
