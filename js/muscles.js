@@ -1,7 +1,7 @@
 /* Stay Strong — muscle focus map.
  *
  * A stylised front/back figure where every muscle group is its own shape. For
- * each exercise the target muscles light up gold (primary) and dim gold
+ * each exercise the target muscles light up bright (primary) and dimmer
  * (secondary), with a one-line mind–muscle cue for the primary muscle. The
  * regions are read from the exercise's `muscles` text, so every exercise gets a
  * map without hand-tagging; the cue comes from the first primary region. */

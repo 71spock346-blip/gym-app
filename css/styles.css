@@ -3,8 +3,8 @@
  * Layout: one column of cards under a sticky top bar, a fixed bottom nav,
  * 16px gutters, 640px max width. Display type (Oswald, condensed, uppercase)
  * carries the brand on titles and numbers; Manrope carries everything else.
- * Palette drawn from the app icon: warm near-black ground, charcoal surfaces
- * with a slight gold bias, one gold accent. The app is a single dark world:
+ * Palette drawn from the gym photos: cool near-black ground, green-black surfaces
+ * with a slight green bias, one neon-green accent. The app is a single dark world:
  * colours are fixed, color-scheme is dark. */
 
 @font-face {
@@ -24,29 +24,29 @@
 
 :root {
   color-scheme: dark;   /* already dark — stops Android's "force dark" re-tinting it */
-  --bg: #0c0b09;
-  --surface: #15140f;
-  --surface-2: #1e1c15;
-  --surface-3: #27241b;
-  --border: rgba(255, 228, 160, 0.09);
-  --border-strong: rgba(255, 228, 160, 0.18);
-  --text: #f3efe4;
-  --text-dim: #a39e90;
-  --text-faint: #6f6a5e;
-  --accent: #d9a92f;
-  --accent-2: #f0c75a;
-  --accent-dim: rgba(217, 169, 47, 0.14);
-  --accent-glow: rgba(217, 169, 47, 0.35);
-  --on-accent: #171207;
-  /* Three rules borrowed from print: gold is the one SIGNAL colour and only
+  --bg: #070d0b;
+  --surface: #0e1512;
+  --surface-2: #161f1a;
+  --surface-3: #1e2a23;
+  --border: rgba(107, 240, 180, 0.09);
+  --border-strong: rgba(107, 240, 180, 0.18);
+  --text: #eef5f0;
+  --text-dim: #9caba1;
+  --text-faint: #66746c;
+  --accent: #2ddc86;
+  --accent-2: #6bf0b4;
+  --accent-dim: rgba(45, 220, 134, 0.14);
+  --accent-glow: rgba(45, 220, 134, 0.35);
+  --on-accent: #03130a;
+  /* Three rules borrowed from print: neon green is the one SIGNAL colour and only
    * ever means "tap this"; everything else is ink on paper. Type is either
    * huge or tiny, nothing in between. Screens are built in three planes: big
    * ghost type at the back, the subject in the middle, buttons on top. */
-  --tap-border: rgba(217, 169, 47, 0.55);
-  --gold-edge: rgba(255, 255, 255, 0.88);   /* white rim on every golden chip, pill and bubble */
-  --ink-hi: #fff8e6;
-  --ink-glow: rgba(255, 248, 230, 0.28);
-  --ghost: rgba(243, 239, 228, 0.06);
+  --tap-border: rgba(45, 220, 134, 0.55);
+  --rim: rgba(255, 255, 255, 0.88);   /* white rim on every green chip, pill and bubble */
+  --ink-hi: #f2fff7;
+  --ink-glow: rgba(242, 255, 247, 0.28);
+  --ghost: rgba(238, 245, 240, 0.06);
   /* motion: enters ease out and land softly, exits are quick, releases spring back */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
@@ -54,10 +54,10 @@
   --dur-fast: 110ms;
   --dur: 220ms;
   --dur-slow: 320ms;
-  --amber: #c0842a;
-  --blue: #e8cf7f;        /* champagne: links, chips (name kept from the earlier palette) */
+  --amber: #e0b84a;        /* warnings only */
+  --blue: #9df5c8;         /* pale mint: links, chips (name kept from the earlier palette) */
   --rose: #e0756a;
-  --gold-grad: linear-gradient(135deg, #f3d27a 0%, #d9a92f 50%, #b57c1c 100%);
+  --accent-grad: linear-gradient(135deg, #7df7bd 0%, #2ddc86 50%, #17a862 100%);
   --radius: 16px;
   --radius-sm: 10px;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
@@ -95,7 +95,7 @@ button:focus:not(:focus-visible) { outline: none; }
 /* ------------------------------ header ------------------------------ */
 .topbar {
   position: sticky; top: 0; z-index: 10;
-  background: rgba(12, 11, 9, 0.97);
+  background: rgba(7, 13, 11, 0.97);
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border);
   padding: calc(10px + env(safe-area-inset-top)) 16px 8px;
@@ -199,21 +199,21 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 .day-tab-dow { font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; }
 .day-tab-name { font-size: 1.1rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text); white-space: nowrap; line-height: 1.1; }
 .day-tab-mark { color: var(--text); }
-.day-tab.active { background: var(--gold-grad); color: var(--on-accent); box-shadow: 0 4px 14px var(--accent-glow); }
+.day-tab.active { background: var(--accent-grad); color: var(--on-accent); box-shadow: 0 4px 14px var(--accent-glow); }
 .day-tab.active .day-tab-name, .day-tab.active .day-tab-mark { color: var(--on-accent); }
 
 /* ------------------------------ hero ------------------------------ */
 /* Middle plane: the hero sits under the tabs, over its own ghost type. */
 .hero {
   position: relative; overflow: hidden;
-  background: linear-gradient(135deg, #1f1b12 0%, #15140f 55%, #1b1a16 100%);
+  background: linear-gradient(135deg, #0f1c15 0%, #0d1310 55%, #101a14 100%);
   border: 1px solid var(--border-strong); border-radius: 20px;
   padding: 40px 18px 18px; margin: 0 0 14px;
   box-shadow: var(--shadow);
 }
 .hero::before {
   content: ''; position: absolute; top: -90px; right: -70px; width: 260px; height: 260px;
-  background: radial-gradient(circle, rgba(243, 239, 228, 0.07), transparent 62%); pointer-events: none;
+  background: radial-gradient(circle, rgba(238, 245, 240, 0.07), transparent 62%); pointer-events: none;
 }
 /* Back plane: the day's name as huge ghost type. */
 .hero-ghost, .card-ghost {
@@ -221,7 +221,7 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
   text-transform: uppercase; color: var(--ghost); pointer-events: none; user-select: none; white-space: nowrap;
 }
 .hero-ghost { right: -8px; top: -12px; font-size: 7.5rem; letter-spacing: -0.02em; }
-.hero.complete { border-color: rgba(243, 239, 228, 0.4); background: linear-gradient(135deg, #26211a 0%, #171510 60%, #1b1a16 100%); }
+.hero.complete { border-color: rgba(238, 245, 240, 0.4); background: linear-gradient(135deg, #12281b 0%, #0f1a13 60%, #101a14 100%); }
 .hero-main { display: flex; align-items: center; justify-content: space-between; gap: 14px; position: relative; }
 .hero-text { min-width: 0; }
 .hero-greeting { color: var(--text-dim); font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; }
@@ -278,17 +278,17 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 .exercise-card {
   padding: 16px; margin-bottom: 24px; scroll-margin-top: 112px; transition: border-color 0.2s ease;
   position: relative; overflow: hidden;
-  /* each workout sits on a solid warm-charcoal slab, one step up from the page,
-   * in the same black / charcoal / gold family as the rest of the app */
-  background: #262219;
-  border: 2px solid rgba(255, 228, 160, 0.34);
+  /* each workout sits on a solid dark-green slab, one step up from the page,
+   * in the same black / green family as the rest of the app */
+  background: #141c17;
+  border: 2px solid rgba(107, 240, 180, 0.34);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 16px 36px rgba(0, 0, 0, 0.6);
   /* chips, bubbles and boxes inside the card sit one step lighter than the slab */
-  --surface-2: #332e21; --surface-3: #3e382a;
-  --border: rgba(255, 228, 160, 0.14); --border-strong: rgba(255, 228, 160, 0.26);
+  --surface-2: #1d2922; --surface-3: #27362d;
+  --border: rgba(107, 240, 180, 0.14); --border-strong: rgba(107, 240, 180, 0.26);
 }
-.card-ghost { right: 4px; top: -26px; font-size: 8.5rem; color: rgba(243, 239, 228, 0.075); }   /* back plane: the exercise number */
-.exercise-card.card-done { border-color: rgba(243, 239, 228, 0.45); }
+.card-ghost { right: 4px; top: -26px; font-size: 8.5rem; color: rgba(238, 245, 240, 0.075); }   /* back plane: the exercise number */
+.exercise-card.card-done { border-color: rgba(238, 245, 240, 0.45); }
 .exercise-card.swapped { border-color: var(--border-strong); }
 
 .exercise-top { display: flex; gap: 12px; align-items: flex-start; }
@@ -318,7 +318,7 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
   border: 1px solid var(--border);
 }
 .chip .ico { width: 11px; height: 11px; vertical-align: -1.5px; }
-.chip-gear, .chip-equip { background: var(--accent-2); color: var(--on-accent); border-color: var(--gold-edge); }   /* equipment: golden */
+.chip-gear, .chip-equip { background: var(--accent-2); color: var(--on-accent); border-color: var(--rim); }   /* equipment: green */
 .chip-muscle { background: var(--surface-2); color: var(--text-dim); }
 .chip-video { background: var(--accent-dim); color: var(--accent-2); border-color: var(--tap-border); text-decoration: none; }   /* tappable: signal colour */
 .chip-video .ico { width: 10px; height: 10px; }
@@ -326,8 +326,8 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 
 .scheme-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
 .scheme-pill {
-  background: var(--accent-2); color: var(--on-accent);   /* golden yellow: the sets × reps for today */
-  border: 1.5px solid var(--gold-edge);
+  background: var(--accent-2); color: var(--on-accent);   /* neon green: the sets × reps for today */
+  border: 1.5px solid var(--rim);
   border-radius: 999px; padding: 4px 12px;
   font-weight: 700; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;
   font-variant-numeric: tabular-nums;
@@ -343,11 +343,11 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
   background: rgba(0, 0, 0, 0.22); border: 1px solid var(--border); border-radius: 12px;
 }
 .body-map { width: 84px; height: 84px; flex: 0 0 auto; display: block; }
-.body-map .m-sil { fill: rgba(255, 255, 255, 0.05); stroke: rgba(255, 228, 160, 0.16); stroke-width: 0.8; }
-.body-map .m { fill: rgba(255, 255, 255, 0.09); stroke: rgba(12, 11, 9, 0.7); stroke-width: 0.6; }
+.body-map .m-sil { fill: rgba(255, 255, 255, 0.05); stroke: rgba(107, 240, 180, 0.16); stroke-width: 0.8; }
+.body-map .m { fill: rgba(255, 255, 255, 0.09); stroke: rgba(7, 13, 11, 0.7); stroke-width: 0.6; }
 .body-map .m-primary { fill: var(--ink-hi); filter: drop-shadow(0 0 3px var(--ink-glow)); }
-.body-map .m-secondary { fill: rgba(255, 248, 230, 0.4); }
-.body-map .m-lines { fill: none; stroke: rgba(12, 11, 9, 0.55); stroke-width: 0.8; }
+.body-map .m-secondary { fill: rgba(242, 255, 247, 0.4); }
+.body-map .m-lines { fill: none; stroke: rgba(7, 13, 11, 0.55); stroke-width: 0.8; }
 /* your own front/back figure in place of the drawn map: a little wider, since it shows two full bodies */
 .body-map-photo { object-fit: contain; object-position: center; width: 104px; height: 92px; }
 .focus-big .body-map-photo { width: 200px; height: 176px; }
@@ -366,7 +366,7 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 .focus-legend { display: flex; gap: 12px; margin-top: 8px; font-size: 0.72rem; color: var(--text-dim); }
 .focus-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; }
 .focus-legend .k-primary { background: var(--ink-hi); }
-.focus-legend .k-secondary { background: rgba(255, 248, 230, 0.4); }
+.focus-legend .k-secondary { background: rgba(242, 255, 247, 0.4); }
 
 .weight-line {
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -397,15 +397,15 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 .set-bubble {
   width: 46px; height: 46px; border-radius: 50%;
   background: #d4383a; color: #fff;   /* red: a set still to do */
-  border: 1.5px solid var(--gold-edge);
+  border: 1.5px solid var(--rim);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);   /* top plane: the buttons float */
   font-size: 1rem; font-weight: 800; cursor: pointer;
   font-variant-numeric: tabular-nums;
 }
 .set-bubble.done {
   /* green with the same white rim: a set that is done, next to the red ones still to do */
-  background: linear-gradient(135deg, #2fa457 0%, #1f7f41 100%); border-color: var(--gold-edge); color: #fff;
-  box-shadow: 0 4px 14px rgba(47, 164, 87, 0.4);
+  background: linear-gradient(135deg, #2ddc86 0%, #17a862 100%); border-color: var(--rim); color: #fff;
+  box-shadow: 0 4px 14px rgba(45, 220, 134, 0.4);
   animation: bubble-pop 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.3);
 }
 @keyframes bubble-pop { 0% { transform: scale(0.85); } 60% { transform: scale(1.08); } 100% { transform: scale(1); } }
@@ -424,7 +424,7 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 .reps-label { font-size: 0.64rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-dim); }
 .reps-btn {
   width: 36px; height: 36px; border-radius: 50%; flex: 0 0 auto;
-  background: var(--accent-2); color: var(--on-accent); border: 1.5px solid var(--gold-edge);   /* golden, like the set bubbles */
+  background: var(--accent-2); color: var(--on-accent); border: 1.5px solid var(--rim);   /* green, like the pill */
   font-size: 1.25rem; font-weight: 800; line-height: 1; cursor: pointer;
 }
 .reps-val { font-family: var(--font-display); font-size: 1.6rem; font-weight: 600; min-width: 2.4em; text-align: center; color: var(--text); font-variant-numeric: tabular-nums; }
@@ -571,7 +571,7 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 .vl-playlist {
   display: flex; align-items: center; gap: 8px;
   background: var(--accent-dim); color: var(--accent-2);
-  border: 1px solid rgba(217, 169, 47, 0.5); border-radius: var(--radius-sm);
+  border: 1px solid rgba(45, 220, 134, 0.5); border-radius: var(--radius-sm);
   padding: 10px 12px; font-weight: 800; font-size: 0.85rem; text-decoration: none;
 }
 .vl-playlist .ico { color: var(--accent); }
@@ -586,8 +586,8 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
   position: fixed; left: 12px; right: 12px;
   bottom: calc(80px + env(safe-area-inset-bottom));
   max-width: 616px; margin: 0 auto;
-  background: rgba(30, 28, 21, 0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(243, 239, 228, 0.35);
+  background: rgba(14, 21, 18, 0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(238, 245, 240, 0.35);
   border-radius: 18px;
   padding: 10px 14px 12px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 24px rgba(0, 0, 0, 0.4);
@@ -625,7 +625,7 @@ body.timer-on .main { padding-bottom: calc(184px + env(safe-area-inset-bottom));
 .bottom-nav {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
   display: flex; justify-content: space-around;
-  background: rgba(12, 11, 9, 0.97); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  background: rgba(7, 13, 11, 0.97); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--border);
   padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
 }
@@ -703,7 +703,7 @@ body.timer-on .toast { bottom: calc(200px + env(safe-area-inset-bottom)); }   /*
 
 .primary-btn {
   display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 24px;
-  background: var(--gold-grad); color: var(--on-accent);
+  background: var(--accent-grad); color: var(--on-accent);
   border: none; border-radius: 14px; padding: 16px;
   font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
   box-shadow: 0 10px 28px var(--accent-glow), 0 18px 40px rgba(0, 0, 0, 0.5);
@@ -731,7 +731,7 @@ body.timer-on .toast { bottom: calc(200px + env(safe-area-inset-bottom)); }   /*
 .key { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin: 0 4px 0 8px; vertical-align: middle; }
 .key.full { background: var(--ink-hi); } .key.part { background: var(--surface-3); border: 1px solid var(--text-dim); }
 .hist-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 8px; }
-.hist-row.full { border-color: rgba(243, 239, 228, 0.35); }
+.hist-row.full { border-color: rgba(238, 245, 240, 0.35); }
 .hist-date { font-size: 0.66rem; font-weight: 700; color: var(--text-dim); width: 74px; flex: 0 0 auto; letter-spacing: 0.04em; }
 .hist-main { flex: 1; min-width: 0; }
 .hist-main strong { display: block; font-family: var(--font-display); font-size: 1.25rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.03em; line-height: 1; }
@@ -774,17 +774,17 @@ body.timer-on .toast { bottom: calc(200px + env(safe-area-inset-bottom)); }   /*
 .splash.hide { opacity: 0; pointer-events: none; }
 .splash-glow {
   position: absolute; width: 300px; height: 300px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 196, 64, 0.22) 0%, rgba(255, 196, 64, 0) 65%);
+  background: radial-gradient(circle, rgba(45, 220, 134, 0.22) 0%, rgba(45, 220, 134, 0) 65%);
   animation: splash-glow 1.6s ease-in-out infinite alternate;
 }
 .splash-logo {
   width: 132px; height: 132px; border-radius: 30px; position: relative;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 196, 64, 0.25);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(45, 220, 134, 0.25);
   animation: splash-pop 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
 }
 .splash-name {
   margin-top: 16px; font-size: 2.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; line-height: 1; position: relative;
-  background: var(--gold-grad);
+  background: var(--accent-grad);
   -webkit-background-clip: text; background-clip: text; color: transparent;
   animation: splash-rise 0.6s ease-out 0.25s both;
 }

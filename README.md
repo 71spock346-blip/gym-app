@@ -126,7 +126,7 @@ remembered if you close the app mid-session.
   exercise to *plates* — for stacks with unmarked plates you enter the plate count
   and get suggestions back as plate counts.
 - **Muscle focus map.** Every card shows a small front/back figure with the
-  target muscle lit in gold and the helpers in a dimmer gold, plus a one-line
+  target muscle lit bright and the helpers dimmer, plus a one-line
   mind–muscle cue ("Pull with your elbows, not your hands…"). The guide has a
   larger "Where to feel it" version with a legend. The regions are read from each
   exercise's muscle description (`js/muscles.js`), so new exercises get a map
@@ -161,7 +161,7 @@ remembered if you close the app mid-session.
   can be built into the app for everyone; *Import pack* loads one.
 - **Animated demos.** Exercises listed in `js/anims.js` show a looping clip
   (`img/anim/<id>.webm` + `.mp4`, poster `.jpg`) in place of the photos, with the
-  working muscle highlighted in gold. Clips play while the guide is open, pause on
+  working muscle highlighted. Clips play while the guide is open, pause on
   tap, are saved for offline use with the photos, and the service worker answers
   the byte-range requests video players make, so they play offline on iPhone too.
   `tools/mannequin_curl.py` and `tools/mannequin_lat_raise.py` render the
@@ -175,7 +175,7 @@ remembered if you close the app mid-session.
   *Form video library* opens each training day as a YouTube playlist: save it,
   download it with Premium, and the buttons then play from your downloads with
   no signal.
-- **Three design rules.** Gold is the one *signal* colour and only ever means
+- **Three design rules.** Neon green is the one *signal* colour and only ever means
   "tap this" — buttons, chips, the active tab, set bubbles; everything else is
   ink on paper. Type is either huge (the day name, the week, a stat, the rest
   clock) or tiny (labels, chips, cues), nothing in between. Every screen is
@@ -220,7 +220,7 @@ python3 -m http.server 8000
 
 ```
 index.html            app shell (onboarding, workout, history, settings views)
-css/styles.css        mobile-first dark theme (black / charcoal / gold, from the icon)
+css/styles.css        mobile-first dark theme (near-black with neon green, after the gym photos)
 js/exercises.js       exercise database (160+ exercises with guides) + SVG pictograms
 js/videos.js          curated YouTube form video per exercise
 js/icons.js           monoline UI icon set
