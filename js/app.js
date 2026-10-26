@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 63;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 64;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -1314,15 +1314,6 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
       </div>
     </div>
     ${weightBlock}
-    <div class="scheme-row">
-      <span class="scheme-pill">${scheme.sets} × ${scheme.repsLo}–${scheme.repsHi} reps</span>
-      <span class="scheme-rest">rest ${scheme.rest}</span>
-      ${scheme.capped ? `<span class="scheme-cap" title="A set trimmed so this muscle stays near 12 hard sets this session">· volume cap</span>` : ''}
-    </div>
-    <div class="tempo-line">⏱ ${phase.tempo}</div>
-    <div class="sets-block">${setsBlock(ex, scheme, dateISO, phase, isAnchor)}</div>
-    ${focusBlock(ex)}
-    ${altChips(ex, day, chosenIds, weekIdx, dateISO, swappedFrom)}
     <details class="howto">
       <summary>${ico('book')} How to do it</summary>
       <div class="howto-body">
@@ -1347,6 +1338,15 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
         </div>`}
       </div>
     </details>
+    <div class="scheme-row">
+      <span class="scheme-pill">${scheme.sets} × ${scheme.repsLo}–${scheme.repsHi} reps</span>
+      <span class="scheme-rest">rest ${scheme.rest}</span>
+      ${scheme.capped ? `<span class="scheme-cap" title="A set trimmed so this muscle stays near 12 hard sets this session">· volume cap</span>` : ''}
+    </div>
+    <div class="tempo-line">⏱ ${phase.tempo}</div>
+    <div class="sets-block">${setsBlock(ex, scheme, dateISO, phase, isAnchor)}</div>
+    ${focusBlock(ex)}
+    ${altChips(ex, day, chosenIds, weekIdx, dateISO, swappedFrom)}
   </article>`;
 }
 

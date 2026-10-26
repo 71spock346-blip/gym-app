@@ -474,7 +474,7 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 }
 
 /* ------------------------------ how-to ------------------------------ */
-.howto { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 10px; }
+.howto { margin-top: 14px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 0; }   /* a band between the weight and the sets */
 .howto summary {
   display: flex; align-items: center; gap: 8px;
   cursor: pointer; font-weight: 800; font-size: 0.84rem; color: var(--accent-2);
