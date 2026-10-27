@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Stay Strong" />
-  <link rel="stylesheet" href="css/styles.css?v=65" />
+  <link rel="stylesheet" href="css/styles.css?v=66" />
 </head>
 <body>
   <div id="splash" class="splash" role="status" aria-label="Stay Strong is loading">
@@ -88,6 +88,12 @@
 
   <div id="toast" class="toast" hidden></div>
 
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Exercise picture" hidden>
+    <button id="lightboxClose" class="lightbox-close" type="button" aria-label="Close">×</button>
+    <div id="lightboxBody" class="lightbox-body"></div>
+    <div class="lightbox-text"><div id="lightboxCap" class="lightbox-cap"></div><div id="lightboxSub" class="lightbox-sub"></div></div>
+  </div>
+
   <nav class="bottom-nav" aria-label="Sections">
     <button class="nav-btn active" type="button" data-view="workout">
       <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10v4M6 8v8M18 8v8M21 10v4M6 12h12" /></svg>Workout</button>
@@ -97,14 +103,14 @@
       <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8" /></svg>Settings</button>
   </nav>
 
-  <script src="js/exercises.js?v=65"></script>
-  <script src="js/demos.js?v=65"></script>
-  <script src="js/media.js?v=65"></script>
-  <script src="js/anims.js?v=65"></script>
-  <script src="js/videos.js?v=65"></script>
-  <script src="js/icons.js?v=65"></script>
-  <script src="js/muscles.js?v=65"></script>
-  <script src="js/app.js?v=65"></script>
+  <script src="js/exercises.js?v=66"></script>
+  <script src="js/demos.js?v=66"></script>
+  <script src="js/media.js?v=66"></script>
+  <script src="js/anims.js?v=66"></script>
+  <script src="js/videos.js?v=66"></script>
+  <script src="js/icons.js?v=66"></script>
+  <script src="js/muscles.js?v=66"></script>
+  <script src="js/app.js?v=66"></script>
   <script>
     // Register the offline cache, and auto-reload once a new version has
     // installed — so updates apply on the first open, no relaunch dance.

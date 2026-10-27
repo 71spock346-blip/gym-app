@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 65;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 66;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -1316,7 +1316,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
     <div class="card-ghost" aria-hidden="true">${i + 1}</div>
     ${swapNote}
     <div class="exercise-top">
-      <div class="exercise-icon ${hasThumb(ex) ? 'has-thumb' : ''}">${hasThumb(ex)
+      <div class="exercise-icon ${hasThumb(ex) ? 'has-thumb' : ''}" role="button" tabindex="0" data-ex="${ex.id}" aria-label="See ${esc(ex.name)} full screen" title="Tap to enlarge">${hasThumb(ex)
         ? `<img class="exercise-thumb" src="${thumbSrc(ex.id)}" alt="" loading="lazy" />`
         : (ICONS[ex.icon] || ICONS.dumbbell)}</div>
       <div class="exercise-info">
@@ -1671,6 +1671,48 @@ async function adminImport(file) {
   catch (err) { showToast(err.message || 'That is not a Stay Strong image pack', 'info'); }
 }
 
+/* ------------------------------ picture lightbox ------------------------------ */
+/* Tap an exercise's icon box to see its best picture full screen: your
+ * illustration or thumbnail where one exists, else the stock start/finish
+ * photos (tap the picture to flip), else the pictogram itself, large. */
+const lightbox = { ex: null, frame: 0 };
+function lightboxSources(ex) {
+  if (!ex) return [];
+  const id = ex.id;
+  const one = ownUrl('illus', id) || ((typeof DEMO_ILLUS !== 'undefined' && DEMO_ILLUS[id]) ? illusUrl(id) : null)
+    || ownUrl('thumb', id) || ((typeof DEMO_THUMBS !== 'undefined' && DEMO_THUMBS[id]) ? thumbUrl(id) : null);
+  if (one) return [{ src: one, label: '' }];
+  if (DEMO_PHOTOS[id]) return [{ src: photoUrl(id, 0), label: 'Start' }, { src: photoUrl(id, 1), label: 'Finish' }];
+  return [];
+}
+function renderLightbox() {
+  const ex = lightbox.ex;
+  if (!ex) return;
+  const frames = lightboxSources(ex);
+  const f = frames[lightbox.frame] || null;
+  $('#lightboxBody').innerHTML = f
+    ? `<img class="lightbox-img" src="${f.src}" alt="${esc(ex.name)}${f.label ? ' — ' + f.label.toLowerCase() : ''}" />`
+    : `<div class="lightbox-svg" aria-hidden="true">${ICONS[ex.icon] || ICONS.dumbbell}</div>`;
+  $('#lightboxCap').textContent = ex.name;
+  $('#lightboxSub').textContent = frames.length > 1
+    ? `${f.label} · tap the picture for the ${lightbox.frame ? 'start' : 'finish'} · tap outside to close`
+    : 'Tap anywhere to close';
+}
+function openLightbox(ex) {
+  lightbox.ex = ex; lightbox.frame = 0;
+  renderLightbox();
+  $('#lightbox').hidden = false;
+  document.body.classList.add('lightbox-open');
+  $('#lightboxClose').focus();
+}
+function closeLightbox() {
+  const el = $('#lightbox');
+  if (!el || el.hidden) return;
+  el.hidden = true;
+  document.body.classList.remove('lightbox-open');
+  lightbox.ex = null;
+}
+
 /* ------------------------------ toast ------------------------------ */
 let toastTimer = null;
 function showToast(msg, icon) {
@@ -1801,6 +1843,15 @@ $('#restPlus').addEventListener('click', () => {
 document.addEventListener('click', (e) => {
   const summary = e.target.closest('.howto summary');
   if (summary) { e.preventDefault(); toggleGuide(summary.parentElement); return; }
+
+  // picture lightbox: tap the icon box to open; inside, the picture flips start/finish, anything else closes
+  if (e.target.closest('#lightbox')) {
+    if (e.target.closest('.lightbox-img') && lightboxSources(lightbox.ex).length > 1) { lightbox.frame = 1 - lightbox.frame; renderLightbox(); return; }
+    closeLightbox();
+    return;
+  }
+  const iconBox = e.target.closest('.exercise-icon[data-ex]');
+  if (iconBox) { const ex = findExercise(iconBox.dataset.ex); if (ex) openLightbox(ex); return; }
 
   const nav = e.target.closest('.nav-btn');
   if (nav) { state.view = nav.dataset.view; render(); window.scrollTo(0, 0); return; }
@@ -1960,7 +2011,11 @@ document.addEventListener('paste', (e) => {
   adminAdd(box.closest('.media-slot'), blob);
 });
 document.addEventListener('keydown', (e) => {
-  if (e.key !== 'Enter' || !e.target) return;
+  if (!e.target) return;
+  if (e.key === 'Escape') { closeLightbox(); return; }
+  const icon = e.target.closest && e.target.closest('.exercise-icon[data-ex]');
+  if (icon && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); const ex = findExercise(icon.dataset.ex); if (ex) openLightbox(ex); return; }
+  if (e.key !== 'Enter') return;
   if (e.target.id === 'adminPinIn') { e.preventDefault(); adminUnlock(); }
   else if (e.target.id === 'adminPinNew') { e.preventDefault(); adminSetPin(); }
 });

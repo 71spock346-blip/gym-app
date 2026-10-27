@@ -175,6 +175,10 @@ remembered if you close the app mid-session.
   *Form video library* opens each training day as a YouTube playlist: save it,
   download it with Premium, and the buttons then play from your downloads with
   no signal.
+- **Tap to enlarge.** Tap an exercise's icon box and its best picture fills the
+  screen: your illustration or thumbnail where one exists, otherwise the stock
+  start and finish photos (tap the picture to flip between them), otherwise
+  the pictogram itself. Tap anywhere else, the × or Escape to close.
 - **Text size.** Settings → *Text size* (Normal / Large / Extra large), or the
   **Aa** button in the header, scales the whole app — words and tap targets
   together, since everything is sized in rem — and the choice is remembered.
