@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 64;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 65;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -224,11 +224,28 @@ const state = {
   anchors: store.read('anchors', {}),              // { exId: { zones: { hypertrophy|strength|volume: { w } }, applied: { date: { zone, outcome, step, at } } } }
   editSet: null,                                   // { date, ex, set } — the done set whose reps are being adjusted
   ob: { goal: 'build', equip: 'gym', split: 'twice' },   // onboarding choices in progress
+  textSize: store.read('textSize', 'normal'),      // 'normal' | 'large' | 'xl' — root font size (Settings → Text size, or the Aa button)
   adminPin: store.read('adminPin', null),          // SHA-256 of the PIN that locks Settings → Your images (admin)
   admin: { open: false, ex: null, trim: false, changing: false, pasteFor: null },   // admin area UI state (not saved)
 };
 // Phones that picked a goal before onboarding existed skip straight in.
 if (!state.profile && state.goal) { state.profile = { name: '', onboarded: true }; store.write('profile', state.profile); }
+
+/* ------------------------------ text size ------------------------------ */
+/* One root font size scales the words and the tap targets together (everything
+ * is sized in rem). Applied before the first paint so nothing jumps. */
+const TEXT_SIZES = [
+  { key: 'normal', name: 'Normal', short: 'As designed', badge: 'A' },
+  { key: 'large', name: 'Large', short: 'About 15% bigger', badge: 'A+' },
+  { key: 'xl', name: 'Extra large', short: 'About 30% bigger — for tired or poor eyes', badge: 'A++' },
+];
+function applyTextSize() { document.documentElement.dataset.text = state.textSize; }
+function setTextSize(key) {
+  state.textSize = TEXT_SIZES.some((t) => t.key === key) ? key : 'normal';
+  store.write('textSize', state.textSize);
+  applyTextSize();
+}
+applyTextSize();
 
 /* ------------------------------ date helpers ------------------------------ */
 function startOfWeekUTC(date) {
@@ -1027,6 +1044,7 @@ function renderHeader() {
   $('#weekTitle').textContent = `Week ${isoWeekNumber(monday)}${offsetNote}`;
   $('#weekDates').textContent = `${fmt(monday)} – ${fmt(friday)}`;
   $('#unitToggle').textContent = state.unit;
+  $('#textSize').classList.toggle('on', state.textSize !== 'normal');
   $('#appVersion').textContent = `Stay Strong v${APP_VERSION}`;
 }
 
@@ -1514,6 +1532,9 @@ function renderSettings() {
       <button class="choice set-unit ${state.unit === 'kg' ? 'active' : ''}" type="button" data-unit="kg"><span class="choice-emoji"><span class="choice-badge">kg</span></span><span class="choice-text"><strong>Kilograms</strong><small>kg, 2.5 kg steps</small></span></button>
       <button class="choice set-unit ${state.unit === 'lb' ? 'active' : ''}" type="button" data-unit="lb"><span class="choice-emoji"><span class="choice-badge">lb</span></span><span class="choice-text"><strong>Pounds</strong><small>lb, 5 lb steps</small></span></button>
     </div>
+    <h2 class="section-title">Text size</h2>
+    <div class="choice-grid">${choiceCards('set-text', TEXT_SIZES, state.textSize, 'text')}</div>
+    <p class="hint">Scales the whole app — words and buttons together. The <strong>Aa</strong> button in the header cycles through the sizes too.</p>
     <h2 class="section-title">Your images · admin</h2>
     ${adminPanel()}`;
 }
@@ -1802,6 +1823,8 @@ document.addEventListener('click', (e) => {
   if (setSplit) { state.split = setSplit.dataset.split; store.write('split', state.split); render(); return; }
   const setUnit = e.target.closest('.set-unit');
   if (setUnit) { state.unit = setUnit.dataset.unit; store.write('unit', state.unit); render(); return; }
+  const setText = e.target.closest('.set-text');
+  if (setText) { setTextSize(setText.dataset.text); render(); return; }
 
   // your images (admin)
   if (e.target.closest('#adminSetPin')) { adminSetPin(); return; }
@@ -2027,6 +2050,14 @@ $('#unitToggle').addEventListener('click', () => {
   state.unit = state.unit === 'kg' ? 'lb' : 'kg';
   store.write('unit', state.unit);
   render();
+});
+/* Aa in the header: cycle Normal → Large → Extra large, from any screen. */
+$('#textSize').addEventListener('click', () => {
+  const i = TEXT_SIZES.findIndex((t) => t.key === state.textSize);
+  const next = TEXT_SIZES[(i + 1) % TEXT_SIZES.length];
+  setTextSize(next.key);
+  render();
+  showToast(`Text size: ${next.name}`, 'info');
 });
 
 /* ------------------------------ video library ------------------------------ */

@@ -71,7 +71,7 @@ html { -webkit-text-size-adjust: 100%; }
 
 body {
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: 0.9375rem;   /* 15px at the normal text size; scales with Settings → Text size */
   background: var(--bg);
   color: var(--text);
   line-height: 1.5;
@@ -119,7 +119,7 @@ button:focus:not(:focus-visible) { outline: none; }
 
 .week-nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 8px auto 0; max-width: 640px; }
 .week-arrow {
-  width: 38px; height: 38px; border-radius: 50%;
+  width: 2.375rem; height: 2.375rem; border-radius: 50%;
   background: transparent; color: var(--accent-2);
   border: 1px solid var(--tap-border); font-size: 1.3rem; line-height: 1;
   cursor: pointer;
@@ -189,7 +189,7 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 }
 .day-tabs::-webkit-scrollbar { display: none; }
 .day-tab {
-  flex: 1 0 auto; min-width: 86px;
+  flex: 1 0 auto; min-width: 5.375rem;
   display: flex; flex-direction: column; align-items: center; gap: 1px;
   background: transparent; color: var(--text-dim);
   border: none; border-radius: 11px;
@@ -293,7 +293,7 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 
 .exercise-top { display: flex; gap: 12px; align-items: flex-start; }
 .exercise-icon {
-  flex: 0 0 auto; width: 56px; height: 56px;
+  flex: 0 0 auto; width: 3.5rem; height: 3.5rem;
   display: flex; align-items: center; justify-content: center;
   color: var(--accent-2);
   background: linear-gradient(160deg, var(--surface-3), var(--surface-2));
@@ -342,14 +342,14 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
   display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 10px 12px;
   background: rgba(0, 0, 0, 0.22); border: 1px solid var(--border); border-radius: 12px;
 }
-.body-map { width: 84px; height: 84px; flex: 0 0 auto; display: block; }
+.body-map { width: 5.25rem; height: 5.25rem; flex: 0 0 auto; display: block; }
 .body-map .m-sil { fill: rgba(255, 255, 255, 0.05); stroke: rgba(107, 240, 180, 0.16); stroke-width: 0.8; }
 .body-map .m { fill: rgba(255, 255, 255, 0.09); stroke: rgba(7, 13, 11, 0.7); stroke-width: 0.6; }
 .body-map .m-primary { fill: var(--ink-hi); filter: drop-shadow(0 0 3px var(--ink-glow)); }
 .body-map .m-secondary { fill: rgba(242, 255, 247, 0.4); }
 .body-map .m-lines { fill: none; stroke: rgba(7, 13, 11, 0.55); stroke-width: 0.8; }
 /* your own front/back figure in place of the drawn map: a little wider, since it shows two full bodies */
-.body-map-photo { object-fit: contain; object-position: center; width: 104px; height: 92px; }
+.body-map-photo { object-fit: contain; object-position: center; width: 6.5rem; height: 5.75rem; }
 .focus-big .body-map-photo { width: 200px; height: 176px; }
 .focus-text { min-width: 0; flex: 1; }
 .focus-label { font-size: 0.8rem; font-weight: 800; color: var(--text); line-height: 1.3; }
@@ -395,7 +395,7 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 
 .sets-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
 .set-bubble {
-  width: 46px; height: 46px; border-radius: 50%;
+  width: 2.875rem; height: 2.875rem; border-radius: 50%;
   background: #d4383a; color: #fff;   /* red: a set still to do */
   border: 1.5px solid var(--rim);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);   /* top plane: the buttons float */
@@ -423,7 +423,7 @@ body.onboarding .topbar, body.onboarding .bottom-nav { display: none; }
 }
 .reps-label { font-size: 0.64rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-dim); }
 .reps-btn {
-  width: 36px; height: 36px; border-radius: 50%; flex: 0 0 auto;
+  width: 2.25rem; height: 2.25rem; border-radius: 50%; flex: 0 0 auto;
   background: var(--accent-2); color: var(--on-accent); border: 1.5px solid var(--rim);   /* green, like the pill */
   font-size: 1.25rem; font-weight: 800; line-height: 1; cursor: pointer;
 }
@@ -636,7 +636,7 @@ body.timer-on .main { padding-bottom: calc(184px + env(safe-area-inset-bottom));
   padding: 4px 4px 6px; cursor: pointer;
 }
 .nav-btn .nav-icon {
-  width: 24px; height: 24px; fill: none; stroke: currentColor;
+  width: 1.5rem; height: 1.5rem; fill: none; stroke: currentColor;
   stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round;
   padding: 0; box-sizing: content-box; border-radius: 999px;
   transition: transform var(--dur-slow) var(--ease-spring), background 0.15s ease, color 0.15s ease;
@@ -870,3 +870,12 @@ body.timer-on .toast { bottom: calc(200px + env(safe-area-inset-bottom)); }   /*
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ------------------------------ text size ------------------------------ */
+/* Everything is sized in rem, so one root font size scales the words and the
+ * tap targets together. Settings → Text size, or the Aa button in the header. */
+:root[data-text="large"] { font-size: 115%; }
+:root[data-text="xl"] { font-size: 130%; }
+.topbar-actions { display: flex; align-items: center; gap: 8px; }
+.text-toggle { text-transform: none; letter-spacing: 0; font-size: 0.9rem; padding: 6px 12px; }
+.text-toggle.on { background: var(--accent-dim); border-color: var(--accent); }
