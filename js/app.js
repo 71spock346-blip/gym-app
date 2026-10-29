@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 66;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 67;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
