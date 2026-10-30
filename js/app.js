@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 68;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 69;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -1722,18 +1722,28 @@ function closeLightbox(fromBack) {
  * one spare entry under itself: back closes an open picture, returns from
  * History or Settings to the workout, and at the workout asks before leaving
  * (and puts the spare entry back if you stay). */
-const backNav = { ignore: false, exitArmed: false };
+const backNav = { ignore: false, leaving: false };
 const histState = () => (typeof history !== 'undefined' && history.state && history.state.ss) || null;
 function pushGuard() { if (typeof history === 'undefined') return; if (histState() !== 'root') history.pushState({ ss: 'root' }, ''); }
+/* Chrome skips history entries a page adds without a user gesture, so the spare
+ * entry is pushed on the first tap or key press (and again after a back press
+ * has used it up), never at load. */
+function ensureGuard() {
+  if (backNav.leaving) { backNav.leaving = false; pushGuard(); return; }   // tapped around after "leave": staying after all
+  const dlg = $('#exitDialog');
+  if (dlg && !dlg.hidden) return;
+  const s = histState();
+  if (s === null || s === 'launch') pushGuard();
+}
 function installBackGuard() {
   if (typeof history === 'undefined' || !history.pushState) return;
   history.replaceState({ ss: 'launch' }, '');
-  pushGuard();
+  for (const type of ['pointerup', 'click', 'keydown']) document.addEventListener(type, ensureGuard, true);
   window.addEventListener('popstate', (e) => {
     if (backNav.ignore) { backNav.ignore = false; return; }
     const s = (e.state && e.state.ss) || null;
     const picture = $('#lightbox');
-    if (picture && !picture.hidden) { closeLightbox(true); if (s !== 'launch') return; }
+    if (picture && !picture.hidden) { closeLightbox(true); return; }   // back closes the picture, whatever entry it landed on
     if (s === 'view') { if (state.view !== e.state.view) { state.view = e.state.view; render(); window.scrollTo(0, 0); } return; }
     if (s === 'root') { if (state.view !== 'workout') { state.view = 'workout'; render(); window.scrollTo(0, 0); } return; }
     askExit();   // backed out of the root: the launch entry (or an older one)
@@ -1762,9 +1772,10 @@ function stayInApp() {
 function leaveApp() {
   $('#exitDialog').hidden = true;
   document.body.classList.remove('lightbox-open');
+  backNav.leaving = true;   // no spare entry until the next tap: the next back press leaves
   try { window.close(); } catch { /* not allowed */ }
   // most phones won't let a page close itself: with the spare entry gone, the next back press leaves
-  setTimeout(() => { if (!document.hidden) { backNav.exitArmed = true; showToast('Press back once more to leave', 'info'); } }, 250);
+  setTimeout(() => { if (!document.hidden) showToast('Press back once more to leave', 'info'); }, 250);
 }
 
 /* ------------------------------ toast ------------------------------ */
@@ -1899,7 +1910,6 @@ document.addEventListener('click', (e) => {
   if (summary) { e.preventDefault(); toggleGuide(summary.parentElement); return; }
 
   // leave dialog (from the phone's back button): Stay puts the spare history entry back
-  if (backNav.exitArmed) { backNav.exitArmed = false; pushGuard(); }
   if (e.target.closest('#exitDialog')) {
     if (e.target.closest('#exitLeave')) leaveApp();
     else if (e.target.closest('#exitStay') || !e.target.closest('.modal-card')) stayInApp();
