@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 67;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 68;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -1704,13 +1704,67 @@ function openLightbox(ex) {
   $('#lightbox').hidden = false;
   document.body.classList.add('lightbox-open');
   $('#lightboxClose').focus();
+  if (typeof history !== 'undefined' && history.pushState && histState() !== 'lightbox') history.pushState({ ss: 'lightbox' }, '');   // so the back button closes it
 }
-function closeLightbox() {
+function closeLightbox(fromBack) {
   const el = $('#lightbox');
   if (!el || el.hidden) return;
   el.hidden = true;
   document.body.classList.remove('lightbox-open');
   lightbox.ex = null;
+  // closed by a tap: drop the picture's history entry so the next back press isn't spent on it
+  if (!fromBack && histState() === 'lightbox') { backNav.ignore = true; history.back(); }
+}
+
+/* ------------------------------ phone back button ------------------------------ */
+/* Android's back button walks the browser history, and a home-screen app has
+ * nothing to walk — so the first press used to leave the app. The app now keeps
+ * one spare entry under itself: back closes an open picture, returns from
+ * History or Settings to the workout, and at the workout asks before leaving
+ * (and puts the spare entry back if you stay). */
+const backNav = { ignore: false, exitArmed: false };
+const histState = () => (typeof history !== 'undefined' && history.state && history.state.ss) || null;
+function pushGuard() { if (typeof history === 'undefined') return; if (histState() !== 'root') history.pushState({ ss: 'root' }, ''); }
+function installBackGuard() {
+  if (typeof history === 'undefined' || !history.pushState) return;
+  history.replaceState({ ss: 'launch' }, '');
+  pushGuard();
+  window.addEventListener('popstate', (e) => {
+    if (backNav.ignore) { backNav.ignore = false; return; }
+    const s = (e.state && e.state.ss) || null;
+    const picture = $('#lightbox');
+    if (picture && !picture.hidden) { closeLightbox(true); if (s !== 'launch') return; }
+    if (s === 'view') { if (state.view !== e.state.view) { state.view = e.state.view; render(); window.scrollTo(0, 0); } return; }
+    if (s === 'root') { if (state.view !== 'workout') { state.view = 'workout'; render(); window.scrollTo(0, 0); } return; }
+    askExit();   // backed out of the root: the launch entry (or an older one)
+  });
+}
+/* Switching tabs: History and Settings sit one entry above the workout. */
+function openView(view) {
+  state.view = view; render(); window.scrollTo(0, 0);
+  if (typeof history === 'undefined' || !history.pushState) return;
+  if (view === 'workout') { if (histState() === 'view') { backNav.ignore = true; history.back(); } return; }
+  if (histState() === 'view') history.replaceState({ ss: 'view', view }, '');
+  else history.pushState({ ss: 'view', view }, '');
+}
+function askExit() {
+  const el = $('#exitDialog');
+  if (!el) return;
+  el.hidden = false;
+  document.body.classList.add('lightbox-open');
+  $('#exitStay').focus();
+}
+function stayInApp() {
+  $('#exitDialog').hidden = true;
+  document.body.classList.remove('lightbox-open');
+  pushGuard();
+}
+function leaveApp() {
+  $('#exitDialog').hidden = true;
+  document.body.classList.remove('lightbox-open');
+  try { window.close(); } catch { /* not allowed */ }
+  // most phones won't let a page close itself: with the spare entry gone, the next back press leaves
+  setTimeout(() => { if (!document.hidden) { backNav.exitArmed = true; showToast('Press back once more to leave', 'info'); } }, 250);
 }
 
 /* ------------------------------ toast ------------------------------ */
@@ -1844,6 +1898,14 @@ document.addEventListener('click', (e) => {
   const summary = e.target.closest('.howto summary');
   if (summary) { e.preventDefault(); toggleGuide(summary.parentElement); return; }
 
+  // leave dialog (from the phone's back button): Stay puts the spare history entry back
+  if (backNav.exitArmed) { backNav.exitArmed = false; pushGuard(); }
+  if (e.target.closest('#exitDialog')) {
+    if (e.target.closest('#exitLeave')) leaveApp();
+    else if (e.target.closest('#exitStay') || !e.target.closest('.modal-card')) stayInApp();
+    return;
+  }
+
   // picture lightbox: tap the icon box to open; inside, the picture flips start/finish, anything else closes
   if (e.target.closest('#lightbox')) {
     if (e.target.closest('.lightbox-img') && lightboxSources(lightbox.ex).length > 1) { lightbox.frame = 1 - lightbox.frame; renderLightbox(); return; }
@@ -1853,8 +1915,8 @@ document.addEventListener('click', (e) => {
   const iconBox = e.target.closest('.exercise-icon[data-ex]');
   if (iconBox) { const ex = findExercise(iconBox.dataset.ex); if (ex) openLightbox(ex); return; }
 
-  const nav = e.target.closest('.nav-btn');
-  if (nav) { state.view = nav.dataset.view; render(); window.scrollTo(0, 0); return; }
+  const navBtn = e.target.closest('.nav-btn');
+  if (navBtn) { openView(navBtn.dataset.view); return; }
 
   // onboarding
   const obGoal = e.target.closest('.ob-goal');
@@ -2012,7 +2074,7 @@ document.addEventListener('paste', (e) => {
 });
 document.addEventListener('keydown', (e) => {
   if (!e.target) return;
-  if (e.key === 'Escape') { closeLightbox(); return; }
+  if (e.key === 'Escape') { const dlg = $('#exitDialog'); if (dlg && !dlg.hidden) stayInApp(); else closeLightbox(); return; }
   const icon = e.target.closest && e.target.closest('.exercise-icon[data-ex]');
   if (icon && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); const ex = findExercise(icon.dataset.ex); if (ex) openLightbox(ex); return; }
   if (e.key !== 'Enter') return;
@@ -2217,6 +2279,7 @@ $('#checkUpdate').addEventListener('click', forceUpdate);
 window.addEventListener('online', prefetchPhotos);
 
 render();
+installBackGuard();   // the phone's back button: close the picture, leave Settings, ask before leaving
 // your own images, once the phone's store answers (a moment, under the splash)
 if (typeof loadOwnMedia === 'function') loadOwnMedia().then((n) => { if (n) { render(); renderVideoLibrary(); } });
 renderVideoLibrary();

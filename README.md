@@ -179,6 +179,10 @@ remembered if you close the app mid-session.
   screen: your illustration or thumbnail where one exists, otherwise the stock
   start and finish photos (tap the picture to flip between them), otherwise
   the pictogram itself. Tap anywhere else, the × or Escape to close.
+- **The phone's back button behaves.** Back closes an open picture, returns from
+  History or Settings to the workout, and at the workout asks *Leave Stay
+  Strong?* with Stay / Leave instead of dropping out of the app (the app keeps
+  one spare history entry under itself and puts it back when you stay).
 - **Text size.** Settings → *Text size* (Normal / Large / Extra large), or the
   **Aa** button in the header, scales the whole app — words and tap targets
   together, since everything is sized in rem — and the choice is remembered.
