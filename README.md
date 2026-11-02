@@ -187,10 +187,10 @@ remembered if you close the app mid-session.
   **Aa** button in the header, scales the whole app — words and tap targets
   together, since everything is sized in rem — and the choice is remembered.
 - **Fills for what matters, outlines for the rest.** On a card only three
-  things are solid green: the set-up chip, the sets × reps pill and a done set
-  (dark text on green, so it reads). Everything else tappable is outlined in
-  green; a set still to do is a red ring; nothing is below about 0.7rem.
-- **Three design rules.** Neon green is the one *signal* colour and only ever means
+  things are solid lime: the set-up chip, the sets × reps pill and a done set
+  (dark text on lime, so it reads). Everything else tappable is outlined in
+  lime; a set still to do is a red ring; nothing is below about 0.7rem.
+- **Three design rules.** Neon lime (from the logo) is the one *signal* colour and only ever means
   "tap this" — buttons, chips, the active tab, set bubbles; everything else is
   ink on paper. Type is either huge (the day name, the week, a stat, the rest
   clock) or tiny (labels, chips, cues), nothing in between. Every screen is
@@ -244,7 +244,7 @@ NODE_PATH=$(npm root -g) node tools/smoke_test.js --shots out # plus screenshots
 
 ```
 index.html            app shell (onboarding, workout, history, settings views)
-css/styles.css        mobile-first dark theme (near-black with neon green, after the gym photos)
+css/styles.css        mobile-first dark theme (lime-tinted near-black with the logo's neon lime)
 js/exercises.js       exercise database (160+ exercises with guides) + SVG pictograms
 js/videos.js          curated YouTube form video per exercise
 js/icons.js           monoline UI icon set
