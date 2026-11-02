@@ -231,6 +231,15 @@ python3 -m http.server 8000
 # then open http://localhost:8000
 ```
 
+A smoke test walks the main flows (splash and icons, onboarding, ticking a set,
+the full-screen picture, the phone back button, text size, settings) in a
+headless phone-sized Chromium:
+
+```bash
+NODE_PATH=$(npm root -g) node tools/smoke_test.js            # needs Playwright
+NODE_PATH=$(npm root -g) node tools/smoke_test.js --shots out # plus screenshots
+```
+
 ## Project layout
 
 ```

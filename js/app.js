@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 69;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 70;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -1061,7 +1061,7 @@ function renderOnboarding() {
   $('#view-onboarding').innerHTML = `
     <div class="ob">
       <div class="ob-hero">
-        <img class="ob-logo" src="icons/icon-192.png" alt="" />
+        <img class="ob-logo" src="icons/icon-512.png" alt="" />
         <h1>Stay Strong</h1>
         <p>A plan that changes every week, real-photo form guides, a rest timer that chimes —
         and it all works with no signal.</p>
