@@ -242,7 +242,11 @@ NODE_PATH=$(npm root -g) node tools/smoke_test.js --shots out # plus screenshots
 
 ## Project layout
 
+Continuing the project? Start with **[HANDOVER.md](HANDOVER.md)**: how releases work,
+the design rules, the owner's decisions so far and what is still open.
+
 ```
+HANDOVER.md           working notes for whoever continues the project
 index.html            app shell (onboarding, workout, history, settings views)
 css/styles.css        mobile-first dark theme (lime-tinted near-black with the logo's neon lime)
 js/exercises.js       exercise database (160+ exercises with guides) + SVG pictograms
