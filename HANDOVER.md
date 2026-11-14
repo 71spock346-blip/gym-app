@@ -7,6 +7,7 @@ The README is the feature reference; this file is the working knowledge around i
 
 *State at handover: version **71**, commit `401057d` (2 Nov 2026), 52 commits on
 branch `claude/gym-workout-planner-dutuod`. Smoke test: 9 of 9 passing.*
+*Planner tests added in version 72: 17 of 17 passing.*
 
 ---
 
@@ -68,6 +69,7 @@ img/thumb/            owner's card thumbnails, <id>.jpg
 img/focus/            owner's lit muscle figures, <id>.webp
 img/anim/             mannequin clips, <id>.webm / .mp4 / .jpg poster
 tools/smoke_test.js   headless browser smoke test (see §5)
+tools/planner_test.js planner rule tests in plain Node (see §5)
 tools/*.py, *.sh      Blender scripts that rendered the mannequin clips, and the encoder
 ```
 
@@ -90,7 +92,7 @@ version is not bumped, phones keep running the old files.**
    sed -i "s/^const VERSION = $OLD; /const VERSION = $NEW; /" sw.js
    ```
    `index.html` has nine `?v=` references (one stylesheet, eight scripts).
-3. Run the smoke test (§5).
+3. Run the smoke test and the planner tests (§5).
 4. Update `README.md` when a feature changes.
 5. Commit and push to `claude/gym-workout-planner-dutuod`. GitHub Pages rebuilds in
    about a minute. Do not open pull requests unless the owner asks.
@@ -143,15 +145,25 @@ transparency, service-worker install and caching, ticking a set and the rest tim
 full-screen picture, the phone back button, text size, and the Settings screens. Exit
 code 1 on any failure or page error.
 
-**Gap to close next:** an earlier, larger suite (28 checks) was lost with a temporary
-folder. It also covered the planner rules that the smoke test does not: anchors fixed
-for a cycle and listed first, the twice-a-week split covering every muscle twice with no
-repeats across paired days, volume caps, double progression, the one-calf-raise cap,
-rotation (no repeats within two weeks), bodyweight limits per equipment mode, HIIT
-restrictions, every exercise having a muscle map and cue, photo files existing, and
-unique video ids. These should be rebuilt as a fast Node test (the planner functions
-run fine outside a browser in a `vm` context with `js/exercises.js`, `js/demos.js`,
-`js/anims.js`, `js/videos.js`, `js/icons.js`, `js/muscles.js` and `js/app.js` loaded).
+```bash
+node tools/planner_test.js                     # planner rules, plain Node, about 12 s
+PLANNER_WEEKS=52 node tools/planner_test.js    # a full year of weeks (about a minute)
+```
+
+The planner tests load the app's scripts into a Node `vm` context with a stub DOM and
+replay 20 weeks (five 4-week cycles) for both splits, all three equipment modes and both
+goals. Seventeen checks: unique ids, muscle map and cue on every exercise, bundled
+picture files present, unique video ids, deterministic plans, full-size sessions within
+the kit, required slots filled, anchors fixed for a cycle, listed first and rotated each
+cycle, no back-to-back accessory repeats in a full gym, twice-a-week coverage and no
+repeats across paired days, volume caps, the one-calf-raise cap, bodyweight limits per
+equipment mode, the HIIT goal's avoided lifts and core/glute slots, and double
+progression.
+
+Some rules are only checked where the pool makes them possible: with free weights or
+calisthenics there are too few rows, calf raises and chest moves to avoid repeats, and a
+full gym cannot always keep a two-week gap on Friday's second hamstring move. The comments
+above each check say why.
 
 ---
 
@@ -290,6 +302,9 @@ same area.
   replace stock photos *and* the video link for that exercise.
 - **Programme:** evidence-based choices the owner approved: twice-a-week split, anchor
   lifts with double progression, per-session volume caps, 4-week periodisation.
+- **HIIT extras win (v72):** when a day's shared slots already fill every place (the
+  Pull day), the HIIT goal drops a shared accessory, usually the curl, so its promised
+  core or glute move stays. Before v72 the core move was the one dropped.
 - **Admin exercise list:** alphabetical, by group.
 - **Working style:** the owner writes short messages, often from the phone, and wants
   the change made rather than discussed. Screenshots in replies help. When a request is
@@ -304,10 +319,9 @@ same area.
    fails, find out which browser the app was installed from (Chrome, Samsung Internet…).
 2. **Barbell Bench Press muscle figure:** the owner sent it once, but it never arrived.
    Add it via the admin area or ask for it again. Other exercises have no figures yet.
-3. **Rebuild the planner tests** described in §5.
-4. **Home-screen icon refresh:** Android updates installed-app icons on its own schedule
+3. **Home-screen icon refresh:** Android updates installed-app icons on its own schedule
    (around a day, sometimes asking first); iPhone needs the app re-added to the home screen.
-5. More of the owner's illustrations and thumbnails are expected, probably beyond chest day.
+4. More of the owner's illustrations and thumbnails are expected, probably beyond chest day.
 
 ---
 
@@ -324,7 +338,7 @@ truth for how it works, the design rules and the owner's decisions; README.md is
 feature reference. Read the relevant section before changing anything.
 
 Every release: bump the version in js/app.js (APP_VERSION), sw.js (VERSION) and every ?v=
-in index.html; run tools/smoke_test.js; update README.md for feature changes; push to the
+in index.html; run tools/smoke_test.js and tools/planner_test.js; update README.md for feature changes; push to the
 branch above (each push deploys); then tell the owner to tap Settings → Check for updates.
 
 Keep the design rules: lime (#86ee14 / #a8f64c) is the only signal colour; to-do sets are

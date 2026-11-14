@@ -240,6 +240,16 @@ NODE_PATH=$(npm root -g) node tools/smoke_test.js            # needs Playwright
 NODE_PATH=$(npm root -g) node tools/smoke_test.js --shots out # plus screenshots
 ```
 
+The planner rules are tested separately, in plain Node with no browser (about 12 s).
+It replays 20 weeks of plans for both splits, all three equipment modes and both
+goals, and checks anchors, rotation, the twice-a-week coverage, volume caps, the
+one-calf-raise cap, bodyweight limits, the HIIT goal's avoided lifts and core/glute
+slots, double progression, muscle maps, bundled picture files and video ids:
+
+```bash
+node tools/planner_test.js                     # PLANNER_WEEKS=52 for a longer replay
+```
+
 ## Project layout
 
 Continuing the project? Start with **[HANDOVER.md](HANDOVER.md)**: how releases work,
