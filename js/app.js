@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 71;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 72;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -527,10 +527,17 @@ function applyGoal(picks, day, weekIdx, dayIdx, lastMine, exclude) {
   const countSlot = (s) => out.filter((ex) => matchesSlot(ex, s)).length;
   const removable = (i) => !has(out[i], 'core') && !anchorIds.has(out[i].id) &&
     slots.every((s) => !matchesSlot(out[i], s) || countSlot(s) - 1 >= s.count);
+  // When every shared slot is already full (a pull day's five slots fill all
+  // five places), the goal's own extras still win: give up a shared-slot
+  // accessory rather than the core or glute work the goal promises.
+  const keepsExtras = (i) => !anchorIds.has(out[i].id) &&
+    extras.every((s) => !has(out[i], s.tag) || count(s.tag) - 1 >= s.count);
   while (out.length > day.picks) {
     let idx = -1;
     for (let i = out.length - 1; i >= 0 && idx < 0; i--) if (removable(i) && !has(out[i], 'compound')) idx = i;
     for (let i = out.length - 1; i >= 0 && idx < 0; i--) if (removable(i)) idx = i;
+    for (let i = out.length - 1; i >= 0 && idx < 0; i--) if (keepsExtras(i) && !has(out[i], 'compound')) idx = i;
+    for (let i = out.length - 1; i >= 0 && idx < 0; i--) if (keepsExtras(i)) idx = i;
     out.splice(idx < 0 ? out.length - 1 : idx, 1);
   }
   // Same ordering as the shared plan: anchors, then compounds, finishers late, core last.
