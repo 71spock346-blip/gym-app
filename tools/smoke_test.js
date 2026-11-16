@@ -164,6 +164,38 @@ const server = http.createServer((req, res) => {
     await goto('workout');
   });
 
+  await t('backup: save a file, restore it on a wiped phone, then undo the restore', async () => {
+    await goto('settings');
+    const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 5000 }), page.locator('#backupSave').click()]);
+    const b = JSON.parse(fs.readFileSync(await dl.path(), 'utf8'));
+    if (b.app !== 'staystrong-backup' || !b.data || !b.data.profile || b.data.profile.name !== 'Dave') throw new Error('backup file contents');
+    if (!Object.keys(b.data.done || {}).length) throw new Error('backup has no ticked sets');
+    if (!/Last backup/.test(await page.locator('.backup-last').textContent())) throw new Error('last-backup line');
+    await shot('backup');
+    // a wiped phone: the welcome screen offers the restore
+    await page.evaluate(() => localStorage.clear());
+    await page.reload(); await settle();
+    if (!(await page.locator('#view-onboarding').isVisible())) throw new Error('wipe did not reach the welcome screen');
+    await page.locator('#obBackupFile').setInputFiles({ name: 'b.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(b)) });
+    await page.locator('#backupRestoreGo').waitFor({ timeout: 3000 });
+    await shot('backup-confirm');
+    await Promise.all([page.waitForEvent('load'), page.locator('#backupRestoreGo').click()]);
+    await settle();
+    await page.locator('#view-workout').waitFor({ timeout: 4000 });
+    const restored = await page.evaluate(() => ({ p: JSON.parse(localStorage.getItem('ironweek.profile')), d: JSON.parse(localStorage.getItem('ironweek.done') || '{}') }));
+    if (!restored.p || restored.p.name !== 'Dave' || JSON.stringify(restored.d) !== JSON.stringify(b.data.done)) throw new Error('data not restored');
+    if ((await page.locator('.set-bubble.done').count()) < 1) throw new Error('ticked set not shown after restore');
+    // undo puts the wiped phone back
+    await goto('settings');
+    await Promise.all([page.waitForEvent('load'), page.locator('#backupUndo').click()]);
+    await settle();
+    if (!(await page.locator('#view-onboarding').isVisible())) throw new Error('undo did not return to the wiped state');
+    // a non-backup file is refused without touching anything
+    await page.locator('#obBackupFile').setInputFiles({ name: 'x.json', mimeType: 'application/json', buffer: Buffer.from('{"hello":1}') });
+    await page.waitForTimeout(300);
+    if (await page.locator('#backupRestoreGo').count()) throw new Error('accepted a file that is not a backup');
+  });
+
   console.log(results.join('\n'));
   console.log(errors.length ? '\nPAGE ERRORS:\n' + errors.join('\n') : '\nNo page errors.');
   await browser.close(); server.close();

@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 73;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 74;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -227,6 +227,7 @@ const state = {
   textSize: store.read('textSize', 'normal'),      // 'normal' | 'large' | 'xl' — root font size (Settings → Text size, or the Aa button)
   adminPin: store.read('adminPin', null),          // SHA-256 of the PIN that locks Settings → Your images (admin)
   admin: { open: false, ex: null, trim: false, changing: false, pasteFor: null },   // admin area UI state (not saved)
+  backup: { pending: null },                       // Settings → Backup: a picked backup waiting for Restore (not saved)
 };
 // Phones that picked a goal before onboarding existed skip straight in.
 if (!state.profile && state.goal) { state.profile = { name: '', onboarded: true }; store.write('profile', state.profile); }
@@ -1090,6 +1091,10 @@ function renderOnboarding() {
         <p>A plan that changes every week, real-photo form guides, a rest timer that chimes —
         and it all works with no signal.</p>
       </div>
+      ${state.backup.pending ? backupPanel() : `
+      <label class="ob-restore">${ico('download')} Moving from another phone? <strong>Restore a backup</strong>
+        <input id="obBackupFile" type="file" accept="application/json,.json" hidden />
+      </label>`}
       <label class="ob-field">What should we call you?
         <input id="obName" type="text" maxlength="24" placeholder="Your first name" autocomplete="given-name" value="${esc(state.ob.name || '')}" />
       </label>
@@ -1561,8 +1566,139 @@ function renderSettings() {
     <h2 class="section-title">Text size</h2>
     <div class="choice-grid">${choiceCards('set-text', TEXT_SIZES, state.textSize, 'text')}</div>
     <p class="hint">Scales the whole app — words and buttons together. The <strong>Aa</strong> button in the header cycles through the sizes too.</p>
+    <h2 class="section-title">Backup</h2>
+    ${backupPanel()}
     <h2 class="section-title">Your images · admin</h2>
     ${adminPanel()}`;
+}
+
+/* ------------------------------ backup & restore ------------------------------ */
+/* Everything the app saves lives in this phone's browser storage, so clearing
+ * the browser, resetting or losing the phone would lose it. Save backup writes
+ * one JSON file with every saved setting, set, session, record and anchor
+ * weight (plus your own images from the admin area); Restore backup reads it
+ * back on this phone or a new one. The data on the phone before a restore is
+ * kept aside, so a restore can be undone. */
+const STORE_PREFIX = 'ironweek.';
+const BEFORE_RESTORE_KEY = 'staystrong.beforeRestore';   // outside the prefix so it never lands in a backup
+
+function savedData() {
+  const data = {};
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || !k.startsWith(STORE_PREFIX)) continue;
+      const raw = localStorage.getItem(k);
+      try { data[k.slice(STORE_PREFIX.length)] = JSON.parse(raw); } catch { /* not ours */ }
+    }
+  } catch { /* storage blocked */ }
+  return data;
+}
+
+function replaceSavedData(data) {
+  const old = [];
+  for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith(STORE_PREFIX)) old.push(k); }
+  old.forEach((k) => localStorage.removeItem(k));
+  for (const [k, v] of Object.entries(data)) localStorage.setItem(STORE_PREFIX + k, JSON.stringify(v));
+}
+
+const countOf = (o) => (o && typeof o === 'object') ? Object.keys(o).length : 0;
+const shortDate = (iso) => new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+
+function backupSummary(data) {
+  const sessions = countOf(data.sessions);
+  const prs = Array.isArray(data.prs) ? data.prs.length : 0;
+  const weights = countOf(data.baselines) + countOf(data.anchors);
+  return `${sessions} workout${sessions === 1 ? '' : 's'}, ${prs} personal best${prs === 1 ? '' : 's'}, ${weights} saved weight${weights === 1 ? '' : 's'}`;
+}
+
+function backupPanel() {
+  const at = store.read('backupAt', null);
+  const pending = state.backup.pending;
+  const undo = (() => { try { return JSON.parse(localStorage.getItem(BEFORE_RESTORE_KEY) || 'null'); } catch { return null; } })();
+  let last = 'No backup saved from this phone yet.';
+  if (at) {
+    const days = Math.floor((Date.now() - Date.parse(at)) / MS_PER_DAY);
+    last = `Last backup: ${shortDate(at)} (${days <= 0 ? 'today' : days === 1 ? 'yesterday' : `${days} days ago`}).`;
+  }
+  if (pending) {
+    const b = pending.backup;
+    const who = b.data.profile && b.data.profile.name ? ` for ${esc(b.data.profile.name)}` : '';
+    const imgs = b.media && Array.isArray(b.media.items) && b.media.items.length;
+    return `
+    <div class="admin-card backup-card confirm">
+      <p class="admin-p"><strong>Restore this backup${who}?</strong><br>
+      Saved ${shortDate(b.at)}: ${backupSummary(b.data)}${imgs ? `, ${imgs} image${imgs === 1 ? '' : 's'}` : ''}.</p>
+      <p class="admin-p">It replaces what is on this phone now (${backupSummary(savedData())}). You can undo it afterwards.</p>
+      <div class="media-actions">
+        <button id="backupRestoreGo" class="admin-btn primary" type="button">${ico('download')} Restore</button>
+        <button id="backupRestoreCancel" class="admin-btn" type="button">${ico('undo')} Cancel</button>
+      </div>
+    </div>`;
+  }
+  return `
+    <div class="admin-card backup-card">
+      <p class="admin-p">Your workouts, weights and records are kept on this phone only. Save a backup file now and then — to Drive, your files or a chat to yourself — so nothing is lost if the phone is reset or replaced.</p>
+      <p class="admin-p backup-last ${!at || Date.now() - Date.parse(at) > 14 * MS_PER_DAY ? 'old' : ''}">${last}</p>
+      <div class="media-actions">
+        <button id="backupSave" class="admin-btn" type="button">${ico('share')} Save backup</button>
+        <label class="admin-btn">${ico('download')} Restore backup <input id="backupFile" type="file" accept="application/json,.json" hidden /></label>
+        ${undo ? `<button id="backupUndo" class="admin-btn" type="button">${ico('undo')} Undo last restore</button>` : ''}
+      </div>
+    </div>`;
+}
+
+async function backupSave() {
+  try {
+    const data = savedData();
+    let media = null;
+    if (typeof exportOwnMedia === 'function' && ownMediaCount()) media = JSON.parse(await (await exportOwnMedia()).text());
+    const backup = { app: 'staystrong-backup', v: 1, appVersion: APP_VERSION, at: new Date().toISOString(), data, media };
+    const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
+    const r = await saveBlobToPhone(blob, `staystrong-backup-${todayISO()}.json`);
+    if (r === 'cancelled') return;
+    store.write('backupAt', backup.at);
+    render();
+    showToast(r === 'shared' ? 'Backup shared — keep it somewhere safe' : 'Backup saved to your downloads', 'check');
+  } catch (err) { showToast('Could not save the backup: ' + (err.message || err), 'info'); }
+}
+
+async function backupPick(file) {
+  const bad = 'That file is not a Stay Strong backup';
+  let b;
+  try { b = JSON.parse(await file.text()); } catch { showToast(bad, 'info'); return; }
+  if (b && b.app === 'staystrong-media') { showToast('That is an image pack — import it under Your images', 'info'); return; }
+  if (!b || b.app !== 'staystrong-backup' || !b.data || typeof b.data !== 'object' || Array.isArray(b.data)) { showToast(bad, 'info'); return; }
+  state.backup.pending = { backup: b };
+  render();
+  const card = $('.backup-card');
+  if (card) card.scrollIntoView({ block: 'center' });
+}
+
+async function backupRestore() {
+  const b = state.backup.pending && state.backup.pending.backup;
+  if (!b) return;
+  try {
+    const before = savedData();
+    localStorage.setItem(BEFORE_RESTORE_KEY, JSON.stringify({ at: new Date().toISOString(), data: before }));
+    replaceSavedData(b.data);
+    if (b.media && Array.isArray(b.media.items) && b.media.items.length && typeof importOwnMedia === 'function') {
+      try { await importOwnMedia(new Blob([JSON.stringify(b.media)])); } catch { /* the workout data matters most */ }
+    }
+  } catch (err) { showToast('Could not restore: ' + (err.message || err), 'info'); return; }
+  sessionStorage.setItem('staystrong.toast', 'Backup restored');
+  location.reload();   // start fresh from the restored data
+}
+
+function backupUndo() {
+  try {
+    const prev = JSON.parse(localStorage.getItem(BEFORE_RESTORE_KEY) || 'null');
+    if (!prev || !prev.data) return;
+    replaceSavedData(prev.data);
+    localStorage.removeItem(BEFORE_RESTORE_KEY);
+  } catch (err) { showToast('Could not undo: ' + (err.message || err), 'info'); return; }
+  sessionStorage.setItem('staystrong.toast', 'Restore undone — your earlier data is back');
+  location.reload();
 }
 
 /* ------------------------------ your images (admin) ------------------------------ */
@@ -1985,6 +2121,10 @@ document.addEventListener('click', (e) => {
   const removeBtn = e.target.closest('.media-remove');
   if (removeBtn) { adminRemove(removeBtn.closest('.media-slot')); return; }
   if (e.target.closest('#mediaExport')) { adminExport(); return; }
+  if (e.target.closest('#backupSave')) { backupSave(); return; }
+  if (e.target.closest('#backupRestoreGo')) { backupRestore(); return; }
+  if (e.target.closest('#backupRestoreCancel')) { state.backup.pending = null; render(); return; }
+  if (e.target.closest('#backupUndo')) { backupUndo(); return; }
 
   if (e.target.closest('#goalPill')) {
     state.goal = currentGoal().key === 'build' ? 'fatloss' : 'build';
@@ -2097,6 +2237,7 @@ document.addEventListener('change', (e) => {
   if (el.id === 'adminTrim') { state.admin.trim = el.checked; return; }
   if (el.classList && el.classList.contains('media-file')) { const f = el.files && el.files[0]; if (f) adminAdd(el.closest('.media-slot'), f); return; }
   if (el.id === 'mediaImport') { const f = el.files && el.files[0]; if (f) adminImport(f); }
+  if (el.id === 'backupFile' || el.id === 'obBackupFile') { const f = el.files && el.files[0]; el.value = ''; if (f) backupPick(f); }
 });
 document.addEventListener('paste', (e) => {
   const box = e.target && e.target.closest && e.target.closest('.paste-target');
@@ -2321,6 +2462,7 @@ if (typeof loadOwnMedia === 'function') loadOwnMedia().then((n) => { if (n) { re
 renderVideoLibrary();
 prefetchPhotos();
 hideSplash();
+try { const t = sessionStorage.getItem('staystrong.toast'); if (t) { sessionStorage.removeItem('staystrong.toast'); setTimeout(() => showToast(t, 'check'), 900); } } catch { /* no session storage */ }
 $('#checkUpdate').innerHTML = ico('refresh') + ' Check for updates';
 $('#videoLibrary summary').innerHTML = ico('film') + ' Form video library &amp; offline setup (YouTube Premium)';
 

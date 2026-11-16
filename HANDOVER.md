@@ -283,6 +283,12 @@ Crossover), plus a muscle figure for the Smith Machine Incline Press.
   **Do not rename it**, or every user loses their weights and history. Keys: `profile`,
   `goal`, `equip`, `split`, `unit`, `textSize`, `baselines`, `done`, `reps`, `swaps`,
   `sessions`, `prs`, `anchors`, `adminPin`.
+- **Backup (v74):** Settings → Backup saves every `ironweek.*` key (plus the admin
+  image pack) to one JSON file (`app: 'staystrong-backup'`) and restores it on any
+  phone, including from the welcome screen. A restore replaces all `ironweek.*` keys,
+  merges images, and keeps the replaced data in `staystrong.beforeRestore` (outside
+  the prefix) for *Undo last restore*. `backupAt` records the last save. Any new
+  saved key under the prefix is included automatically.
 
 ---
 
