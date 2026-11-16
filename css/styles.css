@@ -931,3 +931,11 @@ body.lightbox-open { overflow: hidden; }
 .modal-actions { display: flex; gap: 10px; }
 .modal-actions .admin-btn { flex: 1; justify-content: center; min-height: 48px; font-size: 0.9rem; }
 .modal-actions .primary-btn { flex: 1; margin: 0; padding: 12px; }
+
+/* Drop-set week: a lime-outlined note under the tempo line, and a tag beside the pill. */
+.scheme-drop { color: var(--accent-2); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+.dropset-line {
+  margin-top: 8px; padding: 8px 10px; border: 1px solid var(--accent-2); border-radius: 10px;
+  color: var(--text); font-size: 0.82rem; line-height: 1.4;
+}
+.dropset-line strong { color: var(--accent-2); }
