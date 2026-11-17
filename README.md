@@ -20,9 +20,9 @@ week layout once, and every day's plan is built to fit.
   split is still there for anyone who prefers it (partners should pick the same
   layout so they share days).
 - **Anchor lifts.** Each day's main movement(s) — a press, a row, a squat pattern, a
-  hinge — are **fixed for a whole 4-week cycle** so you can practise and progress
-  them, then rotated to a fresh candidate next cycle. Only the accessories rotate
-  weekly. Anchors always go first in the session and carry an *Anchor lift* chip.
+  hinge — are **fixed for two weeks** so you can practise and progress
+  them, then rotated to a fresh candidate (weeks 1–2 and 3–4 of each cycle have
+  different anchors). The accessories rotate weekly. Anchors always go first in the session and carry an *Anchor lift* chip.
 - **Double progression on anchors.** Every ticked set logs its reps (the top of the
   range until you adjust it — tap a done bubble to change). Hit the top of the rep
   range on every set and that zone's weight goes up next cycle (+2.5 kg upper body,
@@ -91,19 +91,20 @@ remembered if you close the app mid-session.
 ## What it does
 
 - **A different plan every week.** Each calendar week gets its own combination of
-  exercises, drawn from a pool of **160+ movements** (machine, free-weight and
+  exercises, drawn from a pool of **200 movements** (machine, free-weight and
   bodyweight). Selection rules keep every session balanced.
 - **Anti-repeat rotation (accessories).** The planner remembers when each exercise
-  was last scheduled and prefers anything unused for three weeks or more, so an
-  accessory never comes back within two weeks and each day cycles through most of
-  its pool; on the twice-a-week split the second session of a muscle also avoids
+  was last scheduled and picks the longest-unused option, so each slot works
+  through every alternative it has before any comes back; on the twice-a-week split the second session of a muscle also avoids
   what the first used that week. Strength weeks lean into big compound lifts while
   volume weeks favour cable/isolation pump work, so each type of week feels different.
-  Anchor lifts are the exception: they stay put for the cycle on purpose.
+  Anchor lifts are the exception: they stay put for two weeks on purpose.
 - **Reps and sets rotate through a 4-week training cycle:**
   1. **Hypertrophy** — 3–4 sets × 8–12 reps, moderate weight
   2. **Strength** — 4–5 sets × 4–6 reps, heavy
-  3. **Volume** — 3 sets × 12–20 reps, lighter, short rests
+  3. **Drop-set volume** — 3 sets × 12–20 reps, lighter, short rests; the last set
+     of each loaded accessory is a **drop set** (about 25% lighter, straight on to
+     near failure). Never on anchors, bodyweight or core moves.
   4. **Deload** — 2–3 easy sets to recover (this is where growth happens)
 - **Today at a glance.** A hero card greets you by name, shows a progress ring
   for the session's sets, your week streak, sessions this week and PR count —

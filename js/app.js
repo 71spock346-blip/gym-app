@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 72;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 73;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -27,8 +27,8 @@ const PHASES = [
     pct: 1.15, isoPct: 1.05, isoReps: [[8, 10], [8, 12]],
   },
   {
-    key: 'volume', name: 'Volume', icon: 'flame',
-    desc: 'Pump week: lighter weight, high reps, short rests. Chase the burn.',
+    key: 'volume', name: 'Drop-set volume', icon: 'flame', dropSets: true,
+    desc: 'Pump week: lighter weight, high reps, short rests. The last set of each accessory is a drop set. Chase the burn.',
     sets: [3, 3], reps: [[12, 15], [15, 20]], rest: '45–60 s',
     tempo: 'steady rhythm · 1–2 s each way', restSec: 50,
     pct: 0.85, isoPct: 0.85, isoReps: [[15, 20], [12, 15]],
@@ -63,7 +63,7 @@ const GOALS = {
       'ch-bench-press', 'ch-smith-flat', 'ch-smith-incline', 'ch-pec-deck', 'ch-cable-cross',
       'ch-flat-fly', 'ch-low-cable-fly', 'ch-flat-db-press', 'ch-floor-press',
       'ar-concentration', 'ar-skull', 'ar-spider-curl', 'ar-cgbp', 'ar-preacher', 'ar-db-skull',
-      'bk-shrug',
+      'bk-shrug', 'bk-bb-shrug', 'ch-decline-fly',
       'ch-incline-bb', 'ch-decline-db', 'ch-incline-fly', 'ch-incline-machine', 'ch-cable-press', 'ch-squeeze-press', 'ar-decline-skull', 'ar-db-preacher',
     ],
     // Guaranteed per day on top of the shared plan.
@@ -315,6 +315,10 @@ function seededShuffle(arr, rng) {
 /* ------------------------------ plan generation ------------------------------ */
 function phaseForWeek(weekIdx) { return PHASES[((weekIdx % 4) + 4) % 4]; }
 function cycleForWeek(weekIdx) { return Math.floor(weekIdx / 4); }
+/* Anchor lifts change every two weeks (the owner's choice, for more variety):
+ * weeks 1–2 of a cycle share one set of anchors, weeks 3–4 the next. */
+const ANCHOR_WEEKS = 2;
+function anchorBlockForWeek(weekIdx) { return Math.floor(weekIdx / ANCHOR_WEEKS); }
 
 /* Pick this week's exercises for a day, with two guarantees on top of the
  * weekly shuffle:
@@ -359,18 +363,18 @@ const coversNew = (list, ex) => {
   return muscleCoverage(ex).hits.some((r) => !have.has(r));
 };
 
-/* ANCHOR LIFTS: each day's main movement(s) are fixed for a whole 4-week cycle
+/* ANCHOR LIFTS: each day's main movement(s) are fixed for a two-week block
  * so they can be practised and progressed (double progression, see the reps
- * section), then rotated to a fresh candidate next cycle. Chosen with a
+ * section), then rotated to a fresh candidate next block. Chosen with a
  * cycle-level replay so every phone agrees, with last cycle's anchors sent to
  * the back of the queue and no exercise anchoring two days of one split.
  * Outside calisthenics mode an anchor is always a loaded lift. */
-const ANCHOR_CYCLE_START = Math.floor(ANTI_REPEAT_ANCHOR / 4);
+const ANCHOR_CYCLE_START = Math.floor(ANTI_REPEAT_ANCHOR / ANCHOR_WEEKS);
 const anchorCache = new Map();
 function anchorCandidates(day, spec) {
   const loadedOnly = currentEquip().key !== 'body';
   return dayPool(day).filter((ex) => allowed(ex) && matchesSlot(ex, spec) &&
-    !ex.tags.includes('core') && !ex.tags.includes('finisher') &&
+    !ex.tags.includes('core') && !ex.tags.includes('finisher') && !ex.noAnchor &&
     (spec.iso || ex.tags.includes('compound')) && !(loadedOnly && isBodyPick(ex)));
 }
 function cycleAnchors(days, cycleIdx) {
@@ -404,7 +408,7 @@ function cycleAnchors(days, cycleIdx) {
   return result;
 }
 function anchorsFor(day, weekIdx) {
-  return cycleAnchors(daysOf(day), cycleForWeek(weekIdx)).get(day.key) || [];
+  return cycleAnchors(daysOf(day), anchorBlockForWeek(weekIdx)).get(day.key) || [];
 }
 
 /* VOLUME CAP: around 12 hard sets per muscle per session is where the research
@@ -452,11 +456,13 @@ function pickExercises(day, weekIdx, dayIdx) {
   return mine;
 }
 
-/* How long ago an exercise was last scheduled, capped at 3: anything unused
- * for three weeks or more counts the same, so the weekly flavour (compounds
- * on strength weeks, pump work on volume weeks) still decides among them. */
+/* How long ago an exercise was last scheduled, capped at 12 weeks: the
+ * longest-unused move wins, so each slot works through every alternative it
+ * has before any comes back (before v73 the cap was 3, so small pools kept
+ * flipping between the same two or three moves). The weekly flavour
+ * (compounds on strength weeks, pump work on volume weeks) breaks ties. */
 function staleness(lastWeek, weekIdx, id) {
-  return Math.min(3, weekIdx - (id in lastWeek ? lastWeek[id] : -99));
+  return Math.min(12, weekIdx - (id in lastWeek ? lastWeek[id] : -99));
 }
 
 /* Goal-specific adjustments on top of the shared plan: drop anything the
@@ -486,7 +492,7 @@ function applyGoal(picks, day, weekIdx, dayIdx, lastMine, exclude) {
   const rng = mulberry32(weekIdx * 4241 + dayIdx * 613 + 7);
   // Another day's anchors and a paired day's picks go to the back of the refill queue.
   const others = new Set();
-  for (const [k, list] of cycleAnchors(daysOf(day), cycleForWeek(weekIdx))) if (k !== day.key) list.forEach((ex) => others.add(ex.id));
+  for (const [k, list] of cycleAnchors(daysOf(day), anchorBlockForWeek(weekIdx))) if (k !== day.key) list.forEach((ex) => others.add(ex.id));
   const excluded = (ex) => ((exclude && exclude.has(ex.id)) || others.has(ex.id) ? 1 : 0);
   const pool = seededShuffle(dayPool(day).concat(EXERCISE_DB.core), rng)
     .map((ex, i) => ({ ex, i }))
@@ -497,7 +503,15 @@ function applyGoal(picks, day, weekIdx, dayIdx, lastMine, exclude) {
       (a.i - b.i))
     .map((o) => o.ex)
     .filter((ex) => !avoid.has(ex.id) && allowed(ex));
-  const out = picks.filter((ex) => !avoid.has(ex.id));
+  let out = picks.filter((ex) => !avoid.has(ex.id));
+  // A move this goal added last week may turn up in this week's shared plan.
+  // Swap it out (when no shared slot needs it) so it doesn't run two weeks in a row.
+  const weekAnchors = new Set(anchorsFor(day, weekIdx).map((ex) => ex.id));
+  for (const ex of out.slice()) {
+    if (weekAnchors.has(ex.id) || lastMine[ex.id] !== weekIdx - 1) continue;
+    const rest = out.filter((e) => e !== ex);
+    if (day.slots.every((sl) => !matchesSlot(ex, sl) || rest.filter((e) => matchesSlot(e, sl)).length >= sl.count)) out = rest;
+  }
   const taken = new Set(out.map((ex) => ex.id));
   const has = (ex, tag) => ex.tags.includes(tag);
   const count = (tag) => out.filter((ex) => has(ex, tag)).length;
@@ -561,7 +575,7 @@ function pickWeek(day, weekIdx, dayIdx, lastUsed, exclude) {
   // back of the accessory queue.
   const anchors = anchorsFor(day, weekIdx);
   const others = new Set();
-  for (const [k, list] of cycleAnchors(daysOf(day), cycleForWeek(weekIdx))) if (k !== day.key) list.forEach((ex) => others.add(ex.id));
+  for (const [k, list] of cycleAnchors(daysOf(day), anchorBlockForWeek(weekIdx))) if (k !== day.key) list.forEach((ex) => others.add(ex.id));
   const excluded = (ex) => ((exclude && exclude.has(ex.id)) || others.has(ex.id) ? 1 : 0);
   const sorted = seededShuffle(dayPool(day), rng)
     .map((ex, i) => ({ ex, i }))
@@ -628,8 +642,11 @@ function schemeFor(ex, phase, weekIdx, exOrdinal, isAnchor) {
   hi = Math.min(hi + goal.repsDelta, 22);
   const sets = isAnchor ? phase.sets[phase.sets.length - 1] : phase.sets[Math.floor(rng() * phase.sets.length)];
   const restSec = Math.max(goal.restMin || 40, Math.round((phase.restSec * goal.restMult) / 5) * 5);
+  // Drop-set week: the last set of each loaded accessory runs past its reps on
+  // a lighter weight. Never on anchors (heavy compounds) or bodyweight / core moves.
+  const dropSet = !!phase.dropSets && !isAnchor && equipOf(ex) !== 'body' && !ex.tags.includes('core');
   return {
-    sets, repsLo: lo, repsHi: hi,
+    sets, repsLo: lo, repsHi: hi, dropSet,
     restSec, rest: formatRest(restSec),
     pct: (iso ? phase.isoPct : phase.pct) * goal.pctMult,
   };
@@ -1115,7 +1132,7 @@ function renderPhaseBanner() {
       <span class="phase-name phase-${phase.key}">${phase.name} week</span>
     </div>
     <p class="phase-desc">${phase.desc} <span class="phase-week">Week ${(((weekIdx % 4) + 4) % 4) + 1} of 4 —
-      anchor lifts stay fixed all cycle.</span></p>
+      anchor lifts change every 2 weeks.</span></p>
     <button id="goalPill" class="goal-pill" type="button"
       title="Tap to switch goal">${ico(goal.icon)} ${goal.name} ${ico('swap')}</button>`;
 }
@@ -1333,7 +1350,7 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
           <span class="chip chip-muscle">${ex.muscles}</span>
           <span class="chip chip-equip">${equipTag}</span>
           ${hasIllus(ex) ? '' : `<a class="chip chip-video" href="${videoUrl(ex)}" target="_blank" rel="noopener">${ico('play')} Video</a>`}
-          ${isAnchor ? `<span class="chip chip-anchor" title="Fixed for this 4-week cycle and progressed by double progression">${ico('target')} Anchor lift</span>` : ''}
+          ${isAnchor ? `<span class="chip chip-anchor" title="Fixed for two weeks and progressed by double progression">${ico('target')} Anchor lift</span>` : ''}
           ${supersetLabel ? `<span class="chip chip-superset">${ico('link')} Superset ${supersetLabel}</span>` : ''}
         </div>
       </div>
@@ -1366,9 +1383,11 @@ function exerciseCard(ex, i, phase, weekIdx, dateISO, day, chosenIds, supersetLa
     <div class="scheme-row">
       <span class="scheme-pill">${scheme.sets} × ${scheme.repsLo}–${scheme.repsHi} reps</span>
       <span class="scheme-rest">rest ${scheme.rest}</span>
+      ${scheme.dropSet ? `<span class="scheme-drop">+ drop set</span>` : ''}
       ${scheme.capped ? `<span class="scheme-cap" title="A set trimmed so this muscle stays near 12 hard sets this session">· volume cap</span>` : ''}
     </div>
     <div class="tempo-line">⏱ ${phase.tempo}</div>
+    ${scheme.dropSet ? `<div class="dropset-line"><strong>Last set: drop set.</strong> When you reach the reps, put the weight down, take about 25% off and keep going until you are close to failure. No rest in between.</div>` : ''}
     <div class="sets-block">${setsBlock(ex, scheme, dateISO, phase, isAnchor)}</div>
     ${focusBlock(ex)}
     ${altChips(ex, day, chosenIds, weekIdx, dateISO, swappedFrom)}

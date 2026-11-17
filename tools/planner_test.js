@@ -69,7 +69,7 @@ function loadApp() {
   // script can hand them back out.
   return vm.runInContext(`({
     state, PHASES, GOALS, EQUIPMENT, SPLITS, DAYS, DAYS_TWICE, EXERCISE_DB, TAG_CAP, BODY_CAP,
-    ANTI_REPEAT_ANCHOR, DEMO_PHOTOS, DEMO_ILLUS, DEMO_THUMBS, DEMO_FOCUS, DEMO_ANIMS, FORM_VIDEOS,
+    ANTI_REPEAT_ANCHOR, ANCHOR_WEEKS, DEMO_PHOTOS, DEMO_ILLUS, DEMO_THUMBS, DEMO_FOCUS, DEMO_ANIMS, FORM_VIDEOS,
     equipOf, allowed, isBodyPick, focusFor, matchesSlot, matchesCap, phaseForWeek, cycleForWeek,
     anchorsFor, anchorCandidates, pickExercises, schemeFor, applyVolumeCaps, evaluateAnchor, anchorStep, derivedZoneWeight,
   })`, ctx);
@@ -238,18 +238,18 @@ check('every required slot is filled (Build muscle, weights available)', () => {
   return problems;
 });
 
-check('anchor lifts hold for the whole 4-week cycle, go first, and anchor one day only', () => {
+check('anchor lifts hold for their whole two-week block, go first, and anchor one day only', () => {
   const problems = [];
   for (const c of configs()) {
     const avoid = new Set(app.GOALS[c.goal].avoid || []);
     for (const w of weeks) {
-      const cycleStart = w - (w % 4);
+      const cycleStart = w - (w % app.ANCHOR_WEEKS);
       const anchorOwner = new Map();
       for (const p of c.plans[w]) {
         configure(c.split, c.equip, c.goal);
         const anchors = app.anchorsFor(p.day, w);
         const first = app.anchorsFor(p.day, Math.max(cycleStart, weeks[0]));
-        if (!sameIds(anchors, first)) problems.push(`${where(c, p)}: anchors ${ids(anchors)}, cycle began with ${ids(first)}`);
+        if (!sameIds(anchors, first)) problems.push(`${where(c, p)}: anchors ${ids(anchors)}, block began with ${ids(first)}`);
         // A slot with no loaded candidate in this kit (no loaded vertical pull with free weights) has no anchor.
         const wanted = (p.day.anchors || []).reduce((n, s) => n + Math.min(s.count, app.anchorCandidates(p.day, s).length), 0);
         if (anchors.length !== wanted) problems.push(`${where(c, p)}: ${anchors.length} of ${wanted} anchors`);
@@ -268,16 +268,17 @@ check('anchor lifts hold for the whole 4-week cycle, go first, and anchor one da
   return problems;
 });
 
-check('anchor lifts rotate to a fresh lift each new cycle when the pool allows', () => {
+check('anchor lifts rotate to a fresh lift each new block when the pool allows', () => {
   const problems = [];
   for (const c of configs({ equips: ['gym'], goals: ['build'] })) {
     configure(c.split, c.equip, c.goal);
     app.SPLITS[c.split].days.forEach((day) => {
-      for (let w = weeks[0] + 4; w <= weeks[weeks.length - 1]; w += 4) {
-        const prev = app.anchorsFor(day, w - 4).map((ex) => ex.id);
+      const B = app.ANCHOR_WEEKS;
+      for (let w = weeks[0] + B; w <= weeks[weeks.length - 1]; w += B) {
+        const prev = app.anchorsFor(day, w - B).map((ex) => ex.id);
         const now = app.anchorsFor(day, w);
         const kept = now.filter((ex) => prev.includes(ex.id));
-        if (kept.length) problems.push(`${c.split} cycle ${(w - weeks[0]) / 4} ${day.key}: ${ids(kept)} anchors two cycles running`);
+        if (kept.length) problems.push(`${c.split} block ${(w - weeks[0]) / B} ${day.key}: ${ids(kept)} anchors two blocks running`);
       }
     });
   }

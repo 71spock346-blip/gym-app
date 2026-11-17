@@ -46,7 +46,7 @@ build step, no server, no accounts. Everything a user saves stays on their phone
 index.html            app shell: splash, views, rest timer, toast, picture lightbox, leave dialog
 css/styles.css        all styling; colour tokens at the top (:root)
 css/fonts/            Manrope (body) and Oswald (display), bundled for offline
-js/exercises.js       exercise database (164 exercises) with set-up/steps/tips/mistakes, day
+js/exercises.js       exercise database (200 exercises) with set-up/steps/tips/mistakes, day
                       definitions (DAYS = one muscle a day, DAYS_TWICE = twice-a-week split),
                       equipOf(), equipment pictograms
 js/app.js             everything else: planner, goals, equipment modes, rendering, sets/reps,
@@ -118,11 +118,16 @@ so its URL changes (`?r=2`) and phones fetch the new one.
 - **Slots:** each day lists required slots by tag (press, row, squat, hinge, calf, rear
   delt…); free picks prefer muscles not yet covered. `TAG_CAP = { calf: 1 }`, so there
   is never more than one calf raise in a session.
-- **Anchor lifts:** each day's main movements stay fixed for a 4-week cycle, go first,
+- **Anchor lifts:** each day's main movements stay fixed for two weeks (`ANCHOR_WEEKS`,
+  owner's choice in v73; was the whole 4-week cycle), go first,
   and progress by **double progression** (top of the rep range on every set → +2.5 kg
-  upper body, +5 kg legs, +1 plate; otherwise hold). Accessories rotate weekly with an
-  anti-repeat rule (nothing returns within two weeks).
-- **Phases:** a 4-week cycle of Hypertrophy → Strength → Volume → Deload.
+  upper body, +5 kg legs, +1 plate; otherwise hold). An exercise can opt out of
+  anchoring with `noAnchor: true` (renegade row, kettlebell swing, lateral lunge).
+  Accessories rotate weekly, longest-unused first (staleness cap 12 weeks since v73,
+  was 3), so each slot goes through all its alternatives before one repeats.
+- **Phases:** a 4-week cycle of Hypertrophy → Strength → Drop-set volume → Deload.
+  In week 3 the last set of each loaded accessory is a drop set (`dropSets` on the
+  phase; the phase key stays `volume` so saved anchor weights keep working).
 - **Volume caps:** per-muscle hard-set caps per session; sets are trimmed from the last
   accessories (never below 2, never from an anchor).
 - **Goals:** *Build muscle* (full rests) and *HIIT · Lean & toned* (higher reps,
@@ -154,8 +159,8 @@ The planner tests load the app's scripts into a Node `vm` context with a stub DO
 replay 20 weeks (five 4-week cycles) for both splits, all three equipment modes and both
 goals. Seventeen checks: unique ids, muscle map and cue on every exercise, bundled
 picture files present, unique video ids, deterministic plans, full-size sessions within
-the kit, required slots filled, anchors fixed for a cycle, listed first and rotated each
-cycle, no back-to-back accessory repeats in a full gym, twice-a-week coverage and no
+the kit, required slots filled, anchors fixed for their two-week block, listed first and
+rotated each block, no back-to-back accessory repeats in a full gym, twice-a-week coverage and no
 repeats across paired days, volume caps, the one-calf-raise cap, bodyweight limits per
 equipment mode, the HIIT goal's avoided lifts and core/glute slots, and double
 progression.
@@ -302,6 +307,12 @@ same area.
   replace stock photos *and* the video link for that exercise.
 - **Programme:** evidence-based choices the owner approved: twice-a-week split, anchor
   lifts with double progression, per-session volume caps, 4-week periodisation.
+- **Variety (v73):** the owner found workouts repetitive. 36 exercises were added where
+  pools were thinnest (core 6 → 17, free-weight back, calves and hamstrings, calisthenics
+  moves), anchors change every two weeks (owner picked this over four), and week 3 is a
+  drop-set week (owner asked for one). 18 new moves have stock photos from
+  free-exercise-db; the rest show the kit pictogram until the owner sends pictures.
+  Calisthenics mode still repeats on some days: its pools are small.
 - **HIIT extras win (v72):** when a day's shared slots already fill every place (the
   Pull day), the HIIT goal drops a shared accessory, usually the curl, so its promised
   core or glute move stays. Before v72 the core move was the one dropped.
