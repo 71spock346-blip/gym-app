@@ -204,7 +204,17 @@ remembered if you close the app mid-session.
   stick figures, so the app looks the same on every phone.
 - **Week preview.** Use the ‹ › arrows to peek at next week's (or last week's) plan.
 
-Everything is stored locally on your phone (`localStorage`) — nothing leaves your device.
+- **Backup and restore.** *Settings → Backup → Save backup* writes one JSON file
+  (`staystrong-backup-YYYY-MM-DD.json`) with every saved setting, ticked set, logged
+  session, personal best and anchor weight, plus your own images from the admin
+  area. On Android it opens the share sheet (Drive, Files, a chat to yourself);
+  otherwise it downloads. *Restore backup* (also offered on the welcome screen of
+  a new phone) shows what the file holds and asks before replacing this phone's
+  data; the data it replaced is kept aside, so *Undo last restore* puts it back.
+  The card shows when the last backup was saved and turns red after 14 days.
+
+Everything is stored locally on your phone (`localStorage`) — nothing leaves your
+device unless you save a backup file.
 
 ## Put it on your phone
 
