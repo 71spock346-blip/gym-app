@@ -164,6 +164,33 @@ const server = http.createServer((req, res) => {
     await goto('workout');
   });
 
+  await t('plan, exercise library filters and progress body map work; back closes a filter sheet', async () => {
+    await goto('plan');
+    if ((await page.locator('.week-strip .strip-day').count()) !== 7) throw new Error('week strip');
+    if ((await page.locator('.plan-card[data-plan-day]').count()) !== 5) throw new Error('plan day cards');
+    await goto('library');
+    const all = await page.locator('.lib-row').count();
+    if (all < 150) throw new Error(`library shows only ${all} exercises`);
+    await page.locator('#libMuscleBtn').click();
+    await page.locator('.pick-map [data-m="chest"] path').first().click();
+    await page.locator('#muscleApply').click();
+    const chest = await page.locator('.lib-row').count();
+    if (!(chest > 5 && chest < all)) throw new Error(`chest filter gave ${chest}`);
+    await page.locator('#libKitBtn').click();
+    await page.goBack(); await page.waitForTimeout(300);
+    if (!(await page.locator('#overlay').isHidden())) throw new Error('back did not close the equipment sheet');
+    if (!(await page.locator('#view-library').isVisible())) throw new Error('back left the library');
+    await page.locator('#libSearch').fill('zzzz');
+    if ((await page.locator('.lib-row').count()) !== 0) throw new Error('search');
+    await page.locator('#libClear').click();
+    await page.locator('.lib-row').first().click();
+    if (!(await page.locator('.ex-page .howto-body').isVisible())) throw new Error('exercise page');
+    await page.locator('.ex-page .sheet-close').click();
+    await goto('history');
+    if ((await page.locator('.prog-map .m-primary, .prog-map .m-secondary').count()) < 1) throw new Error('no muscles lit after ticking a set');
+    await goto('workout');
+  });
+
   await t('backup: save a file, restore it on a wiped phone, then undo the restore', async () => {
     await goto('settings');
     const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 5000 }), page.locator('#backupSave').click()]);

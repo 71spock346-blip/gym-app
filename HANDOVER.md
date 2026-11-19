@@ -53,6 +53,8 @@ js/app.js             everything else: planner, goals, equipment modes, renderin
                       anchors and double progression, rest timer, history, settings, admin
                       images UI, lightbox, back-button guard, text size, prefetch, updates
 js/muscles.js         muscle focus map: words → body regions, cues, the drawn front/back figure
+js/views.js           (v75) Plan tab, exercise Library with filters and exercise page, Progress
+                      body map, colour theme (Ember / Lime); loaded before app.js
 js/demos.js           manifests of bundled media: DEMO_PHOTOS (stock), DEMO_REV, DEMO_ILLUS,
                       DEMO_THUMBS, DEMO_FOCUS, and their URL helpers
 js/anims.js           DEMO_ANIMS: looping mannequin clips (curl, lateral raise)
@@ -174,8 +176,16 @@ above each check say why.
 
 ## 6. Design system (what the owner has settled on)
 
-### Colour
-The palette comes from the app logo: lime-tinted near-black, with the logo's neon lime
+### Colour (v75: two themes)
+Since v75 there are two palettes, picked in Settings → Colour and stored in
+`ironweek.theme`; `<html data-theme="ember|lime">` is set by an inline script in
+`index.html` before the first paint. **Ember** (charcoal `#15171b`, orange `#f0612a`)
+is the default, modelled on the look of the Repivo app the owner liked (layout and
+feel only; no Repivo names, wording or artwork). In Ember done sets use `--done`
+(green) so the owner's red-until-done / green-when-done rule holds. Every translucent
+tint uses the `--*-rgb` triplets, so a new theme only needs a token block.
+
+The original palette comes from the app logo: lime-tinted near-black, with the logo's neon lime
 as the **one signal colour**. Tokens live at the top of `css/styles.css`.
 
 | Token | Value | Use |
@@ -298,8 +308,12 @@ What the owner asked for, kept or rejected. Check here before proposing a change
 same area.
 
 - **Colour history:** black / charcoal / gold → a blue card background (tried) → gold
-  dropped for the green of a gym photo → **lime from the logo** (current). Don't bring
-  gold back.
+  dropped for the green of a gym photo → **lime from the logo** → (v75) **Ember**
+  charcoal/orange inspired by Repivo, with lime kept as a choice. Don't bring gold back.
+- **Repivo (v75):** the owner shared screenshots of Repivo and asked how close we could
+  get. Built: look and feel, 5-tab nav, Plan, Library with filters, Progress body map.
+  Not built: the AI Coach (needs a server), the Gym tab (3D map, machine scan) and
+  accounts. Never copy Repivo's branding, wording or its licensed exercise art.
 - **Cards:** gradient slabs were rejected; a solid colour with a thicker 2 px border was
   approved. A version with heavy separators between cards was called "UGLY" and reverted.
 - **Bubbles and chips:** the owner asked for filled pills/chips with a white rim, and for
