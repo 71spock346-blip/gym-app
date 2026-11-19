@@ -15,7 +15,11 @@ branch `claude/gym-workout-planner-dutuod`. Smoke test: 9 of 9 passing.*
 
 **Stay Strong** is a phone-first workout planner, built as an offline web app (PWA)
 that installs to the home screen. Plain HTML, CSS and JavaScript: no framework, no
-build step, no server, no accounts. Everything a user saves stays on their phone.
+build step. Everything a user saves stays on their phone first.
+
+**v76 adds an optional online side** (see §12): accounts and sync between phones
+(Supabase) and an AI Coach tab (Claude, through a Vercel function). The app still works
+fully offline with no account; signing in only adds an online copy.
 
 - **Live:** https://71spock346-blip.github.io/gym-app/
 - **Repository:** `71spock346-blip/gym-app`, branch `claude/gym-workout-planner-dutuod`
@@ -53,6 +57,13 @@ js/app.js             everything else: planner, goals, equipment modes, renderin
                       anchors and double progression, rest timer, history, settings, admin
                       images UI, lightbox, back-button guard, text size, prefetch, updates
 js/muscles.js         muscle focus map: words → body regions, cues, the drawn front/back figure
+js/cloud.js           (v76) optional account, sync between phones, Coach tab; loaded after views.js
+api/config.mjs        (v76) Vercel function: hands the app the public Supabase settings
+api/coach.mjs         (v76) Vercel function: the AI Coach (Claude); the Anthropic key stays here
+api/_cors.mjs         shared CORS helper (lets the old GitHub Pages copy call the functions)
+supabase/setup.sql    run once in Supabase's SQL editor: tables + row level security
+package.json          only for the functions (the Anthropic SDK); the app itself has no build
+vercel.json           function time limit, no-cache on sw.js
 js/views.js           (v75) Plan tab, exercise Library with filters and exercise page, Progress
                       body map, colour theme (Ember / Lime); loaded before app.js
 js/demos.js           manifests of bundled media: DEMO_PHOTOS (stock), DEMO_REV, DEMO_ILLUS,
@@ -72,6 +83,7 @@ img/focus/            owner's lit muscle figures, <id>.webp
 img/anim/             mannequin clips, <id>.webm / .mp4 / .jpg poster
 tools/smoke_test.js   headless browser smoke test (see §5)
 tools/planner_test.js planner rule tests in plain Node (see §5)
+tools/cloud_test.js   account, sync and coach test against stand-ins for Supabase and Anthropic (see §5)
 tools/*.py, *.sh      Blender scripts that rendered the mannequin clips, and the encoder
 ```
 
@@ -93,7 +105,7 @@ version is not bumped, phones keep running the old files.**
    sed -i "s/^const APP_VERSION = $OLD;/const APP_VERSION = $NEW;/" js/app.js
    sed -i "s/^const VERSION = $OLD; /const VERSION = $NEW; /" sw.js
    ```
-   `index.html` has nine `?v=` references (one stylesheet, eight scripts).
+   `index.html` has ten `?v=` references (one stylesheet, nine scripts).
 3. Run the smoke test and the planner tests (§5).
 4. Update `README.md` when a feature changes.
 5. Commit and push to `claude/gym-workout-planner-dutuod`. GitHub Pages rebuilds in
@@ -151,6 +163,17 @@ Nine checks: splash and welcome logos, onboarding, header logo, manifest icon si
 transparency, service-worker install and caching, ticking a set and the rest timer, the
 full-screen picture, the phone back button, text size, and the Settings screens. Exit
 code 1 on any failure or page error.
+
+```bash
+npm install                                                   # once: the Anthropic SDK for api/coach.mjs
+NODE_PATH=$(npm root -g) node tools/cloud_test.js            # account, sync between two phones, coach
+```
+
+The cloud test runs the real `api/` functions against a local stand-in for Supabase and
+the Anthropic API (no keys, no network): sign-up and sign-in, phone-only keys kept local,
+a new phone signing in from the welcome screen, sets ticked on two phones merged, a
+setting reaching the other phone, an offline queue, the coach's request (model, server
+key, training snapshot), the daily limit, and refusing signed-out callers.
 
 ```bash
 node tools/planner_test.js                     # planner rules, plain Node, about 12 s
@@ -382,3 +405,44 @@ requests and images (one per message, captioned with the exercise name). Make th
 rather than discussing it, show a screenshot or describe exactly what changed, and say
 plainly when something could not be verified on a real phone.
 ```
+
+---
+
+## 12. Online: accounts, sync and the AI Coach (v76)
+
+**Hosting.** The online version runs on Vercel (static files plus the two functions in
+`api/`). GitHub Pages keeps serving the old offline copy; it can still sign in and coach
+by calling the Vercel functions at `CLOUD_ORIGIN` in `js/cloud.js` (change that constant
+if the Vercel address is different), so people can sign in there once to carry their
+data over to the new address.
+
+**Settings live in Vercel → Project → Settings → Environment Variables** (never in the code):
+
+| Name | What | Secret? |
+|---|---|---|
+| `SUPABASE_URL` | Supabase → Project Settings → API → Project URL | no |
+| `SUPABASE_ANON_KEY` | Supabase → Project Settings → API → anon / publishable key | no (row level security protects the data) |
+| `ANTHROPIC_API_KEY` | console.anthropic.com → API keys | **yes** |
+| `COACH_DAILY_LIMIT` | optional, coach questions per person per day (default 30) | no |
+| `ALLOWED_ORIGINS` | optional, comma-separated extra sites allowed to call the functions | no |
+
+**Supabase setup:** run `supabase/setup.sql` once in the SQL editor. Under
+Authentication → URL Configuration, set Site URL to the Vercel address so the
+confirm-your-email link opens the app.
+
+**How sync works** (`js/cloud.js`): one `user_store` row per saved key (the same keys a
+backup file holds). `store.write` stamps the key and queues it; a sync pulls rows changed
+since the last pull, merges, then pushes the queue. `done`, `sessions`, `reps`, `swaps`,
+`baselines` and `anchors` merge entry by entry (so workouts logged on two phones both
+survive); everything else is newest-wins. `textSize`, `backupAt` and `adminPin` stay on the
+phone. Login and sync bookkeeping live under `staystrong.auth` / `staystrong.sync`, outside
+the `ironweek.` prefix, so they never go into a backup file. Own images (IndexedDB) are not
+synced; use the image pack. Known limit: an entry deleted on one phone (an undone set's
+whole day) can come back from the other phone's copy.
+
+**Coach** (`api/coach.mjs`): signed-in only (it checks the Supabase token), daily limit via
+the `coach_log` table, model `claude-opus-5-5` at low effort with server-side refusal
+fallbacks. The phone sends a compact snapshot: settings, today's plan with working
+weights, the last six weeks of sessions and reps, personal bests. The conversation is
+saved as the `coach` key, so it syncs too. Roughly 2 to 3 US cents a question.
+

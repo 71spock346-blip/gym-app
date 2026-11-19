@@ -19,7 +19,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Stay Strong" />
-  <link rel="stylesheet" href="css/styles.css?v=75" />
+  <link rel="stylesheet" href="css/styles.css?v=76" />
 </head>
 <body>
   <div id="splash" class="splash" role="status" aria-label="Stay Strong is loading">
@@ -63,6 +63,8 @@
 
     <section id="view-history" class="view content" hidden></section>
 
+    <section id="view-coach" class="view content" hidden></section>
+
     <section id="view-settings" class="view content" hidden>
       <div id="settingsBody"></div>
       <h2 class="section-title">Offline &amp; videos</h2>
@@ -73,7 +75,7 @@
       <p id="offlineStatus" class="offline-status"></p>
       <h2 class="section-title">About</h2>
       <p class="about">Plans rotate automatically every week — exercises, sets, reps and weights all change.
-      Photos: free-exercise-db (public domain). Everything is stored on this phone only — save a backup under Backup above.</p>
+      Photos: free-exercise-db (public domain). Everything is stored on this phone. Sign in under Account &amp; sync to keep a copy online and use it on more than one phone, or save a backup file under Backup.</p>
       <p id="appVersion" class="app-version"></p>
       <button id="checkUpdate" class="update-btn" type="button">Check for updates</button>
     </section>
@@ -124,19 +126,22 @@
       <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 12.5h8M8 16h5" /></svg>Library</button>
     <button class="nav-btn" type="button" data-view="history">
       <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V12M10 20V6M15 20v-9M20 20V9" /></svg>Progress</button>
+    <button class="nav-btn" type="button" data-view="coach">
+      <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14v10H10l-4 3.5v-3.5H5zM9 10.5h.01M12 10.5h.01M15 10.5h.01" /></svg>Coach</button>
     <button class="nav-btn" type="button" data-view="settings">
       <svg class="nav-icon nav-icon-ring" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8" /></svg>Settings</button>
   </nav>
 
-  <script src="js/exercises.js?v=75"></script>
-  <script src="js/demos.js?v=75"></script>
-  <script src="js/media.js?v=75"></script>
-  <script src="js/anims.js?v=75"></script>
-  <script src="js/videos.js?v=75"></script>
-  <script src="js/icons.js?v=75"></script>
-  <script src="js/muscles.js?v=75"></script>
-  <script src="js/views.js?v=75"></script>
-  <script src="js/app.js?v=75"></script>
+  <script src="js/exercises.js?v=76"></script>
+  <script src="js/demos.js?v=76"></script>
+  <script src="js/media.js?v=76"></script>
+  <script src="js/anims.js?v=76"></script>
+  <script src="js/videos.js?v=76"></script>
+  <script src="js/icons.js?v=76"></script>
+  <script src="js/muscles.js?v=76"></script>
+  <script src="js/views.js?v=76"></script>
+  <script src="js/cloud.js?v=76"></script>
+  <script src="js/app.js?v=76"></script>
   <script>
     // Register the offline cache, and auto-reload once a new version has
     // installed — so updates apply on the first open, no relaunch dance.

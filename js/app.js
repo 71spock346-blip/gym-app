@@ -6,7 +6,7 @@
 
 'use strict';
 
-const APP_VERSION = 75;  // keep in step with VERSION in sw.js and ?v= in index.html
+const APP_VERSION = 76;  // keep in step with VERSION in sw.js and ?v= in index.html
 
 /* ------------------------------ training phases ------------------------------ */
 /* 4-week cycle. pct scales the user's saved working weight (a comfortable
@@ -203,11 +203,12 @@ const store = {
   },
   write(key, value) {
     try { localStorage.setItem('ironweek.' + key, JSON.stringify(value)); } catch { /* private mode */ }
+    if (typeof noteLocalChange === 'function') noteLocalChange(key);   // online sync (js/cloud.js)
   },
 };
 
 const state = {
-  view: 'workout',                                 // 'workout' | 'plan' | 'library' | 'history' (Progress) | 'settings'
+  view: 'workout',                                 // 'workout' | 'plan' | 'library' | 'history' (Progress) | 'coach' | 'settings'
   weekOffset: 0,                                   // 0 = current week
   selectedDay: defaultDayIndex(),
   unit: store.read('unit', 'kg'),                  // 'kg' | 'lb'
@@ -1048,7 +1049,7 @@ function render() {
   const onboarded = state.profile && state.profile.onboarded;
   document.body.classList.toggle('onboarding', !onboarded);
   document.body.classList.toggle('view-workout', onboarded && state.view === 'workout');
-  for (const v of ['onboarding', 'workout', 'plan', 'library', 'history', 'settings']) {
+  for (const v of ['onboarding', 'workout', 'plan', 'library', 'history', 'coach', 'settings']) {
     const el = $('#view-' + v);
     el.hidden = onboarded ? v !== state.view : v !== 'onboarding';
   }
@@ -1059,6 +1060,7 @@ function render() {
   else if (state.view === 'plan') renderPlan();
   else if (state.view === 'library') renderLibrary();
   else if (state.view === 'history') renderHistory();
+  else if (state.view === 'coach') renderCoach();
   else renderSettings();
 }
 
@@ -1097,6 +1099,7 @@ function renderOnboarding() {
       <label class="ob-restore">${ico('download')} Moving from another phone? <strong>Restore a backup</strong>
         <input id="obBackupFile" type="file" accept="application/json,.json" hidden />
       </label>`}
+      ${typeof obAccountBlock === 'function' && !state.backup.pending ? obAccountBlock() : ''}
       <label class="ob-field">What should we call you?
         <input id="obName" type="text" maxlength="24" placeholder="Your first name" autocomplete="given-name" value="${esc(state.ob.name || '')}" />
       </label>
@@ -1580,6 +1583,8 @@ function renderSettings() {
     <h2 class="section-title">Text size</h2>
     <div class="choice-grid">${choiceCards('set-text', TEXT_SIZES, state.textSize, 'text')}</div>
     <p class="hint">Scales the whole app — words and buttons together. The <strong>Aa</strong> button in the header cycles through the sizes too.</p>
+    <h2 class="section-title">Account &amp; sync</h2>
+    ${accountPanel()}
     <h2 class="section-title">Backup</h2>
     ${backupPanel()}
     <h2 class="section-title">Your images · admin</h2>
@@ -1614,6 +1619,7 @@ function replaceSavedData(data) {
   for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith(STORE_PREFIX)) old.push(k); }
   old.forEach((k) => localStorage.removeItem(k));
   for (const [k, v] of Object.entries(data)) localStorage.setItem(STORE_PREFIX + k, JSON.stringify(v));
+  if (typeof noteAllChanged === 'function') noteAllChanged();   // the restored data replaces the online copy too
 }
 
 const countOf = (o) => (o && typeof o === 'object') ? Object.keys(o).length : 0;
@@ -1652,7 +1658,7 @@ function backupPanel() {
   }
   return `
     <div class="admin-card backup-card">
-      <p class="admin-p">Your workouts, weights and records are kept on this phone only. Save a backup file now and then — to Drive, your files or a chat to yourself — so nothing is lost if the phone is reset or replaced.</p>
+      <p class="admin-p">${typeof signedIn === 'function' && signedIn() ? 'Your account keeps an online copy too. A backup file is an extra copy you hold yourself.' : 'Your workouts, weights and records are kept on this phone only.'} Save a backup file now and then — to Drive, your files or a chat to yourself — so nothing is lost if the phone is reset or replaced.</p>
       <p class="admin-p backup-last ${!at || Date.now() - Date.parse(at) > 14 * MS_PER_DAY ? 'old' : ''}">${last}</p>
       <div class="media-actions">
         <button id="backupSave" class="admin-btn" type="button">${ico('share')} Save backup</button>
@@ -2471,6 +2477,7 @@ $('#checkUpdate').addEventListener('click', forceUpdate);
 window.addEventListener('online', prefetchPhotos);
 
 render();
+if (typeof initCloud === 'function') initCloud();   // optional account: sync this phone with the online copy (js/cloud.js)
 installBackGuard();   // the phone's back button: close the picture, leave Settings, ask before leaving
 // your own images, once the phone's store answers (a moment, under the splash)
 if (typeof loadOwnMedia === 'function') loadOwnMedia().then((n) => { if (n) { render(); renderVideoLibrary(); } });

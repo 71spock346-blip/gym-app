@@ -5,7 +5,7 @@
  * cache that the page fills in the background and that the fetch handler
  * tops up on demand. */
 
-const VERSION = 75;                 // keep in step with APP_VERSION in js/app.js
+const VERSION = 76;                 // keep in step with APP_VERSION in js/app.js
 const CACHE = `staystrong-v${VERSION}`;
 const PHOTO_CACHE = 'staystrong-photos';  // demo photos + animated clips; survives version bumps
 const ASSETS = [
@@ -22,6 +22,7 @@ const ASSETS = [
   `./js/icons.js?v=${VERSION}`,
   `./js/muscles.js?v=${VERSION}`,
   `./js/views.js?v=${VERSION}`,
+  `./js/cloud.js?v=${VERSION}`,
   `./js/app.js?v=${VERSION}`,
   './manifest.webmanifest',
   './icons/icon-192.png',
@@ -52,6 +53,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
+  // the account, sync and coach always go to the network: never cache them
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
 
   if (request.mode === 'navigate') {
     event.respondWith(

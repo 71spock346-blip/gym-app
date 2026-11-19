@@ -1,2 +1,4 @@
 tools/out_lat/
 tools/out2/
+node_modules/
+.vercel/
