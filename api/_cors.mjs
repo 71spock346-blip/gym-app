@@ -16,3 +16,7 @@ export function cors(req, res) {
   if (req.method === 'OPTIONS') { res.status(204).end(); return true; }
   return false;
 }
+
+/* Supabase's public key: the older "anon" key or the newer sb_publishable_ key
+ * both work. Accept either name in Vercel's settings. */
+export const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || '';

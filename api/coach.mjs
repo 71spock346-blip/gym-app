@@ -8,7 +8,7 @@
  * (ANTHROPIC_API_KEY) lives in Vercel's settings and never reaches the phone.
  */
 import Anthropic from '@anthropic-ai/sdk';
-import { cors } from './_cors.mjs';
+import { cors, SUPABASE_KEY } from './_cors.mjs';
 
 const MODEL = 'claude-opus-5-5';
 const DAILY_LIMIT = Number(process.env.COACH_DAILY_LIMIT || 30);
@@ -31,7 +31,7 @@ const TASKS = {
 
 async function supabaseUser(token) {
   const r = await fetch(`${process.env.SUPABASE_URL}/auth/v1/user`, {
-    headers: { apikey: process.env.SUPABASE_ANON_KEY, Authorization: `Bearer ${token}` },
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${token}` },
   });
   return r.ok ? r.json() : null;
 }
@@ -40,7 +40,7 @@ async function supabaseUser(token) {
  * their own rows; they cannot delete them), then add this one. */
 async function underDailyLimit(token, userId) {
   const base = `${process.env.SUPABASE_URL}/rest/v1/coach_log`;
-  const headers = { apikey: process.env.SUPABASE_ANON_KEY, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const headers = { apikey: SUPABASE_KEY, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const r = await fetch(`${base}?select=id&at=gt.${encodeURIComponent(since)}`, { headers: { ...headers, Prefer: 'count=exact', Range: '0-0' } });
   if (!r.ok) throw new Error(`coach_log read failed: ${r.status}`);
@@ -57,7 +57,7 @@ export default async function handler(req, res) {
   if (cors(req, res)) return;
   if (req.method !== 'POST') { res.status(405).json({ error: 'Use POST' }); return; }
   if (!process.env.ANTHROPIC_API_KEY) { res.status(503).json({ error: 'The coach is not switched on yet' }); return; }
-  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) { res.status(503).json({ error: 'Online accounts are not set up yet' }); return; }
+  if (!process.env.SUPABASE_URL || !SUPABASE_KEY) { res.status(503).json({ error: 'Online accounts are not set up yet' }); return; }
 
   const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
   const user = token ? await supabaseUser(token).catch(() => null) : null;
