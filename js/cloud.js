@@ -23,7 +23,7 @@
 
 /* Where the Vercel copy lives. The GitHub Pages copy asks this address for its
  * settings and coach, so it can sign in and move its data across. */
-const CLOUD_ORIGIN = 'https://stay-strong.vercel.app';
+const CLOUD_ORIGIN = 'https://stay-strong-six.vercel.app';
 const CLOUD_CFG_KEY = 'staystrong.cloudConfig';   // last good /api/config answer (works offline after the first)
 const AUTH_KEY = 'staystrong.auth';               // { access_token, refresh_token, expires_at, user: { id, email } }
 const SYNC_KEY = 'staystrong.sync';               // { stamps: { key: ms }, dirty: [keys], pulledAt: iso, at: ms }

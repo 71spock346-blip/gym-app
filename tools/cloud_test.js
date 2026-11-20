@@ -173,7 +173,7 @@ const check = (name, ok, extra) => { results.push({ name, ok: !!ok }); console.l
 async function phone(browser, errors, label) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: SHOTS ? 2 : 1, serviceWorkers: 'block' });
   // keep the GitHub Pages fallback from reaching the real internet
-  await context.route('https://stay-strong.vercel.app/**', (r) => r.abort());
+  await context.route('https://stay-strong-six.vercel.app/**', (r) => r.abort());
   const page = await context.newPage();
   page.on('pageerror', (e) => errors.push(`${label}: ${e.message}`));
   return page;
