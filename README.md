@@ -90,6 +90,15 @@ remembered if you close the app mid-session.
 
 ## What it does
 
+- **Five tabs (v75).** *Workout* (today's session), *Plan* (the week at a glance: a
+  Mon–Sun strip, a weekly goal of 2–5 sessions and what each day trains; tap a day to
+  open it), *Library* (all 200 exercises with search, a **Muscle group** sheet with a
+  front/back figure you can tap, and an **Equipment** filter; tap one for its full guide),
+  *Progress* (the muscles you trained this week or in the last four weeks, lit on the
+  figure, with sets per muscle, above the history and records) and *Settings*.
+- **Two colour themes (v75).** *Ember*, charcoal and orange (the default), or *Lime*,
+  the original black and lime. Settings → Colour. Done sets stay green in both.
+
 - **A different plan every week.** Each calendar week gets its own combination of
   exercises, drawn from a pool of **200 movements** (machine, free-weight and
   bodyweight). Selection rules keep every session balanced.
@@ -268,8 +277,9 @@ the design rules, the owner's decisions so far and what is still open.
 
 ```
 HANDOVER.md           working notes for whoever continues the project
-index.html            app shell (onboarding, workout, history, settings views)
-css/styles.css        mobile-first dark theme (lime-tinted near-black with the logo's neon lime)
+index.html            app shell (onboarding, workout, plan, library, progress, settings views)
+css/styles.css        mobile-first dark theme; Ember (charcoal/orange) and Lime palettes as tokens
+js/views.js           Plan, Library (search + muscle/equipment filters), Progress body map, colour theme
 js/exercises.js       exercise database (160+ exercises with guides) + SVG pictograms
 js/videos.js          curated YouTube form video per exercise
 js/icons.js           monoline UI icon set

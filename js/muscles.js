@@ -81,47 +81,52 @@ function focusFor(ex) {
   return { primary, secondary, label, also, cue: (first && FOCUS_CUES[first]) || '' };
 }
 
-/* The figure: front view on the left, back view on the right. */
-function bodyMapSVG(primary, secondary, cls) {
+/* The figure: front view on the left, back view on the right (or one of them). */
+function bodyMapSVG(primary, secondary, cls, side) {
   const P = new Set(primary), S = new Set(secondary);
   const state = (r) => (P.has(r) ? ' m-primary' : S.has(r) ? ' m-secondary' : '');
   const one = (d) => `<path d="${d}"/>`;
   const sym = (d) => one(d) + `<path d="${d}" transform="translate(100,0) scale(-1,1)"/>`;
   const region = (r, parts) => `<g class="m${state(r)}" data-m="${r}">${parts}</g>`;
+  // v75: smoother, more anatomical outline; regions keep their names and the 100 × 200 box per view
   const silhouette = `<g class="m-sil">
-    <circle cx="50" cy="12" r="9"/>
-    <path d="M45,20 L55,20 L56,30 L44,30 Z"/>
-    <path d="M30,30 L70,30 L72,52 L66,92 L34,92 L28,52 Z"/>
-    ${sym('M20,33 Q26,30 32,33 L32,70 L20,71 Z')}
-    ${sym('M18,71 L29,70 L28,98 Q23,103 19,98 Z')}
-    ${sym('M34,92 L49,92 L49,140 Q42,144 35,140 Z')}
-    ${sym('M36,140 L48,140 L47,186 L37,186 Z')}
-    ${sym('M33,186 L50,186 L50,192 L31,192 Z')}
+    <ellipse cx="50" cy="12.5" rx="7.2" ry="9.2"/>
+    <path d="M45,19 C45.5,24 44.5,26.5 41,28.5 L59,28.5 C55.5,26.5 54.5,24 55,19 Z"/>
+    <path d="M35,27.5 L65,27.5 C70.5,28.2 73,31 72.5,36 L67,55 C67.5,65 66.5,75 64.5,85 L35.5,85 C33.5,75 32.5,65 33,55 L27.5,36 C27,31 29.5,28.2 35,27.5 Z"/>
+    ${sym('M23,35 C24.5,31 28.5,29.5 31.5,32 L31.5,64 C29,66.5 24,66.5 21.8,64 C21.5,54 21.8,44 23,35 Z')}
+    ${sym('M20.5,63 L30.5,64.5 C29.5,73 27.8,81 26.6,89.5 L20.6,89.5 C19.4,80 19.4,71 20.5,63 Z')}
+    ${sym('M20.2,89 L26.8,89 C27.8,93 26.8,97.5 24.6,100 C22.4,100.5 20.4,98.5 19.6,94.5 Z')}
+    ${sym('M35.5,82 L50,85 L50,129 C46,134.5 40.5,134.5 37.2,131 C34.2,116 33.4,97 35.5,82 Z')}
+    ${sym('M37.2,129.5 L47.4,129.5 C47.6,145 46.4,161 44.6,177 L39.4,177 C37.4,161 36.4,145 37.2,129.5 Z')}
+    ${sym('M38.6,176 L45.2,176 C46.4,180 46.6,184 45,186.5 L36.4,186.5 C35.6,183 36.4,179 38.6,176 Z')}
   </g>`;
   const front = `<g class="m-view">${silhouette}
-    ${region('front-delts', sym('M33,31 Q41,30 43,36 Q41,42 35,42 Q31,38 33,31 Z'))}
-    ${region('side-delts', sym('M24,35 Q27,30 33,31 Q31,38 35,42 Q28,46 24,41 Z'))}
-    ${region('chest', sym('M36,43 Q50,40 50,43 L50,57 Q44,61 38,57 Q33,50 36,43 Z'))}
-    ${region('biceps', sym('M22,45 Q31,43 32,49 L31,68 Q27,71 23,67 Z'))}
-    ${region('forearms', sym('M20,72 Q28,71 29,75 L27,96 Q23,99 19,95 Z'))}
-    ${region('obliques', sym('M37,60 L43,60 L44,90 L39,88 Q35,75 37,60 Z'))}
-    ${region('abs', one('M43,60 L57,60 L56,90 L44,90 Z') + '<path class="m-lines" d="M44,68 L56,68 M44,76 L56,76 M44,84 L56,84 M50,60 L50,90"/>')}
-    ${region('adductors', sym('M44,96 Q50,94 50,96 L50,118 Q47,120 45,116 Z'))}
-    ${region('quads', sym('M35,95 Q48,93 49,99 L48,136 Q42,141 37,137 Q33,116 35,95 Z'))}
+    ${region('side-delts', sym('M31,29.6 C26,30.4 22.6,35 23.2,43.6 C25.4,44.8 27.4,44.2 29,43 C28,37.8 29.6,32.8 33.2,29.8 Z'))}
+    ${region('front-delts', sym('M33.6,29.8 C30.2,32.8 28.6,37.8 29.6,43 C32.4,44 35.2,43 37,40.8 C37.8,36.6 37.8,32.8 36,30 Z'))}
+    ${region('chest', sym('M37,30.6 C42,29.8 46.8,30.6 49.4,31.8 L49.4,46 C46,49.4 40.2,49.4 36.6,46.2 C34.6,42.6 34.8,37.4 37,32.6 Z'))}
+    ${region('biceps', sym('M23.4,46 C26,44.2 29.4,44.4 30.6,47.4 C31.4,53 30.6,59.6 28.6,63.6 C26.6,65 24.2,64.6 23,62.4 C22.2,57 22.4,50.4 23.4,46 Z'))}
+    ${region('forearms', sym('M21.4,66 C24.6,64.8 28.2,65.6 29.2,67.6 C28.8,75 27,81.6 26,88 L21,88 C20.2,80.8 20.2,72.6 21.4,66 Z'))}
+    ${region('obliques', sym('M36.2,48.6 C38.4,50.2 40.8,50.4 42.6,50.4 L42.6,80.4 C40.2,78.4 38.2,74.4 37.2,70 C36,62.6 35.4,55.4 36.2,48.6 Z'))}
+    ${region('abs', one('M43.4,49.4 L56.6,49.4 L56.6,80 C55,85 52.4,88 50,88 C47.6,88 45,85 43.4,80 Z') + '<path class="m-lines" d="M43.4,57 L56.6,57 M43.4,64.4 L56.6,64.4 M43.4,71.8 L56.6,71.8 M50,49.4 L50,88"/>')}
+    ${region('quads', sym('M36.6,85 C41,88.4 45.6,91.8 47.6,96 C48.6,106 47.8,118 45.8,127.6 C43,130.6 40,130.6 38,128 C35,117 34.2,98 36.6,85 Z'))}
+    ${region('adductors', sym('M46.4,90.4 C48.4,92.4 49.6,94.4 49.6,96.4 L49.6,114 C48.2,116 46.8,114.6 46.6,112.4 C47.6,106 47.6,99 46.4,90.4 Z'))}
+    ${region('calves', sym('M38.2,135.6 C41.2,134.6 44.2,135.6 45.2,138 C46,148 45,159.6 43.2,169.6 L40.2,169.6 C38.4,159.6 37.4,148 38.2,135.6 Z'))}
   </g>`;
   const back = `<g class="m-view" transform="translate(100,0)">${silhouette}
-    ${region('traps', sym('M50,22 L36,34 L50,54 Z'))}
-    ${region('rear-delts', sym('M25,33 Q31,29 35,33 Q35,42 30,44 Q24,41 25,33 Z'))}
-    ${region('lats', sym('M34,46 Q32,64 40,86 L50,86 L50,71 L40,69 Q36,58 36,46 Z'))}
-    ${region('upper-back', sym('M38,38 L50,54 L50,70 L41,68 Q37,52 38,38 Z'))}
-    ${region('lower-back', one('M44,72 L56,72 L55,92 L45,92 Z'))}
-    ${region('triceps', sym('M22,45 Q31,43 32,49 L31,68 Q27,71 23,67 Z'))}
-    ${region('forearms', sym('M20,72 Q28,71 29,75 L27,96 Q23,99 19,95 Z'))}
-    ${region('glutes', sym('M35,94 Q50,92 50,113 Q42,118 35,109 Z'))}
-    ${region('hamstrings', sym('M36,115 Q49,113 49,120 L48,148 Q42,153 37,149 Q34,130 36,115 Z'))}
-    ${region('calves', sym('M37,152 Q48,150 48,157 L46,182 Q41,186 38,181 Q34,166 37,152 Z'))}
+    ${region('traps', sym('M50,19.6 C47.6,24 42.6,27 36.2,28.8 C40.6,33.2 45.6,41 50,52.4 Z'))}
+    ${region('rear-delts', sym('M29.4,29.8 C25,30.8 22.4,36 23.2,44 C27.2,44 31.2,41 34.2,36.2 C34.4,33 32.4,30.6 29.4,29.8 Z'))}
+    ${region('lats', sym('M34.6,43 C37,55 42.4,63.6 49.6,66.4 L49.6,72 C45,76.6 41,79.4 38.6,80.2 C35.6,69.6 33.8,57 34.6,43 Z'))}
+    ${region('upper-back', sym('M37.2,31.6 C41.4,36 46,44.4 49.6,54.4 L49.6,63.8 C45,62.6 41,60 38.2,55.6 C36.4,47.6 36.2,39.6 37.2,31.6 Z'))}
+    ${region('lower-back', one('M43.4,67.6 C46.4,69.8 53.6,69.8 56.6,67.6 L57.4,83.6 C54,87 46,87 42.6,83.6 Z'))}
+    ${region('triceps', sym('M23.4,46 C26,44.2 29.4,44.4 30.6,47.4 C31.4,53 30.6,59.6 28.6,63.6 C26.6,65 24.2,64.6 23,62.4 C22.2,57 22.4,50.4 23.4,46 Z'))}
+    ${region('forearms', sym('M21.4,66 C24.6,64.8 28.2,65.6 29.2,67.6 C28.8,75 27,81.6 26,88 L21,88 C20.2,80.8 20.2,72.6 21.4,66 Z'))}
+    ${region('glutes', sym('M36.4,86 C41.4,84.4 47,86.4 49.6,90.4 L49.6,104 C45.4,108.4 39.4,107.4 36.4,102.4 C34.6,96.4 34.6,90.4 36.4,86 Z'))}
+    ${region('hamstrings', sym('M36.4,106.4 C40.4,109.2 45.4,109.2 48.2,107.2 C49,116 48,124 46,130 C43.2,132 40.2,132 38.2,130 C36.2,122 35.4,114 36.4,106.4 Z'))}
+    ${region('calves', sym('M37.6,134.4 C41.2,132.4 45,133.4 46.2,137.2 C47,146 46.2,154 44.4,160.4 C42.4,162.4 40.2,162.4 39,160.4 C37.2,152 36.6,142 37.6,134.4 Z'))}
   </g>`;
-  return `<svg class="body-map ${cls || ''}" viewBox="0 0 200 200" aria-hidden="true">${front}${back}</svg>`;
+  // side 'front' or 'back' crops to one view (the library's muscle picker)
+  const box = side === 'front' ? '0 0 100 200' : side === 'back' ? '100 0 100 200' : '0 0 200 200';
+  return `<svg class="body-map ${cls || ''}" viewBox="${box}" aria-hidden="true">${side === 'back' ? '' : front}${side === 'front' ? '' : back}</svg>`;
 }
 
 /* The "Focus" row on a card, or the larger "Where to feel it" block in the guide. */
