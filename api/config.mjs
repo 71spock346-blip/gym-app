@@ -13,5 +13,6 @@ export default function handler(req, res) {
   const supabaseAnonKey = SUPABASE_KEY;
   res.setHeader('Cache-Control', 'no-store');
   if (!supabaseUrl || !supabaseAnonKey) { res.status(503).json({ error: 'Online accounts are not set up yet' }); return; }
+  if (!/^https?:\/\/\S+$/.test(supabaseUrl)) { res.status(503).json({ error: 'SUPABASE_URL in Vercel should be the Supabase Project URL (https://….supabase.co)' }); return; }
   res.status(200).json({ supabaseUrl, supabaseAnonKey, coach: !!process.env.ANTHROPIC_API_KEY });
 }
