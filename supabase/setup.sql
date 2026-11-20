@@ -42,3 +42,10 @@ drop policy if exists "own log: read" on public.coach_log;
 drop policy if exists "own log: add" on public.coach_log;
 create policy "own log: read" on public.coach_log for select using (auth.uid() = user_id);
 create policy "own log: add"  on public.coach_log for insert with check (auth.uid() = user_id);
+
+-- 3. Let signed-in people use the tables at all (row level security above still
+-- limits them to their own rows). Newer Supabase projects no longer grant this
+-- automatically. Signed-out visitors get nothing.
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on public.user_store to authenticated;
+grant select, insert on public.coach_log to authenticated;
