@@ -1217,3 +1217,46 @@ body.overlay-open { overflow: hidden; }
 :root[data-theme="ember"] .primary-btn { background: var(--accent); font-family: var(--font-body); font-size: 1.1rem; font-weight: 800; letter-spacing: 0.01em; text-transform: none; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45); }
 :root[data-theme="ember"] .topbar, :root[data-theme="ember"] .bottom-nav { border-color: rgba(255, 255, 255, 0.06); }
 :root[data-theme="ember"] .page-title { text-transform: none; }
+
+/* ------------------------------ account & sync ------------------------------ */
+.account-card .ob-field { margin: 4px 0 12px; }
+.account-card .ob-field input { width: 100%; }
+.account-status { color: var(--text); font-weight: 700; }
+.account-err { color: var(--danger-text); }
+.account-msg { color: var(--text); background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
+.account-card .admin-btn { font-size: 0.86rem; min-height: 46px; }
+
+/* ------------------------------ coach ------------------------------ */
+.coach-hello { display: flex; align-items: center; gap: 8px; font-size: 1.05rem; color: var(--text); margin: 4px 2px 12px; }
+.coach-hello .ico { width: 1.3em; height: 1.3em; color: var(--accent-2); }
+.coach-intro .coach-hello { margin-top: 0; }
+.coach-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.coach-chip { min-height: 40px; }
+.coach-chip:disabled { opacity: 0.5; }
+.coach-card {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; font: inherit; color: var(--text);
+  background: var(--surface); border: 1px solid var(--tap-border); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 10px; cursor: pointer;
+}
+.coach-card > span:nth-child(2) { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.coach-card small { color: var(--text-dim); font-size: 0.8rem; }
+.coach-card > .ico { color: var(--accent-2); flex: 0 0 auto; }
+.coach-card-ico { flex: 0 0 auto; width: 38px; height: 38px; border-radius: 999px; background: var(--accent-dim); color: var(--accent-2); display: flex; align-items: center; justify-content: center; }
+.coach-thread { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
+.coach-msg { max-width: 92%; border-radius: 16px; padding: 10px 14px; font-size: 0.92rem; line-height: 1.5; }
+.coach-msg p { margin: 0 0 6px; }
+.coach-msg p:last-child { margin-bottom: 0; }
+.coach-msg ul { margin: 4px 0 8px; padding-left: 20px; }
+.coach-msg li { margin: 2px 0; }
+.coach-msg.from-you { align-self: flex-end; background: var(--accent-dim); color: var(--text); border-bottom-right-radius: 4px; }
+.coach-msg.from-coach { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-bottom-left-radius: 4px; }
+.coach-msg.error { border-color: var(--danger-text); color: var(--danger-text); }
+.coach-msg.thinking { color: var(--text-dim); }
+.coach-ask { display: flex; gap: 8px; align-items: flex-end; position: sticky; bottom: calc(76px + env(safe-area-inset-bottom)); background: rgba(var(--bg-rgb), 0.96); padding: 8px 0; }
+.coach-ask textarea {
+  flex: 1; min-width: 0; font: inherit; font-size: 1rem; color: var(--text); background: var(--surface);
+  border: 1px solid var(--border-strong); border-radius: 14px; padding: 10px 12px; resize: none; min-height: 48px;
+}
+.coach-ask textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+.coach-ask .admin-btn { min-height: 48px; min-width: 48px; justify-content: center; }
+.coach-clear { margin-top: 4px; }
+.ob-account { margin: 0 0 22px; }

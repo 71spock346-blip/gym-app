@@ -1,7 +1,8 @@
 # 🏋️ Stay Strong — Gym Planner
 
 A phone-friendly workout planner for a 5-day week that **changes every week** — no
-accounts, no ads, works offline in the gym. Pick your goal, your equipment and your
+ads, works offline in the gym, no account needed (an optional one syncs your phones and
+unlocks the AI Coach). Pick your goal, your equipment and your
 week layout once, and every day's plan is built to fit.
 
 | Day | Twice-a-week split (recommended) | One muscle a day |
@@ -243,6 +244,23 @@ demo photos are being saved for offline use, the running version number, and a
 **🔄 Check for updates** button that forces a clean refresh (your saved weights and
 progress are kept).
 
+## Online: account, sync and AI Coach (optional)
+
+Hosted on Vercel, the app gets two extras. Everything else keeps working without them.
+
+- **Account & sync** (Settings → Account & sync, or *Have an account? Sign in* on the
+  welcome screen): email and password via Supabase. Your workouts, weights, records and
+  settings are copied online and merged between phones, so ticking sets on two phones
+  never loses either. Text size, the backup date and the admin PIN stay on each phone.
+- **Coach tab:** *What do you want today?* with quick picks (short on time, sore, low
+  energy, am I progressing), free questions, feedback on your last workout, and a monthly
+  check-in. It reads your goal, this week's plan and the last six weeks of training. It
+  needs an account and has a daily question limit.
+
+Setup (once): run `supabase/setup.sql` in a Supabase project, then add `SUPABASE_URL`,
+`SUPABASE_ANON_KEY` and `ANTHROPIC_API_KEY` as Vercel environment variables. Details in
+HANDOVER §12.
+
 ## Run it locally
 
 ```bash
@@ -270,6 +288,12 @@ slots, double progression, muscle maps, bundled picture files and video ids:
 node tools/planner_test.js                     # PLANNER_WEEKS=52 for a longer replay
 ```
 
+Account, sync and coach run against local stand-ins for Supabase and Anthropic:
+
+```bash
+npm install && NODE_PATH=$(npm root -g) node tools/cloud_test.js
+```
+
 ## Project layout
 
 Continuing the project? Start with **[HANDOVER.md](HANDOVER.md)**: how releases work,
@@ -279,6 +303,9 @@ the design rules, the owner's decisions so far and what is still open.
 HANDOVER.md           working notes for whoever continues the project
 index.html            app shell (onboarding, workout, plan, library, progress, settings views)
 css/styles.css        mobile-first dark theme; Ember (charcoal/orange) and Lime palettes as tokens
+js/cloud.js           optional account, sync between phones, Coach tab
+api/                  Vercel functions: config (public Supabase settings) and coach (Claude)
+supabase/setup.sql    database tables with row level security (run once)
 js/views.js           Plan, Library (search + muscle/equipment filters), Progress body map, colour theme
 js/exercises.js       exercise database (160+ exercises with guides) + SVG pictograms
 js/videos.js          curated YouTube form video per exercise

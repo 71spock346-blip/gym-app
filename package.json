@@ -1,0 +1,9 @@
+{
+  "name": "stay-strong",
+  "private": true,
+  "description": "Stay Strong gym planner. Static app plus two small Vercel functions in api/ (config and AI coach).",
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.9.0"
+  }
+}
